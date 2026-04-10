@@ -27,7 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.workout.android.R
 import com.workout.android.ui.components.WorkoutCard
 import com.workout.shared.feature.workoutlist.WorkoutListEffect
 import com.workout.shared.feature.workoutlist.WorkoutListIntent
@@ -55,16 +57,16 @@ fun WorkoutListScreen(
     if (state.pendingDeleteId != null) {
         AlertDialog(
             onDismissRequest = { viewModel.dispatch(WorkoutListIntent.CancelDelete) },
-            title = { Text("Удалить тренировку?") },
-            text = { Text("Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.confirm_delete_workout_title)) },
+            text = { Text(stringResource(R.string.confirm_delete_workout_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.dispatch(WorkoutListIntent.ConfirmDelete) }) {
-                    Text("Удалить", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dispatch(WorkoutListIntent.CancelDelete) }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -73,10 +75,10 @@ fun WorkoutListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Мои тренировки") },
+                title = { Text(stringResource(R.string.my_workouts)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -85,7 +87,7 @@ fun WorkoutListScreen(
             ExtendedFloatingActionButton(
                 onClick = { viewModel.dispatch(WorkoutListIntent.CreateWorkout) },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Создать") }
+                text = { Text(stringResource(R.string.create)) }
             )
         }
     ) { padding ->
@@ -95,7 +97,11 @@ fun WorkoutListScreen(
             }
         } else if (state.workouts.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("Нет тренировок", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.no_workouts),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(

@@ -20,6 +20,7 @@ data class TimerState(
     /** Идентификаторы пресетов звука (Android), задаются при [TimerIntent.Load]. */
     val workStartSoundPresetId: String = "",
     val restStartSoundPresetId: String = "",
+    val finishSoundPresetId: String = "",
     val alertAt10Seconds: Boolean = true
 ) {
     val currentPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex)
@@ -57,7 +58,11 @@ sealed interface TimerIntent {
         val soundEnabled: Boolean,
         val vibrationEnabled: Boolean,
         val workStartSoundPresetId: String,
-        val restStartSoundPresetId: String
+        val restStartSoundPresetId: String,
+        val finishSoundPresetId: String,
+        val alertAt10Seconds: Boolean,
+        /** Локализованная подпись фазы отдыха (для таймера и блоков). */
+        val restPhaseDisplayName: String
     ) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent
@@ -77,6 +82,10 @@ sealed interface TimerEffect {
     data object PlayFinishSound : TimerEffect
     data object Vibrate : TimerEffect
     data object VibrateFinish : TimerEffect
-    data object Alert10Seconds : TimerEffect
+    /**
+     * Предупреждение в конце фазы «Работа»: короткий звук (если включён звук).
+     * [withVibration] — однократная вибрация при входе в последние 10 с (секунда «10»).
+     */
+    data class Alert10Seconds(val withVibration: Boolean) : TimerEffect
     data object NavigateBack : TimerEffect
 }

@@ -1,22 +1,21 @@
 package com.workout.shared.feature.createworkout
 
 import com.workout.core.model.Block
-import kotlin.random.Random
 
 data class CreateWorkoutState(
     val workoutId: Long = 0L,
-    val name: String = defaultNewWorkoutName(),
+    val name: String = "",
     val blocks: List<Block> = emptyList(),
     val isSaving: Boolean = false,
     val totalDurationSeconds: Int = 0
 )
 
-private fun defaultNewWorkoutName(): String = "Тренировка ${Random.nextInt(101)}"
-
 sealed interface CreateWorkoutIntent {
     data class LoadWorkout(val workoutId: Long) : CreateWorkoutIntent
+    /** Задаёт имя для новой тренировки, если поле ещё пустое (локализованная строка с платформы). */
+    data class SetDefaultWorkoutNameIfEmpty(val name: String) : CreateWorkoutIntent
     data class UpdateName(val name: String) : CreateWorkoutIntent
-    data class AddExerciseBlock(val afterIndex: Int? = null) : CreateWorkoutIntent
+    data class AddExerciseBlock(val afterIndex: Int? = null, val defaultExerciseName: String) : CreateWorkoutIntent
     data class AddRestBlock(val afterIndex: Int? = null) : CreateWorkoutIntent
     data class UpdateBlock(val index: Int, val block: Block) : CreateWorkoutIntent
     data class RemoveBlock(val index: Int) : CreateWorkoutIntent
@@ -28,5 +27,5 @@ sealed interface CreateWorkoutIntent {
 
 sealed interface CreateWorkoutEffect {
     data object NavigateBack : CreateWorkoutEffect
-    data class ShowError(val message: String) : CreateWorkoutEffect
+    data object ShowErrorEmptyWorkoutName : CreateWorkoutEffect
 }

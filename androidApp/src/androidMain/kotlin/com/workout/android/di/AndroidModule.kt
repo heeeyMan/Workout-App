@@ -16,5 +16,5 @@ val androidModule = module {
     viewModel { WorkoutListViewModel(get()) }
     viewModel { CreateWorkoutViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
-    viewModel { params -> TimerViewModel(get(), get(), params.get()) }
+    viewModel { params -> TimerViewModel(get(), get(), androidContext(), params.get()) }
 }

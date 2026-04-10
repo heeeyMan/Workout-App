@@ -68,7 +68,10 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
+import com.workout.android.R
 import com.workout.android.theme.BrownContainer
 import com.workout.android.theme.BrownPrimary
 import com.workout.android.theme.OnBrownContainer
@@ -80,6 +83,7 @@ import com.workout.core.model.Block
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
 import com.workout.shared.feature.createworkout.CreateWorkoutIntent
 import kotlin.math.abs
+import kotlin.random.Random
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -90,20 +94,28 @@ fun CreateWorkoutScreen(
     viewModel: CreateWorkoutViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val blockCenters = remember { mutableStateMapOf<Int, Float>() }
     var draggingIndex by remember { mutableIntStateOf(-1) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(workoutId) {
-        if (workoutId != 0L) viewModel.dispatch(CreateWorkoutIntent.LoadWorkout(workoutId))
+        if (workoutId != 0L) {
+            viewModel.dispatch(CreateWorkoutIntent.LoadWorkout(workoutId))
+        } else {
+            val defaultName = context.getString(R.string.default_workout_name_pattern, Random.nextInt(101))
+            viewModel.dispatch(CreateWorkoutIntent.SetDefaultWorkoutNameIfEmpty(defaultName))
+        }
     }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is CreateWorkoutEffect.NavigateBack -> onNavigateBack()
-                is CreateWorkoutEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is CreateWorkoutEffect.ShowErrorEmptyWorkoutName -> snackbarHostState.showSnackbar(
+                    context.getString(R.string.error_workout_name_required)
+                )
             }
         }
     }
@@ -114,7 +126,13 @@ fun CreateWorkoutScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(if (workoutId == 0L) "Новая тренировка" else "Редактировать")
+                        Text(
+                            if (workoutId == 0L) {
+                                stringResource(R.string.create_workout_title_new)
+                            } else {
+                                stringResource(R.string.create_workout_title_edit)
+                            }
+                        )
                         if (state.totalDurationSeconds > 0) {
                             Text(
                                 text = state.totalDurationSeconds.toTimeString(),
@@ -126,12 +144,15 @@ fun CreateWorkoutScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { viewModel.dispatch(CreateWorkoutIntent.Discard) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.dispatch(CreateWorkoutIntent.Save) }) {
-                        Icon(Icons.Default.Check, contentDescription = "Сохранить")
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.cd_save))
                     }
                 }
             )
@@ -147,7 +168,7 @@ fun CreateWorkoutScreen(
                     value = state.name,
                     onValueChange = { viewModel.dispatch(CreateWorkoutIntent.UpdateName(it)) },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Название тренировки") },
+                    label = { Text(stringResource(R.string.workout_name_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
                 )
@@ -204,18 +225,29 @@ fun CreateWorkoutScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
-                        onClick = { viewModel.dispatch(CreateWorkoutIntent.AddExerciseBlock()) },
+                        onClick = {
+                            val n = state.blocks.size + 1
+                            viewModel.dispatch(
+                                CreateWorkoutIntent.AddExerciseBlock(
+                                    afterIndex = null,
+                                    defaultExerciseName = context.getString(
+                                        R.string.default_exercise_name_pattern,
+                                        n
+                                    )
+                                )
+                            )
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("+ Упражнение")
+                        Text(stringResource(R.string.add_exercise))
                     }
                     Button(
                         onClick = { viewModel.dispatch(CreateWorkoutIntent.AddRestBlock()) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("+ Отдых")
+                        Text(stringResource(R.string.add_rest))
                     }
                 }
                 Spacer(Modifier.height(80.dp))
@@ -290,7 +322,11 @@ private fun BlockCard(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = if (isExercise) "УПРАЖНЕНИЕ" else "ОТДЫХ",
+                    text = if (isExercise) {
+                        stringResource(R.string.block_type_exercise)
+                    } else {
+                        stringResource(R.string.block_type_rest)
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = accentColor,
                     fontWeight = FontWeight.Bold,
@@ -311,15 +347,23 @@ private fun BlockCard(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Outlined.DragHandle, contentDescription = "Перенести",
-                            modifier = Modifier.size(28.dp))
+                        Icon(
+                            Icons.Outlined.DragHandle,
+                            contentDescription = stringResource(R.string.cd_reorder),
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
                     IconButton(onClick = onDuplicate, modifier = Modifier.size(40.dp)) {
-                        Icon(Icons.Outlined.ContentCopy, contentDescription = "Дублировать",
-                            modifier = Modifier.size(20.dp))
+                        Icon(
+                            Icons.Outlined.ContentCopy,
+                            contentDescription = stringResource(R.string.cd_duplicate),
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                     IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
-                        Icon(Icons.Outlined.DeleteOutline, contentDescription = "Удалить",
+                        Icon(
+                            Icons.Outlined.DeleteOutline,
+                            contentDescription = stringResource(R.string.cd_delete),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(28.dp))
                     }
@@ -367,7 +411,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         )
         Icon(
             Icons.Outlined.Edit,
-            contentDescription = "Редактировать",
+            contentDescription = stringResource(R.string.cd_edit),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
@@ -381,14 +425,14 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         DurationChip(
-            label = "Работа",
+            label = stringResource(R.string.work_label),
             seconds = block.workDurationSeconds,
             color = BrownPrimary,
             modifier = Modifier.weight(1f),
             onClick = { showWorkDialog = true }
         )
         DurationChip(
-            label = "Отдых",
+            label = stringResource(R.string.rest_label),
             seconds = block.restDurationSeconds,
             color = RestBlue,
             modifier = Modifier.weight(1f),
@@ -407,7 +451,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Повторений",
+            text = stringResource(R.string.repeats_label),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -440,7 +484,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     }
     if (showWorkDialog) {
         DurationPickerDialog(
-            title = "Время работы",
+            title = stringResource(R.string.dialog_work_duration_title),
             seconds = block.workDurationSeconds,
             onConfirm = { onUpdate(block.copy(workDurationSeconds = it)); showWorkDialog = false },
             onDismiss = { showWorkDialog = false }
@@ -448,7 +492,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     }
     if (showRestDialog) {
         DurationPickerDialog(
-            title = "Время отдыха",
+            title = stringResource(R.string.dialog_rest_duration_title),
             seconds = block.restDurationSeconds,
             onConfirm = { onUpdate(block.copy(restDurationSeconds = it)); showRestDialog = false },
             onDismiss = { showRestDialog = false }
@@ -465,7 +509,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
     var showDurationDialog by remember { mutableStateOf(false) }
 
     DurationChip(
-        label = "Длительность",
+        label = stringResource(R.string.duration_label),
         seconds = block.durationSeconds,
         color = RestBlue,
         modifier = Modifier.fillMaxWidth(),
@@ -474,7 +518,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
 
     if (showDurationDialog) {
         DurationPickerDialog(
-            title = "Время отдыха",
+            title = stringResource(R.string.dialog_rest_duration_title),
             seconds = block.durationSeconds,
             onConfirm = { onUpdate(block.copy(durationSeconds = it)); showDurationDialog = false },
             onDismiss = { showDurationDialog = false }
@@ -555,7 +599,7 @@ private fun NameEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Название упражнения") },
+        title = { Text(stringResource(R.string.dialog_exercise_name_title)) },
         text = {
             OutlinedTextField(
                 value = text,
@@ -570,11 +614,11 @@ private fun NameEditDialog(
         },
         confirmButton = {
             TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
-                Text("Готово")
+                Text(stringResource(R.string.done))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }
@@ -607,11 +651,11 @@ private fun DurationPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(minutes * 60 + secs) }) {
-                Text("Готово")
+                Text(stringResource(R.string.done))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

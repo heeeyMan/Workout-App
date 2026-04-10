@@ -21,7 +21,10 @@ class TimerStore(
                 intent.soundEnabled,
                 intent.vibrationEnabled,
                 intent.workStartSoundPresetId,
-                intent.restStartSoundPresetId
+                intent.restStartSoundPresetId,
+                intent.finishSoundPresetId,
+                intent.alertAt10Seconds,
+                intent.restPhaseDisplayName
             )
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
@@ -36,11 +39,14 @@ class TimerStore(
         soundEnabled: Boolean,
         vibrationEnabled: Boolean,
         workStartSoundPresetId: String,
-        restStartSoundPresetId: String
+        restStartSoundPresetId: String,
+        finishSoundPresetId: String,
+        alertAt10Seconds: Boolean,
+        restPhaseDisplayName: String
     ) {
         scope.launch {
             val workout = workoutRepository.getWorkoutById(workoutId) ?: return@launch
-            val phases = workout.blocks.flatMap { it.toPhases() }
+            val phases = workout.blocks.flatMap { it.toPhases(restPhaseDisplayName) }
             val prepLen = blockPrepDurationSeconds.coerceAtLeast(0)
             val first = phases.firstOrNull()
             val startWithPrep = prepLen > 0 &&
@@ -62,6 +68,8 @@ class TimerStore(
                     vibrationEnabled = vibrationEnabled,
                     workStartSoundPresetId = workStartSoundPresetId,
                     restStartSoundPresetId = restStartSoundPresetId,
+                    finishSoundPresetId = finishSoundPresetId,
+                    alertAt10Seconds = alertAt10Seconds,
                     isLoading = false
                 )
             }
@@ -92,10 +100,15 @@ class TimerStore(
             emitEffect(TimerEffect.PlayPrepTickSound)
         }
 
-        if (!s.isPrepBeforeWork && newSeconds == 10 && s.alertAt10Seconds &&
-            (s.soundEnabled || s.vibrationEnabled)
+        if (!s.isPrepBeforeWork && s.alertAt10Seconds &&
+            s.currentPhase?.type == PhaseType.Work &&
+            newSeconds in 1..10
         ) {
-            emitEffect(TimerEffect.Alert10Seconds)
+            val playSound = s.soundEnabled
+            val vibOnce = s.vibrationEnabled && newSeconds == 10
+            if (playSound || vibOnce) {
+                emitEffect(TimerEffect.Alert10Seconds(withVibration = vibOnce))
+            }
         }
 
         if (newSeconds <= 0) {
@@ -206,7 +219,7 @@ class TimerStore(
     }
 
     // Expand a Block into flat list of timer phases
-    private fun Block.toPhases(): List<TimerPhase> = when (this) {
+    private fun Block.toPhases(restPhaseDisplayName: String): List<TimerPhase> = when (this) {
         is Block.Exercise -> (1..repeats).flatMap { rep ->
             buildList {
                 add(
@@ -221,7 +234,7 @@ class TimerStore(
                 if (restDurationSeconds > 0) {
                     add(
                         TimerPhase(
-                            name = "Отдых",
+                            name = restPhaseDisplayName,
                             type = PhaseType.Rest,
                             durationSeconds = restDurationSeconds,
                             repeatLabel = "$rep / $repeats"
@@ -231,7 +244,7 @@ class TimerStore(
             }
         }
         is Block.Rest -> listOf(
-            TimerPhase(name = "Отдых", type = PhaseType.Rest, durationSeconds = durationSeconds)
+            TimerPhase(name = restPhaseDisplayName, type = PhaseType.Rest, durationSeconds = durationSeconds)
         )
     }
 }

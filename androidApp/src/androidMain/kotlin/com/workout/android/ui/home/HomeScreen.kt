@@ -27,8 +27,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.workout.android.R
 import com.workout.android.ui.components.WorkoutCard
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
@@ -56,16 +58,16 @@ fun HomeScreen(
     if (state.pendingDeleteId != null) {
         AlertDialog(
             onDismissRequest = { viewModel.dispatch(HomeIntent.CancelDelete) },
-            title = { Text("Удалить тренировку?") },
-            text = { Text("Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.confirm_delete_workout_title)) },
+            text = { Text(stringResource(R.string.confirm_delete_workout_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.dispatch(HomeIntent.ConfirmDelete) }) {
-                    Text("Удалить", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dispatch(HomeIntent.CancelDelete) }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -74,10 +76,10 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Мои тренировки") },
+                title = { Text(stringResource(R.string.my_workouts)) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Настройки")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                     }
                 }
             )
@@ -86,7 +88,7 @@ fun HomeScreen(
             ExtendedFloatingActionButton(
                 onClick = { viewModel.dispatch(HomeIntent.CreateWorkout) },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Новая тренировка") }
+                text = { Text(stringResource(R.string.new_workout)) }
             )
         }
     ) { padding ->
@@ -100,7 +102,7 @@ fun HomeScreen(
             state.workouts.isEmpty() -> {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Нет тренировок.\nНажми + чтобы создать первую.",
+                        text = stringResource(R.string.empty_home_subtitle),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -120,7 +122,7 @@ fun HomeScreen(
                     if (lastStarted != null) {
                         item {
                             Text(
-                                text = "Последняя тренировка",
+                                text = stringResource(R.string.last_workout),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -136,7 +138,7 @@ fun HomeScreen(
                     }
                     item {
                         Text(
-                            text = "Все тренировки",
+                            text = stringResource(R.string.all_workouts),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
+import com.workout.android.R
 import com.workout.android.data.TimerPreferences
 import org.koin.android.ext.android.getKoin
 
@@ -46,12 +48,9 @@ fun AppEntryPermissionHandler() {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Звук и уведомления") },
+            title = { Text(stringResource(R.string.permission_notifications_title)) },
             text = {
-                Text(
-                    "На Android 13 и новее для надёжной работы звуков таймера может потребоваться разрешение на уведомления. " +
-                        "Вибрация настраивается отдельно в настройках приложения."
-                )
+                Text(stringResource(R.string.permission_notifications_body))
             },
             confirmButton = {
                 TextButton(
@@ -59,7 +58,7 @@ fun AppEntryPermissionHandler() {
                         launcher.launch(permission)
                     }
                 ) {
-                    Text("Разрешить")
+                    Text(stringResource(R.string.allow))
                 }
             },
             dismissButton = {
@@ -69,7 +68,7 @@ fun AppEntryPermissionHandler() {
                         showDialog = false
                     }
                 ) {
-                    Text("Позже")
+                    Text(stringResource(R.string.later))
                 }
             }
         )

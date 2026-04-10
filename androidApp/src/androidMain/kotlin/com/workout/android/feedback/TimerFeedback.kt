@@ -108,8 +108,8 @@ object TimerFeedback {
         }
     }
 
-    fun playFinishTone(context: Context) {
-        playTone(context, ToneGenerator.TONE_CDMA_ALERT_INCALL_LITE, 280)
+    fun playFinishTone(context: Context, presetId: String) {
+        playPreset(context, TimerSoundPresets.byId(presetId))
     }
 
     fun playAlertTone(context: Context) {

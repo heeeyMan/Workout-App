@@ -10,10 +10,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.workout.android.R
 
 @Composable
 fun DurationPicker(
@@ -40,7 +42,7 @@ fun DurationPicker(
                 modifier = Modifier.width(64.dp),
                 textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
                 singleLine = true,
-                label = { Text("мин") },
+                label = { Text(stringResource(R.string.minutes_short)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             Text(":", style = MaterialTheme.typography.titleLarge)
@@ -53,7 +55,7 @@ fun DurationPicker(
                 modifier = Modifier.width(64.dp),
                 textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
                 singleLine = true,
-                label = { Text("сек") },
+                label = { Text(stringResource(R.string.seconds_short)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }

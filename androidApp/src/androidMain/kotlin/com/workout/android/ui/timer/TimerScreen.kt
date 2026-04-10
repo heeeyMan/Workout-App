@@ -34,6 +34,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,9 +57,9 @@ import com.workout.android.theme.TimerPrepGray
 import com.workout.android.theme.TimerPrepGrayDim
 import com.workout.android.theme.TimerRestGreen
 import com.workout.android.theme.TimerRestGreenDim
+import com.workout.android.R
 import com.workout.android.theme.TimerWorkOrange
 import com.workout.android.theme.TimerWorkOrangeDim
-import com.workout.android.feedback.TimerFeedback
 import com.workout.android.ui.components.toTimeString
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
@@ -74,9 +76,12 @@ fun TimerScreen(
     val state by viewModel.state.collectAsState()
     var showExitDialog by remember { mutableStateOf(false) }
 
+    BackHandler(enabled = !state.isLoading && !state.isFinished) {
+        showExitDialog = true
+    }
+
     // Держать экран включённым
     val context = LocalContext.current
-    val appContext = context.applicationContext
     DisposableEffect(Unit) {
         val window = (context as? Activity)?.window
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -85,31 +90,7 @@ fun TimerScreen(
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
-            when (effect) {
-                is TimerEffect.NavigateBack -> onNavigateBack()
-                is TimerEffect.PlayPrepTickSound -> TimerFeedback.playPrepTickTone(appContext)
-                is TimerEffect.PlayPrepEndSound -> {
-                    val st = viewModel.state.value
-                    TimerFeedback.playPrepEndTone(appContext, st.workStartSoundPresetId)
-                }
-                is TimerEffect.VibratePrepEnd -> TimerFeedback.vibratePrepEnd(appContext)
-                is TimerEffect.PlayWorkSound -> {
-                    val st = viewModel.state.value
-                    TimerFeedback.playWorkTone(appContext, st.workStartSoundPresetId)
-                }
-                is TimerEffect.PlayRestSound -> {
-                    val st = viewModel.state.value
-                    TimerFeedback.playRestTone(appContext, st.restStartSoundPresetId)
-                }
-                is TimerEffect.PlayFinishSound -> TimerFeedback.playFinishTone(appContext)
-                is TimerEffect.Vibrate -> TimerFeedback.vibrateShort(appContext)
-                is TimerEffect.VibrateFinish -> TimerFeedback.vibrateFinish(appContext)
-                is TimerEffect.Alert10Seconds -> {
-                    val st = viewModel.state.value
-                    if (st.soundEnabled) TimerFeedback.playAlertTone(appContext)
-                    if (st.vibrationEnabled) TimerFeedback.vibrateAlert(appContext)
-                }
-            }
+            if (effect is TimerEffect.NavigateBack) onNavigateBack()
         }
     }
 
@@ -139,15 +120,22 @@ fun TimerScreen(
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("Завершить тренировку?") },
-            text = { Text("Прогресс не сохранится.") },
+            title = { Text(stringResource(R.string.timer_exit_title)) },
+            text = { Text(stringResource(R.string.timer_exit_message)) },
             confirmButton = {
-                TextButton(onClick = { viewModel.dispatch(TimerIntent.Finish) }) {
-                    Text("Завершить", color = MaterialTheme.colorScheme.error)
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        viewModel.dispatch(TimerIntent.Finish)
+                    }
+                ) {
+                    Text(stringResource(R.string.end_workout), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showExitDialog = false }) { Text("Продолжить") }
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(stringResource(R.string.continue_workout))
+                }
             }
         )
     }
@@ -168,7 +156,10 @@ fun TimerScreen(
         }
 
         if (state.isFinished) {
-            FinishedContent(workoutName = state.workoutName, onBack = onNavigateBack)
+            FinishedContent(
+                workoutName = state.workoutName,
+                onBack = onNavigateBack
+            )
             return@Box
         }
 
@@ -201,9 +192,9 @@ fun TimerScreen(
                 ) {
                     Text(
                         text = when {
-                            state.isPrepBeforeWork -> "ПОДГОТОВКА"
-                            state.currentPhase?.type == PhaseType.Work -> "РАБОТА"
-                            else -> "ОТДЫХ"
+                            state.isPrepBeforeWork -> stringResource(R.string.phase_prep)
+                            state.currentPhase?.type == PhaseType.Work -> stringResource(R.string.phase_work)
+                            else -> stringResource(R.string.phase_rest)
                         },
                         style = MaterialTheme.typography.titleLarge,
                         color = accentColor,
@@ -225,7 +216,7 @@ fun TimerScreen(
                 state.currentPhase?.repeatLabel?.let { label ->
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Повтор $label",
+                        text = stringResource(R.string.timer_repeat_format, label),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -258,7 +249,11 @@ fun TimerScreen(
                 // Следующая фаза
                 state.nextPhase?.let { next ->
                     Text(
-                        text = "Следующее: ${next.name} · ${next.durationSeconds.toTimeString()}",
+                        text = stringResource(
+                            R.string.timer_next_phase,
+                            next.name,
+                            next.durationSeconds.toTimeString()
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -267,7 +262,11 @@ fun TimerScreen(
 
                 // Блок из блоков
                 Text(
-                    text = "Блок ${state.currentPhaseIndex + 1} из ${state.totalPhases}",
+                    text = stringResource(
+                        R.string.timer_block_of,
+                        state.currentPhaseIndex + 1,
+                        state.totalPhases
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -290,7 +289,7 @@ fun TimerScreen(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
-                        Icon(Icons.Default.SkipNext, contentDescription = "Пропустить")
+                        Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.cd_skip))
                     }
 
                     // Пауза / Продолжить
@@ -301,7 +300,11 @@ fun TimerScreen(
                     ) {
                         Icon(
                             if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                            contentDescription = if (state.isPaused) "Продолжить" else "Пауза",
+                            contentDescription = if (state.isPaused) {
+                                stringResource(R.string.cd_resume)
+                            } else {
+                                stringResource(R.string.cd_pause)
+                            },
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.background
                         )
@@ -317,7 +320,7 @@ fun TimerScreen(
                     ) {
                         Icon(
                             Icons.Default.Stop,
-                            contentDescription = "Завершить тренировку",
+                            contentDescription = stringResource(R.string.cd_end_workout),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -343,7 +346,7 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         )
         Spacer(Modifier.height(28.dp))
         Text(
-            text = "Тренировка $workoutName завершена",
+            text = stringResource(R.string.workout_finished_title, workoutName),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -352,7 +355,7 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         )
         Spacer(Modifier.height(40.dp))
         TextButton(onClick = onBack) {
-            Text("На главную")
+            Text(stringResource(R.string.back_to_home))
         }
     }
 }

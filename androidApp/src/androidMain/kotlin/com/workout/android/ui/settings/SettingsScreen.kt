@@ -42,8 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.workout.android.R
 import com.workout.android.feedback.TimerFeedback
 import com.workout.android.feedback.TimerSoundPresets
 import org.koin.androidx.compose.koinViewModel
@@ -57,8 +59,10 @@ fun SettingsScreen(
     val prepSeconds by viewModel.blockPrepSeconds.collectAsState()
     val soundEnabled by viewModel.soundEnabled.collectAsState()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
+    val alertAt10Seconds by viewModel.alertAt10Seconds.collectAsState()
     val workSoundPresetId by viewModel.workSoundPresetId.collectAsState()
     val restSoundPresetId by viewModel.restSoundPresetId.collectAsState()
+    val finishSoundPresetId by viewModel.finishSoundPresetId.collectAsState()
     val soundPickerTarget by viewModel.soundPickerTarget.collectAsState()
     val pendingSoundPresetId by viewModel.pendingSoundPresetId.collectAsState()
     val context = LocalContext.current
@@ -90,8 +94,9 @@ fun SettingsScreen(
                     item {
                         Text(
                             text = when (pickerTarget) {
-                                TimerSoundPickerTarget.WORK -> "Звук перед началом работы"
-                                TimerSoundPickerTarget.REST -> "Звук перед отдыхом"
+                                TimerSoundPickerTarget.WORK -> stringResource(R.string.sound_picker_work_title)
+                                TimerSoundPickerTarget.REST -> stringResource(R.string.sound_picker_rest_title)
+                                TimerSoundPickerTarget.FINISH -> stringResource(R.string.sound_picker_finish_title)
                             },
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(vertical = 12.dp)
@@ -117,7 +122,7 @@ fun SettingsScreen(
                                 }
                             )
                             Text(
-                                text = preset.label,
+                                text = stringResource(preset.labelRes),
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
@@ -130,7 +135,7 @@ fun SettingsScreen(
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)
                 ) {
-                    Icon(Icons.Default.Check, contentDescription = "Подтвердить выбор")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.cd_confirm_selection))
                 }
             }
         }
@@ -139,14 +144,14 @@ fun SettingsScreen(
     if (showPrepDialog) {
         AlertDialog(
             onDismissRequest = { showPrepDialog = false },
-            title = { Text("Время подготовки перед тренировкой") },
+            title = { Text(stringResource(R.string.prep_time_dialog_title)) },
             text = {
                 OutlinedTextField(
                     value = prepInput,
                     onValueChange = { value ->
                         prepInput = value.filter { it.isDigit() }.take(3)
                     },
-                    label = { Text("Секунды") },
+                    label = { Text(stringResource(R.string.seconds_input_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -163,12 +168,12 @@ fun SettingsScreen(
                         showPrepDialog = false
                     }
                 ) {
-                    Text("Сохранить")
+                    Text(stringResource(R.string.save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPrepDialog = false }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -177,10 +182,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Настройки") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -207,12 +212,12 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Время подготовки перед тренировкой",
+                        text = stringResource(R.string.prep_time_title),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Text(
-                        text = "$prepSeconds с",
+                        text = stringResource(R.string.seconds_unit_suffix, prepSeconds),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -229,12 +234,12 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Звук перед началом работы",
+                        text = stringResource(R.string.sound_before_work),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Text(
-                        text = TimerSoundPresets.byId(workSoundPresetId).label,
+                        text = stringResource(TimerSoundPresets.byId(workSoundPresetId).labelRes),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -251,12 +256,34 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Звук перед отдыхом",
+                        text = stringResource(R.string.sound_before_rest),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Text(
-                        text = TimerSoundPresets.byId(restSoundPresetId).label,
+                        text = stringResource(TimerSoundPresets.byId(restSoundPresetId).labelRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = viewModel::openFinishSoundPicker)
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.sound_workout_finish),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Text(
+                        text = stringResource(TimerSoundPresets.byId(finishSoundPresetId).labelRes),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -271,7 +298,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Звук таймера",
+                        text = stringResource(R.string.timer_sound_enabled),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
@@ -290,13 +317,32 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Вибрация",
+                        text = stringResource(R.string.vibration),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Switch(
                         checked = vibrationEnabled,
                         onCheckedChange = viewModel::setVibrationEnabled
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.warn_last_10_seconds),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Switch(
+                        checked = alertAt10Seconds,
+                        onCheckedChange = viewModel::setAlertAt10Seconds
                     )
                 }
             }

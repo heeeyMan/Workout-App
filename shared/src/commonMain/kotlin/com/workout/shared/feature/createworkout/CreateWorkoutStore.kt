@@ -14,8 +14,13 @@ class CreateWorkoutStore(
     override fun dispatch(intent: CreateWorkoutIntent) {
         when (intent) {
             is CreateWorkoutIntent.LoadWorkout -> loadWorkout(intent.workoutId)
+            is CreateWorkoutIntent.SetDefaultWorkoutNameIfEmpty -> {
+                if (state.value.name.isBlank()) {
+                    setState { copy(name = intent.name) }
+                }
+            }
             is CreateWorkoutIntent.UpdateName -> setState { copy(name = intent.name) }
-            is CreateWorkoutIntent.AddExerciseBlock -> addExerciseBlock(intent.afterIndex)
+            is CreateWorkoutIntent.AddExerciseBlock -> addExerciseBlock(intent.afterIndex, intent.defaultExerciseName)
             is CreateWorkoutIntent.AddRestBlock -> addRestBlock(intent.afterIndex)
             is CreateWorkoutIntent.UpdateBlock -> updateBlock(intent.index, intent.block)
             is CreateWorkoutIntent.RemoveBlock -> removeBlock(intent.index)
@@ -40,10 +45,10 @@ class CreateWorkoutStore(
         }
     }
 
-    private fun addExerciseBlock(afterIndex: Int?) {
+    private fun addExerciseBlock(afterIndex: Int?, defaultExerciseName: String) {
         val newBlock = Block.Exercise(
             orderIndex = 0,
-            name = "Упражнение ${state.value.blocks.size + 1}",
+            name = defaultExerciseName,
             workDurationSeconds = 40,
             restDurationSeconds = 20,
             repeats = 3
@@ -105,7 +110,7 @@ class CreateWorkoutStore(
     private fun save() {
         val current = state.value
         if (current.name.isBlank()) {
-            emitEffect(CreateWorkoutEffect.ShowError("Введите название тренировки"))
+            emitEffect(CreateWorkoutEffect.ShowErrorEmptyWorkoutName)
             return
         }
         scope.launch {

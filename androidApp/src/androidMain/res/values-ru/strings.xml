@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Тренировки</string>
+
+    <string name="back">Назад</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="done">Готово</string>
+    <string name="delete">Удалить</string>
+    <string name="allow">Разрешить</string>
+    <string name="later">Позже</string>
+
+    <string name="my_workouts">Мои тренировки</string>
+    <string name="settings">Настройки</string>
+    <string name="new_workout">Новая тренировка</string>
+    <string name="confirm_delete_workout_title">Удалить тренировку?</string>
+    <string name="confirm_delete_workout_message">Это действие нельзя отменить.</string>
+    <string name="last_workout">Последняя тренировка</string>
+    <string name="all_workouts">Все тренировки</string>
+    <string name="empty_home_subtitle">Нет тренировок.\nНажми + чтобы создать первую.</string>
+
+    <string name="create">Создать</string>
+    <string name="no_workouts">Нет тренировок</string>
+
+    <string name="cd_start_workout">Запустить</string>
+    <string name="cd_delete">Удалить</string>
+
+    <string name="workout_card_line">%1$s · %2$s</string>
+
+    <string name="create_workout_title_new">Новая тренировка</string>
+    <string name="create_workout_title_edit">Редактировать</string>
+    <string name="cd_save">Сохранить</string>
+    <string name="workout_name_label">Название тренировки</string>
+    <string name="add_exercise">+ Упражнение</string>
+    <string name="add_rest">+ Отдых</string>
+    <string name="block_type_exercise">УПРАЖНЕНИЕ</string>
+    <string name="block_type_rest">ОТДЫХ</string>
+    <string name="cd_reorder">Перенести</string>
+    <string name="cd_duplicate">Дублировать</string>
+    <string name="cd_edit">Редактировать</string>
+    <string name="work_label">Работа</string>
+    <string name="rest_label">Отдых</string>
+    <string name="repeats_label">Повторений</string>
+    <string name="duration_label">Длительность</string>
+    <string name="dialog_exercise_name_title">Название упражнения</string>
+    <string name="dialog_work_duration_title">Время работы</string>
+    <string name="dialog_rest_duration_title">Время отдыха</string>
+    <string name="error_workout_name_required">Введите название тренировки</string>
+    <string name="default_workout_name_pattern">Тренировка %1$d</string>
+    <string name="default_exercise_name_pattern">Упражнение %1$d</string>
+
+    <string name="minutes_short">мин</string>
+    <string name="seconds_short">сек</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="prep_time_title">Время подготовки перед тренировкой</string>
+    <string name="prep_time_dialog_title">Время подготовки перед тренировкой</string>
+    <string name="seconds_input_label">Секунды</string>
+    <string name="seconds_unit_suffix">%1$d с</string>
+    <string name="sound_before_work">Звук перед началом работы</string>
+    <string name="sound_before_rest">Звук перед отдыхом</string>
+    <string name="sound_workout_finish">Звук окончания тренировки</string>
+    <string name="timer_sound_enabled">Звук таймера</string>
+    <string name="vibration">Вибрация</string>
+    <string name="warn_last_10_seconds">Предупреждать за 10 секунд</string>
+    <string name="cd_confirm_selection">Подтвердить выбор</string>
+    <string name="sound_picker_work_title">Звук перед началом работы</string>
+    <string name="sound_picker_rest_title">Звук перед отдыхом</string>
+    <string name="sound_picker_finish_title">Звук окончания тренировки</string>
+
+    <string name="preset_custom_mp3_start">Старт (MP3)</string>
+    <string name="preset_custom_mp3_end">Гонг конец</string>
+    <string name="preset_custom_sound_1">Звук 1</string>
+    <string name="preset_custom_sound_2">Звук 2</string>
+    <string name="preset_custom_sound_3">Звук 3</string>
+    <string name="preset_beep_standard">Короткий сигнал</string>
+    <string name="preset_beep_soft">Мягкий сигнал</string>
+    <string name="preset_ack">Щелчок</string>
+    <string name="preset_cdma_incall">Напоминание</string>
+    <string name="preset_cdma_guard">Сигнал вызова</string>
+    <string name="preset_dtmf_1">Тон 1</string>
+    <string name="preset_dtmf_3">Тон 3</string>
+    <string name="preset_cdma_high">Высокий тон</string>
+    <string name="preset_finish_default">Окончание тренировки (стандарт)</string>
+
+    <string name="timer_exit_title">Вы действительно хотите завершить тренировку?</string>
+    <string name="timer_exit_message">Прогресс не сохранится.</string>
+    <string name="end_workout">Завершить</string>
+    <string name="continue_workout">Продолжить</string>
+    <string name="phase_prep">ПОДГОТОВКА</string>
+    <string name="phase_work">РАБОТА</string>
+    <string name="phase_rest">ОТДЫХ</string>
+    <string name="timer_repeat_format">Повтор %1$s</string>
+    <string name="timer_next_phase">Следующее: %1$s · %2$s</string>
+    <string name="timer_block_of">Блок %1$d из %2$d</string>
+    <string name="cd_skip">Пропустить</string>
+    <string name="cd_pause">Пауза</string>
+    <string name="cd_resume">Продолжить</string>
+    <string name="cd_end_workout">Завершить тренировку</string>
+    <string name="workout_finished_title">Тренировка %1$s завершена</string>
+    <string name="back_to_home">На главную</string>
+
+    <string name="notif_phase_prep">Подготовка</string>
+    <string name="notif_phase_work">Работа</string>
+    <string name="notif_phase_work_with_name">Работа · %1$s</string>
+    <string name="notif_phase_rest">Отдых</string>
+    <string name="notif_repeat_format">Повтор %1$s</string>
+    <string name="notif_paused">Пауза</string>
+
+    <string name="phase_rest_name">Отдых</string>
+
+    <string name="permission_notifications_title">Звук и уведомления</string>
+    <string name="permission_notifications_body">На Android 13 и новее для надёжной работы звуков таймера может потребоваться разрешение на уведомления. Вибрация настраивается отдельно в настройках приложения.</string>
+
+    <string name="timer_notification_channel_name">Тренировка</string>
+    <string name="timer_notification_channel_desc">Пока таймер активен, приложение остаётся в приоритетном режиме</string>
+    <string name="timer_notification_title_fallback">Тренировка</string>
+    <string name="timer_notification_running">Таймер</string>
+
+    <plurals name="blocks_count">
+        <item quantity="one">%d блок</item>
+        <item quantity="few">%d блока</item>
+        <item quantity="many">%d блоков</item>
+        <item quantity="other">%d блоков</item>
+    </plurals>
+</resources>
