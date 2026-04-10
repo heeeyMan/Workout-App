@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.workout.android.ui.createworkout.CreateWorkoutScreen
 import com.workout.android.ui.home.HomeScreen
+import com.workout.android.ui.settings.SettingsScreen
 import com.workout.android.ui.timer.TimerScreen
 import com.workout.android.ui.workoutlist.WorkoutListScreen
 
@@ -20,8 +21,13 @@ fun AppNavigation(navController: NavHostController) {
         composable(Screen.Home.route) {
             HomeScreen(
                 onNavigateToTimer = { id -> navController.navigate(Screen.Timer.route(id)) },
-                onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) }
+                onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) },
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
             )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         composable(Screen.WorkoutList.route) {
