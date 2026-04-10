@@ -11,6 +11,7 @@ data class WorkoutListState(
 sealed interface WorkoutListIntent {
     data object LoadWorkouts : WorkoutListIntent
     data class SelectWorkout(val workoutId: Long) : WorkoutListIntent
+    data class EditWorkout(val workoutId: Long) : WorkoutListIntent
     data class RequestDelete(val workoutId: Long) : WorkoutListIntent
     data object ConfirmDelete : WorkoutListIntent
     data object CancelDelete : WorkoutListIntent
@@ -20,4 +21,5 @@ sealed interface WorkoutListIntent {
 sealed interface WorkoutListEffect {
     data class NavigateToTimer(val workoutId: Long) : WorkoutListEffect
     data object NavigateToCreateWorkout : WorkoutListEffect
+    data class NavigateToEditWorkout(val workoutId: Long) : WorkoutListEffect
 }

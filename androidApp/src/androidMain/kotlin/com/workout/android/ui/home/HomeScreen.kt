@@ -41,6 +41,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     onNavigateToTimer: (Long) -> Unit,
     onNavigateToCreateWorkout: () -> Unit,
+    onNavigateToEditWorkout: (Long) -> Unit,
     onNavigateToSettings: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
@@ -51,6 +52,7 @@ fun HomeScreen(
             when (effect) {
                 is HomeEffect.NavigateToTimer -> onNavigateToTimer(effect.workoutId)
                 is HomeEffect.NavigateToCreateWorkout -> onNavigateToCreateWorkout()
+                is HomeEffect.NavigateToEditWorkout -> onNavigateToEditWorkout(effect.workoutId)
             }
         }
     }
@@ -131,6 +133,7 @@ fun HomeScreen(
                             WorkoutCard(
                                 workout = lastStarted,
                                 onClick = { viewModel.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
+                                onEditClick = { viewModel.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
                                 onDeleteClick = { viewModel.dispatch(HomeIntent.RequestDelete(lastStarted.id)) }
                             )
                         }
@@ -147,6 +150,7 @@ fun HomeScreen(
                         WorkoutCard(
                             workout = workout,
                             onClick = { viewModel.dispatch(HomeIntent.StartWorkout(workout.id)) },
+                            onEditClick = { viewModel.dispatch(HomeIntent.EditWorkout(workout.id)) },
                             onDeleteClick = { viewModel.dispatch(HomeIntent.RequestDelete(workout.id)) }
                         )
                     }

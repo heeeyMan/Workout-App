@@ -16,6 +16,7 @@ class WorkoutListStore(
         when (intent) {
             is WorkoutListIntent.LoadWorkouts -> loadWorkouts()
             is WorkoutListIntent.SelectWorkout -> emitEffect(WorkoutListEffect.NavigateToTimer(intent.workoutId))
+            is WorkoutListIntent.EditWorkout -> emitEffect(WorkoutListEffect.NavigateToEditWorkout(intent.workoutId))
             is WorkoutListIntent.RequestDelete -> setState { copy(pendingDeleteId = intent.workoutId) }
             is WorkoutListIntent.ConfirmDelete -> confirmDelete()
             is WorkoutListIntent.CancelDelete -> setState { copy(pendingDeleteId = null) }

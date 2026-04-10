@@ -40,6 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 fun WorkoutListScreen(
     onNavigateToTimer: (Long) -> Unit,
     onNavigateToCreateWorkout: () -> Unit,
+    onNavigateToEditWorkout: (Long) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: WorkoutListViewModel = koinViewModel()
 ) {
@@ -50,6 +51,7 @@ fun WorkoutListScreen(
             when (effect) {
                 is WorkoutListEffect.NavigateToTimer -> onNavigateToTimer(effect.workoutId)
                 is WorkoutListEffect.NavigateToCreateWorkout -> onNavigateToCreateWorkout()
+                is WorkoutListEffect.NavigateToEditWorkout -> onNavigateToEditWorkout(effect.workoutId)
             }
         }
     }
@@ -113,6 +115,7 @@ fun WorkoutListScreen(
                     WorkoutCard(
                         workout = workout,
                         onClick = { viewModel.dispatch(WorkoutListIntent.SelectWorkout(workout.id)) },
+                        onEditClick = { viewModel.dispatch(WorkoutListIntent.EditWorkout(workout.id)) },
                         onDeleteClick = { viewModel.dispatch(WorkoutListIntent.RequestDelete(workout.id)) }
                     )
                 }

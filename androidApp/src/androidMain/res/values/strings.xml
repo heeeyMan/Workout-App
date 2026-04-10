@@ -38,6 +38,7 @@
     <string name="cd_reorder">Reorder</string>
     <string name="cd_duplicate">Duplicate</string>
     <string name="cd_edit">Edit</string>
+    <string name="cd_edit_workout">Edit workout</string>
     <string name="work_label">Work</string>
     <string name="rest_label">Rest</string>
     <string name="repeats_label">Repeats</string>

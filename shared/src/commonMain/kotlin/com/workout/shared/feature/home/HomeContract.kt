@@ -11,6 +11,7 @@ data class HomeState(
 sealed interface HomeIntent {
     data object LoadWorkouts : HomeIntent
     data class StartWorkout(val workoutId: Long) : HomeIntent
+    data class EditWorkout(val workoutId: Long) : HomeIntent
     data object CreateWorkout : HomeIntent
     data class RequestDelete(val workoutId: Long) : HomeIntent
     data object ConfirmDelete : HomeIntent
@@ -20,4 +21,5 @@ sealed interface HomeIntent {
 sealed interface HomeEffect {
     data class NavigateToTimer(val workoutId: Long) : HomeEffect
     data object NavigateToCreateWorkout : HomeEffect
+    data class NavigateToEditWorkout(val workoutId: Long) : HomeEffect
 }

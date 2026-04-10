@@ -24,6 +24,7 @@ fun AppNavigation(
             HomeScreen(
                 onNavigateToTimer = { id -> navController.navigate(Screen.Timer.route(id)) },
                 onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) },
+                onNavigateToEditWorkout = { id -> navController.navigate(Screen.CreateWorkout.route(id)) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
             )
         }
@@ -38,6 +39,7 @@ fun AppNavigation(
             WorkoutListScreen(
                 onNavigateToTimer = { id -> navController.navigate(Screen.Timer.route(id)) },
                 onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) },
+                onNavigateToEditWorkout = { id -> navController.navigate(Screen.CreateWorkout.route(id)) },
                 onNavigateBack = { navController.popBackStack() }
             )
         }

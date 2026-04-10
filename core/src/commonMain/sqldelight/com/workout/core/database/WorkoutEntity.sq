@@ -20,5 +20,8 @@ DELETE FROM WorkoutEntity WHERE id = ?;
 updateLastStartedAt:
 UPDATE WorkoutEntity SET last_started_at = ? WHERE id = ?;
 
+updateWorkout:
+UPDATE WorkoutEntity SET name = ? WHERE id = ?;
+
 lastInsertRowId:
 SELECT last_insert_rowid();

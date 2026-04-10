@@ -16,6 +16,7 @@ class HomeStore(
         when (intent) {
             is HomeIntent.LoadWorkouts -> loadWorkouts()
             is HomeIntent.StartWorkout -> startWorkout(intent.workoutId)
+            is HomeIntent.EditWorkout -> emitEffect(HomeEffect.NavigateToEditWorkout(intent.workoutId))
             is HomeIntent.CreateWorkout -> emitEffect(HomeEffect.NavigateToCreateWorkout)
             is HomeIntent.RequestDelete -> setState { copy(pendingDeleteId = intent.workoutId) }
             is HomeIntent.ConfirmDelete -> confirmDelete()

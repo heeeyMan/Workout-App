@@ -51,6 +51,10 @@ class WorkoutRepositoryImpl(
                 )
                 insertedId = database.workoutEntityQueries.lastInsertRowId().executeAsOne()
             } else {
+                database.workoutEntityQueries.updateWorkout(
+                    name = workout.name,
+                    id = workout.id
+                )
                 database.blockEntityQueries.deleteBlocksByWorkoutId(workout.id)
             }
             workout.blocks.forEachIndexed { index, block ->
