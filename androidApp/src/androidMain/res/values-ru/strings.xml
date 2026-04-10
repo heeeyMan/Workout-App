@@ -137,4 +137,5 @@
         <item quantity="many">%d блоков</item>
         <item quantity="other">%d блоков</item>
     </plurals>
+    <string name="timer_previous_phase">Step back</string>
 </resources>

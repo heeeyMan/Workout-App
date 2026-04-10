@@ -135,4 +135,5 @@
         <item quantity="one">%d block</item>
         <item quantity="other">%d blocks</item>
     </plurals>
+    <string name="timer_previous_phase">Шаг назад</string>
 </resources>

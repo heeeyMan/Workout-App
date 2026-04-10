@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -392,64 +394,76 @@ fun TimerScreen(
                         }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 48.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+
                     ) {
-                        FilledIconButton(
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilledIconButton(
+                                onClick = { viewModel.dispatch(TimerIntent.SkipPhase) },
+                                modifier = Modifier.size(52.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.cd_skip))
+                            }
+
+                            FilledIconButton(
+                                onClick = { viewModel.dispatch(TimerIntent.TogglePause) },
+                                modifier = Modifier.size(76.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentColor)
+                            ) {
+                                Icon(
+                                    if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                                    contentDescription = if (state.isPaused) {
+                                        stringResource(R.string.cd_resume)
+                                    } else {
+                                        stringResource(R.string.cd_pause)
+                                    },
+                                    modifier = Modifier.size(38.dp),
+                                    tint = MaterialTheme.colorScheme.background
+                                )
+                            }
+
+                            FilledIconButton(
+                                onClick = { showExitDialog = true },
+                                modifier = Modifier.size(52.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Stop,
+                                    contentDescription = stringResource(R.string.cd_end_workout),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        FilledTonalButton(
                             onClick = { viewModel.dispatch(TimerIntent.PreviousPhase) },
-                            modifier = Modifier.size(52.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
+                            modifier = Modifier.padding(bottom = 48.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
+                            ),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                         ) {
                             Icon(
                                 Icons.Default.NavigateBefore,
-                                contentDescription = stringResource(R.string.cd_previous_phase)
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp)
                             )
-                        }
-
-                        FilledIconButton(
-                            onClick = { viewModel.dispatch(TimerIntent.SkipPhase) },
-                            modifier = Modifier.size(52.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.cd_skip))
-                        }
-
-                        FilledIconButton(
-                            onClick = { viewModel.dispatch(TimerIntent.TogglePause) },
-                            modifier = Modifier.size(76.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentColor)
-                        ) {
-                            Icon(
-                                if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                                contentDescription = if (state.isPaused) {
-                                    stringResource(R.string.cd_resume)
-                                } else {
-                                    stringResource(R.string.cd_pause)
-                                },
-                                modifier = Modifier.size(38.dp),
-                                tint = MaterialTheme.colorScheme.background
-                            )
-                        }
-
-                        FilledIconButton(
-                            onClick = { showExitDialog = true },
-                            modifier = Modifier.size(52.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Icon(
-                                Icons.Default.Stop,
-                                contentDescription = stringResource(R.string.cd_end_workout),
-                                tint = MaterialTheme.colorScheme.error
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.timer_previous_phase),
+                                style = MaterialTheme.typography.labelLarge
                             )
                         }
                     }
