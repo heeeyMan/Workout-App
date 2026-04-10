@@ -19,7 +19,9 @@ class TimerStore(
                 intent.workoutId,
                 intent.blockPrepDurationSeconds,
                 intent.soundEnabled,
-                intent.vibrationEnabled
+                intent.vibrationEnabled,
+                intent.workStartSoundPresetId,
+                intent.restStartSoundPresetId
             )
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
@@ -32,7 +34,9 @@ class TimerStore(
         workoutId: Long,
         blockPrepDurationSeconds: Int,
         soundEnabled: Boolean,
-        vibrationEnabled: Boolean
+        vibrationEnabled: Boolean,
+        workStartSoundPresetId: String,
+        restStartSoundPresetId: String
     ) {
         scope.launch {
             val workout = workoutRepository.getWorkoutById(workoutId) ?: return@launch
@@ -56,6 +60,8 @@ class TimerStore(
                     },
                     soundEnabled = soundEnabled,
                     vibrationEnabled = vibrationEnabled,
+                    workStartSoundPresetId = workStartSoundPresetId,
+                    restStartSoundPresetId = restStartSoundPresetId,
                     isLoading = false
                 )
             }

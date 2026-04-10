@@ -19,7 +19,9 @@ class TimerViewModel(
                 workoutId = workoutId,
                 blockPrepDurationSeconds = timerPreferences.blockPrepDurationSeconds,
                 soundEnabled = timerPreferences.soundEnabled,
-                vibrationEnabled = timerPreferences.vibrationEnabled
+                vibrationEnabled = timerPreferences.vibrationEnabled,
+                workStartSoundPresetId = timerPreferences.workStartSoundPresetId,
+                restStartSoundPresetId = timerPreferences.restStartSoundPresetId
             )
         )
     }

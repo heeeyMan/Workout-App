@@ -17,6 +17,9 @@ data class TimerState(
     val isLoading: Boolean = true,
     val soundEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
+    /** Идентификаторы пресетов звука (Android), задаются при [TimerIntent.Load]. */
+    val workStartSoundPresetId: String = "",
+    val restStartSoundPresetId: String = "",
     val alertAt10Seconds: Boolean = true
 ) {
     val currentPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex)
@@ -52,7 +55,9 @@ sealed interface TimerIntent {
         val workoutId: Long,
         val blockPrepDurationSeconds: Int,
         val soundEnabled: Boolean,
-        val vibrationEnabled: Boolean
+        val vibrationEnabled: Boolean,
+        val workStartSoundPresetId: String,
+        val restStartSoundPresetId: String
     ) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent

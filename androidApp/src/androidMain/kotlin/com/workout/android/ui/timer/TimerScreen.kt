@@ -88,10 +88,19 @@ fun TimerScreen(
             when (effect) {
                 is TimerEffect.NavigateBack -> onNavigateBack()
                 is TimerEffect.PlayPrepTickSound -> TimerFeedback.playPrepTickTone(appContext)
-                is TimerEffect.PlayPrepEndSound -> TimerFeedback.playPrepEndTone(appContext)
+                is TimerEffect.PlayPrepEndSound -> {
+                    val st = viewModel.state.value
+                    TimerFeedback.playPrepEndTone(appContext, st.workStartSoundPresetId)
+                }
                 is TimerEffect.VibratePrepEnd -> TimerFeedback.vibratePrepEnd(appContext)
-                is TimerEffect.PlayWorkSound -> TimerFeedback.playWorkTone(appContext)
-                is TimerEffect.PlayRestSound -> TimerFeedback.playRestTone(appContext)
+                is TimerEffect.PlayWorkSound -> {
+                    val st = viewModel.state.value
+                    TimerFeedback.playWorkTone(appContext, st.workStartSoundPresetId)
+                }
+                is TimerEffect.PlayRestSound -> {
+                    val st = viewModel.state.value
+                    TimerFeedback.playRestTone(appContext, st.restStartSoundPresetId)
+                }
                 is TimerEffect.PlayFinishSound -> TimerFeedback.playFinishTone(appContext)
                 is TimerEffect.Vibrate -> TimerFeedback.vibrateShort(appContext)
                 is TimerEffect.VibrateFinish -> TimerFeedback.vibrateFinish(appContext)
