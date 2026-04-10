@@ -88,7 +88,7 @@
     <string name="end_workout">Завершить</string>
     <string name="continue_workout">Продолжить</string>
     <string name="phase_prep">ПОДГОТОВКА</string>
-    <string name="phase_work">РАБОТА</string>
+    <string name="phase_work">ПОДХОД</string>
     <string name="phase_rest">ОТДЫХ</string>
     <string name="timer_repeat_format">Повтор %1$s</string>
     <string name="timer_next_phase">Следующее: %1$s · %2$s</string>
