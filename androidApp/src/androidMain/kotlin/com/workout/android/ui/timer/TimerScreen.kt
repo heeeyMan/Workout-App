@@ -44,17 +44,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.workout.android.theme.RestBlue
-import com.workout.android.theme.RestBlueDim
-import com.workout.android.theme.WorkOrange
-import com.workout.android.theme.WorkOrangeDim
 import com.workout.android.ui.components.toTimeString
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
@@ -88,16 +83,20 @@ fun TimerScreen(
         }
     }
 
-    // Цвет фона анимируется при смене фазы
-    val phaseColor = if (state.currentPhase?.type == PhaseType.Work) WorkOrange else RestBlue
-    val phaseDimColor = if (state.currentPhase?.type == PhaseType.Work) WorkOrangeDim else RestBlueDim
+    val scheme = MaterialTheme.colorScheme
+    val isWorkPhase = state.currentPhase?.type == PhaseType.Work
+    val phaseAccentTarget =
+        if (isWorkPhase) scheme.onSurface else scheme.onSurfaceVariant
+    val phaseDimTarget =
+        if (isWorkPhase) scheme.onSurface.copy(alpha = 0.12f)
+        else scheme.onSurfaceVariant.copy(alpha = 0.18f)
     val backgroundColor by animateColorAsState(
-        targetValue = phaseDimColor,
+        targetValue = phaseDimTarget,
         animationSpec = tween(durationMillis = 600),
         label = "bg_color"
     )
     val accentColor by animateColorAsState(
-        targetValue = phaseColor,
+        targetValue = phaseAccentTarget,
         animationSpec = tween(durationMillis = 600),
         label = "accent_color"
     )
@@ -278,7 +277,7 @@ fun TimerScreen(
                             if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                             contentDescription = if (state.isPaused) "Продолжить" else "Пауза",
                             modifier = Modifier.size(40.dp),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.background
                         )
                     }
                 }

@@ -14,9 +14,7 @@ import com.workout.android.ui.workoutlist.WorkoutListScreen
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController,
-    isDarkTheme: Boolean,
-    onSetDarkTheme: (Boolean) -> Unit
+    navController: NavHostController
 ) {
     NavHost(
         navController = navController,
@@ -32,8 +30,6 @@ fun AppNavigation(
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                isDarkTheme = isDarkTheme,
-                onSetDarkTheme = onSetDarkTheme,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

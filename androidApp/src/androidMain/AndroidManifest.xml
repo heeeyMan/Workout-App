@@ -6,45 +6,19 @@
         android:label="Workout"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+        android:theme="@style/Theme.Workout"
         android:allowBackup="true">
 
-        <!-- Main activity — no launcher intent-filter, aliases handle it -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
-            android:keepScreenOn="false" />
-
-        <!-- Light theme icon alias (default, enabled) -->
-        <activity-alias
-            android:name=".MainActivityLight"
-            android:targetActivity=".MainActivity"
-            android:label="Workout"
-            android:icon="@mipmap/ic_launcher_light"
-            android:roundIcon="@mipmap/ic_launcher_light_round"
-            android:exported="true"
-            android:enabled="true">
+            android:keepScreenOn="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity-alias>
-
-        <!-- Dark theme icon alias (disabled by default) -->
-        <activity-alias
-            android:name=".MainActivityDark"
-            android:targetActivity=".MainActivity"
-            android:label="Workout"
-            android:icon="@mipmap/ic_launcher_dark"
-            android:roundIcon="@mipmap/ic_launcher_dark_round"
-            android:exported="true"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
+        </activity>
 
     </application>
 
