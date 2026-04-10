@@ -97,6 +97,17 @@
     <string name="timer_next_phase">Next: %1$s · %2$s</string>
     <string name="timer_block_of">Block %1$d of %2$d</string>
     <string name="cd_skip">Skip</string>
+    <string name="cd_previous_phase">Previous phase</string>
+    <string name="timer_minus_10">−10 s</string>
+    <string name="timer_plus_10">+10 s</string>
+    <string name="timer_quick_adjust_title">+10 s / −10 s on timer screen</string>
+    <string name="cd_gym_mode">Fullscreen gym mode</string>
+    <string name="cd_exit_gym_mode">Exit fullscreen</string>
+    <string name="cd_lock_controls">Lock controls</string>
+    <string name="timer_hold_to_unlock">Hold to show controls</string>
+    <string name="notif_action_pause">Pause</string>
+    <string name="notif_action_resume">Resume</string>
+    <string name="notif_action_next_phase">Next</string>
     <string name="cd_pause">Pause</string>
     <string name="cd_resume">Resume</string>
     <string name="cd_end_workout">End workout</string>

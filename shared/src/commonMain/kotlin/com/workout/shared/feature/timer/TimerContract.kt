@@ -67,6 +67,10 @@ sealed interface TimerIntent {
     ) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent
+    /** Вернуться к предыдущей фазе или к подготовке перед текущим подходом. */
+    data object PreviousPhase : TimerIntent
+    /** Сдвинуть оставшееся время текущего сегмента (подготовка / работа / отдых). */
+    data class AdjustRemainingSeconds(val delta: Int) : TimerIntent
     data object Finish : TimerIntent
     data object Tick : TimerIntent  // called every second by platform timer
 }

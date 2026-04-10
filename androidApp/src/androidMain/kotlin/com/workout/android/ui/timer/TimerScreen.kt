@@ -4,7 +4,9 @@ import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +19,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,9 +75,16 @@ import com.workout.android.ui.components.toTimeString
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
 import com.workout.shared.feature.timer.TimerIntent
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TimerScreen(
     workoutId: Long,
@@ -74,9 +92,21 @@ fun TimerScreen(
     viewModel: TimerViewModel = koinViewModel(parameters = { parametersOf(workoutId) })
 ) {
     val state by viewModel.state.collectAsState()
+    val quickAdjust by viewModel.quickAdjustEnabled.collectAsState()
     var showExitDialog by remember { mutableStateOf(false) }
+    var gymMode by remember { mutableStateOf(false) }
+    var gymControlsLocked by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = !state.isLoading && !state.isFinished) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshUiPrefs()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    BackHandler(enabled = !state.isLoading && !state.isFinished && !gymControlsLocked) {
         showExitDialog = true
     }
 
@@ -87,6 +117,35 @@ fun TimerScreen(
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
+
+    val view = LocalView.current
+    DisposableEffect(gymMode, view) {
+        val activity = view.context as? Activity
+        val window = activity?.window
+        if (window == null) {
+            return@DisposableEffect onDispose { }
+        }
+        val controller = WindowCompat.getInsetsController(window, view)
+        if (gymMode) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            controller.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            controller.show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+        }
+        onDispose {
+            if (gymMode) {
+                controller.show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+                WindowCompat.setDecorFitsSystemWindows(window, true)
+            }
+        }
+    }
+
+    val timerFontSize = if (gymMode) 120.sp else 88.sp
+    val titleStyle =
+        if (gymMode) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -164,7 +223,6 @@ fun TimerScreen(
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // Верхняя полоса прогресса всей тренировки
             LinearProgressIndicator(
                 progress = { state.overallProgress },
                 modifier = Modifier.fillMaxWidth().height(4.dp),
@@ -173,17 +231,53 @@ fun TimerScreen(
                 strokeCap = StrokeCap.Round
             )
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = if (gymMode) Arrangement.SpaceBetween else Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (gymMode) {
+                    IconButton(
+                        onClick = {
+                            gymMode = false
+                            gymControlsLocked = false
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.FullscreenExit,
+                            contentDescription = stringResource(R.string.cd_exit_gym_mode)
+                        )
+                    }
+                    if (!gymControlsLocked) {
+                        IconButton(onClick = { gymControlsLocked = true }) {
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = stringResource(R.string.cd_lock_controls)
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(onClick = { gymMode = true }) {
+                        Icon(
+                            Icons.Default.Fullscreen,
+                            contentDescription = stringResource(R.string.cd_gym_mode)
+                        )
+                    }
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(16.dp))
 
                 Spacer(Modifier.weight(1f))
 
-                // Тип фазы
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
@@ -204,15 +298,13 @@ fun TimerScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Название упражнения
                 Text(
                     text = state.currentPhase?.name ?: "",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = titleStyle,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                // Счётчик повторений
                 state.currentPhase?.repeatLabel?.let { label ->
                     Spacer(Modifier.height(4.dp))
                     Text(
@@ -224,10 +316,9 @@ fun TimerScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Главный таймер (цвет стадии: оранжевый / зелёный / серый)
                 Text(
                     text = state.secondsRemaining.toTimeString(),
-                    fontSize = 88.sp,
+                    fontSize = timerFontSize,
                     fontWeight = FontWeight.Bold,
                     color = accentColor,
                     textAlign = TextAlign.Center
@@ -235,7 +326,6 @@ fun TimerScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Прогресс текущей фазы
                 LinearProgressIndicator(
                     progress = { state.phaseProgress },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
@@ -246,82 +336,142 @@ fun TimerScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Следующая фаза
-                state.nextPhase?.let { next ->
+                if (!gymControlsLocked || !gymMode) {
+                    state.nextPhase?.let { next ->
+                        Text(
+                            text = stringResource(
+                                R.string.timer_next_phase,
+                                next.name,
+                                next.durationSeconds.toTimeString()
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
                     Text(
                         text = stringResource(
-                            R.string.timer_next_phase,
-                            next.name,
-                            next.durationSeconds.toTimeString()
+                            R.string.timer_block_of,
+                            state.currentPhaseIndex + 1,
+                            state.totalPhases
                         ),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                // Блок из блоков
-                Text(
-                    text = stringResource(
-                        R.string.timer_block_of,
-                        state.currentPhaseIndex + 1,
-                        state.totalPhases
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
                 Spacer(Modifier.weight(1f))
 
-                // Кнопки управления
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 48.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Пропустить
-                    FilledIconButton(
-                        onClick = { viewModel.dispatch(TimerIntent.SkipPhase) },
-                        modifier = Modifier.size(56.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.cd_skip))
+                if (!gymControlsLocked) {
+                    if (quickAdjust) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilledTonalButton(
+                                onClick = {
+                                    viewModel.dispatch(TimerIntent.AdjustRemainingSeconds(-10))
+                                },
+                                modifier = Modifier.height(48.dp)
+                            ) {
+                                Text(stringResource(R.string.timer_minus_10))
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            FilledTonalButton(
+                                onClick = {
+                                    viewModel.dispatch(TimerIntent.AdjustRemainingSeconds(10))
+                                },
+                                modifier = Modifier.height(48.dp)
+                            ) {
+                                Text(stringResource(R.string.timer_plus_10))
+                            }
+                        }
                     }
 
-                    // Пауза / Продолжить
-                    FilledIconButton(
-                        onClick = { viewModel.dispatch(TimerIntent.TogglePause) },
-                        modifier = Modifier.size(80.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentColor)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 48.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                            contentDescription = if (state.isPaused) {
-                                stringResource(R.string.cd_resume)
-                            } else {
-                                stringResource(R.string.cd_pause)
-                            },
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                    }
+                        FilledIconButton(
+                            onClick = { viewModel.dispatch(TimerIntent.PreviousPhase) },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.NavigateBefore,
+                                contentDescription = stringResource(R.string.cd_previous_phase)
+                            )
+                        }
 
-                    // Завершить тренировку (справа от паузы)
-                    FilledIconButton(
-                        onClick = { showExitDialog = true },
-                        modifier = Modifier.size(56.dp),
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                        FilledIconButton(
+                            onClick = { viewModel.dispatch(TimerIntent.SkipPhase) },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(Icons.Default.SkipNext, contentDescription = stringResource(R.string.cd_skip))
+                        }
+
+                        FilledIconButton(
+                            onClick = { viewModel.dispatch(TimerIntent.TogglePause) },
+                            modifier = Modifier.size(76.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentColor)
+                        ) {
+                            Icon(
+                                if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                                contentDescription = if (state.isPaused) {
+                                    stringResource(R.string.cd_resume)
+                                } else {
+                                    stringResource(R.string.cd_pause)
+                                },
+                                modifier = Modifier.size(38.dp),
+                                tint = MaterialTheme.colorScheme.background
+                            )
+                        }
+
+                        FilledIconButton(
+                            onClick = { showExitDialog = true },
+                            modifier = Modifier.size(52.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Stop,
+                                contentDescription = stringResource(R.string.cd_end_workout),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 48.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = { gymControlsLocked = false }
+                            )
+                            .padding(vertical = 20.dp, horizontal = 16.dp)
                     ) {
-                        Icon(
-                            Icons.Default.Stop,
-                            contentDescription = stringResource(R.string.cd_end_workout),
-                            tint = MaterialTheme.colorScheme.error
+                        Text(
+                            text = stringResource(R.string.timer_hold_to_unlock),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

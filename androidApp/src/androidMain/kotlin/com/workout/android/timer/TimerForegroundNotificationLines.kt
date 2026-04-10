@@ -5,6 +5,24 @@ import com.workout.android.R
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerState
 
+internal fun refreshWorkoutTimerNotification(context: Context, state: TimerState) {
+    val app = context.applicationContext
+    when {
+        state.isFinished || state.isLoading -> WorkoutTimerForegroundService.stop(app)
+        else -> {
+            val lines = state.toForegroundNotificationLines(context) ?: return
+            WorkoutTimerForegroundService.update(
+                app,
+                lines.workoutName,
+                lines.phaseLine,
+                lines.detailLine,
+                lines.timeLine,
+                state.isPaused
+            )
+        }
+    }
+}
+
 internal data class TimerForegroundNotificationLines(
     val workoutName: String,
     val phaseLine: String,

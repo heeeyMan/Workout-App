@@ -6,24 +6,36 @@ import androidx.lifecycle.viewModelScope
 import com.workout.android.R
 import com.workout.android.data.TimerPreferences
 import com.workout.android.feedback.TimerFeedback
+import com.workout.android.timer.TimerSessionBridge
 import com.workout.android.timer.WorkoutTimerForegroundService
-import com.workout.android.timer.toForegroundNotificationLines
+import com.workout.android.timer.refreshWorkoutTimerNotification
 import com.workout.shared.feature.timer.TimerEffect
 import com.workout.shared.feature.timer.TimerIntent
 import com.workout.shared.feature.timer.TimerStore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class TimerViewModel(
     private val store: TimerStore,
     private val timerPreferences: TimerPreferences,
     private val appContext: Context,
+    private val timerSessionBridge: TimerSessionBridge,
     workoutId: Long
 ) : ViewModel() {
 
     val state = store.state
     val effects = store.effects
 
+    private val _quickAdjustEnabled = MutableStateFlow(timerPreferences.timerQuickAdjustEnabled)
+    val quickAdjustEnabled: StateFlow<Boolean> = _quickAdjustEnabled
+
+    fun refreshUiPrefs() {
+        _quickAdjustEnabled.value = timerPreferences.timerQuickAdjustEnabled
+    }
+
     init {
+        timerSessionBridge.attach(store)
         store.dispatch(
             TimerIntent.Load(
                 workoutId = workoutId,
@@ -40,20 +52,7 @@ class TimerViewModel(
 
         viewModelScope.launch {
             store.state.collect { s ->
-                when {
-                    s.isFinished -> WorkoutTimerForegroundService.stop(appContext)
-                    s.isLoading -> Unit
-                    else -> {
-                        val lines = s.toForegroundNotificationLines(appContext) ?: return@collect
-                        WorkoutTimerForegroundService.update(
-                            appContext,
-                            lines.workoutName,
-                            lines.phaseLine,
-                            lines.detailLine,
-                            lines.timeLine
-                        )
-                    }
-                }
+                refreshWorkoutTimerNotification(appContext, s)
             }
         }
 
@@ -96,6 +95,7 @@ class TimerViewModel(
     fun dispatch(intent: TimerIntent) = store.dispatch(intent)
 
     override fun onCleared() {
+        timerSessionBridge.detach(store)
         WorkoutTimerForegroundService.stop(appContext)
         store.destroy()
     }

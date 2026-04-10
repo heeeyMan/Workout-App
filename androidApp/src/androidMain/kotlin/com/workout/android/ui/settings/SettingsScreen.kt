@@ -63,6 +63,7 @@ fun SettingsScreen(
     val workSoundPresetId by viewModel.workSoundPresetId.collectAsState()
     val restSoundPresetId by viewModel.restSoundPresetId.collectAsState()
     val finishSoundPresetId by viewModel.finishSoundPresetId.collectAsState()
+    val timerQuickAdjustEnabled by viewModel.timerQuickAdjustEnabled.collectAsState()
     val soundPickerTarget by viewModel.soundPickerTarget.collectAsState()
     val pendingSoundPresetId by viewModel.pendingSoundPresetId.collectAsState()
     val context = LocalContext.current
@@ -365,6 +366,25 @@ fun SettingsScreen(
                     Switch(
                         checked = vibrationEnabled,
                         onCheckedChange = viewModel::setVibrationEnabled
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.timer_quick_adjust_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Switch(
+                        checked = timerQuickAdjustEnabled,
+                        onCheckedChange = viewModel::setTimerQuickAdjustEnabled
                     )
                 }
             }

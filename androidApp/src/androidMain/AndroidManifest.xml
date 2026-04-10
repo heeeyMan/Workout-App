@@ -30,6 +30,10 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <receiver
+            android:name=".timer.TimerNotificationActionReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

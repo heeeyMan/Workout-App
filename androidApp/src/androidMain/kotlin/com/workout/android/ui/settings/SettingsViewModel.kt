@@ -33,6 +33,9 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
     private val _finishSoundPresetId = MutableStateFlow(timerPreferences.workoutFinishSoundPresetId)
     val finishSoundPresetId: StateFlow<String> = _finishSoundPresetId.asStateFlow()
 
+    private val _timerQuickAdjustEnabled = MutableStateFlow(timerPreferences.timerQuickAdjustEnabled)
+    val timerQuickAdjustEnabled: StateFlow<Boolean> = _timerQuickAdjustEnabled.asStateFlow()
+
     private val _soundPickerTarget = MutableStateFlow<TimerSoundPickerTarget?>(null)
     val soundPickerTarget: StateFlow<TimerSoundPickerTarget?> = _soundPickerTarget.asStateFlow()
 
@@ -53,6 +56,11 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
     fun setVibrationEnabled(enabled: Boolean) {
         timerPreferences.vibrationEnabled = enabled
         _vibrationEnabled.value = enabled
+    }
+
+    fun setTimerQuickAdjustEnabled(enabled: Boolean) {
+        timerPreferences.timerQuickAdjustEnabled = enabled
+        _timerQuickAdjustEnabled.value = enabled
     }
 
     fun setWorkPhaseEndWarningSeconds(seconds: Int) {

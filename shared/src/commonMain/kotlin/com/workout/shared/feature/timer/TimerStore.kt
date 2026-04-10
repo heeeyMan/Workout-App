@@ -28,6 +28,8 @@ class TimerStore(
             )
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
+            is TimerIntent.PreviousPhase -> previousPhase()
+            is TimerIntent.AdjustRemainingSeconds -> adjustRemainingSeconds(intent.delta)
             is TimerIntent.Finish -> finish()
             is TimerIntent.Tick -> tick()
         }
@@ -201,6 +203,65 @@ class TimerStore(
 
     private fun skipPhase() {
         advancePhase()
+    }
+
+    private fun enterPhaseAtIndex(index: Int) {
+        val s = state.value
+        if (index < 0 || index >= s.phases.size) return
+        val p = s.phases[index]
+        val prep = s.blockPrepDurationSeconds
+        val startWithPrep = p.type == PhaseType.Work && prep > 0 && p.needsBlockPrepStart
+        setState {
+            copy(
+                currentPhaseIndex = index,
+                isPrepBeforeWork = startWithPrep,
+                secondsRemaining = if (startWithPrep) prep else p.durationSeconds
+            )
+        }
+    }
+
+    private fun previousPhase() {
+        val s = state.value
+        if (s.isFinished || s.isLoading) return
+
+        if (s.currentPhaseIndex == 0 && s.isPrepBeforeWork) return
+
+        if (s.isPrepBeforeWork) {
+            enterPhaseAtIndex(s.currentPhaseIndex - 1)
+            return
+        }
+
+        val phase = s.currentPhase ?: return
+        if (phase.type == PhaseType.Work && phase.needsBlockPrepStart && s.blockPrepDurationSeconds > 0) {
+            setState {
+                copy(
+                    isPrepBeforeWork = true,
+                    secondsRemaining = blockPrepDurationSeconds
+                )
+            }
+            return
+        }
+
+        if (s.currentPhaseIndex == 0) {
+            setState { copy(secondsRemaining = phase.durationSeconds) }
+            return
+        }
+
+        enterPhaseAtIndex(s.currentPhaseIndex - 1)
+    }
+
+    private fun adjustRemainingSeconds(delta: Int) {
+        if (delta == 0) return
+        val s = state.value
+        if (s.isFinished || s.isLoading) return
+        val maxCap = if (s.isPrepBeforeWork) {
+            s.blockPrepDurationSeconds
+        } else {
+            s.currentPhase?.durationSeconds ?: return
+        }
+        if (maxCap <= 0) return
+        val newVal = (s.secondsRemaining + delta).coerceIn(1, maxCap)
+        setState { copy(secondsRemaining = newVal) }
     }
 
     private fun togglePause() {

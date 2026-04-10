@@ -97,6 +97,17 @@
     <string name="timer_next_phase">Следующее: %1$s · %2$s</string>
     <string name="timer_block_of">Блок %1$d из %2$d</string>
     <string name="cd_skip">Пропустить</string>
+    <string name="cd_previous_phase">Предыдущая фаза</string>
+    <string name="timer_minus_10">−10 с</string>
+    <string name="timer_plus_10">+10 с</string>
+    <string name="timer_quick_adjust_title">Кнопки +10 с / −10 с на экране таймера</string>
+    <string name="cd_gym_mode">Полноэкранный режим</string>
+    <string name="cd_exit_gym_mode">Выйти из полноэкранного режима</string>
+    <string name="cd_lock_controls">Заблокировать кнопки</string>
+    <string name="timer_hold_to_unlock">Удерживайте, чтобы показать кнопки</string>
+    <string name="notif_action_pause">Пауза</string>
+    <string name="notif_action_resume">Продолжить</string>
+    <string name="notif_action_next_phase">Дальше</string>
     <string name="cd_pause">Пауза</string>
     <string name="cd_resume">Продолжить</string>
     <string name="cd_end_workout">Завершить тренировку</string>

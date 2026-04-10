@@ -51,6 +51,16 @@ class TimerPreferences(context: Context) {
             ).apply()
         }
 
+    /**
+     * Кнопки «+10 с / −10 с» на экране таймера для текущей фазы.
+     * По умолчанию выключено — включается в настройках.
+     */
+    var timerQuickAdjustEnabled: Boolean
+        get() = prefs.getBoolean(KEY_TIMER_QUICK_ADJUST, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_TIMER_QUICK_ADJUST, value).apply()
+        }
+
     /** Пользователь нажал «Позже» в диалоге разрешения уведомлений — не показывать снова автоматически. */
     var skipNotificationPermissionPrompt: Boolean
         get() = prefs.getBoolean(KEY_SKIP_NOTIF_PROMPT, false)
@@ -97,6 +107,7 @@ class TimerPreferences(context: Context) {
         private const val KEY_VIBRATION_ENABLED = "vibration_enabled"
         private const val KEY_WORK_PHASE_END_WARN = "work_phase_end_warning_seconds"
         private const val KEY_ALERT_10_SECONDS_LEGACY = "alert_at_10_seconds"
+        private const val KEY_TIMER_QUICK_ADJUST = "timer_quick_adjust_enabled"
         private const val KEY_SKIP_NOTIF_PROMPT = "skip_notification_permission_prompt"
         private const val KEY_WORK_SOUND_PRESET = "work_start_sound_preset"
         private const val KEY_REST_SOUND_PRESET = "rest_start_sound_preset"
