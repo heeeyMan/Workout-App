@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -122,6 +125,11 @@ fun TimerScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) {
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             return@Box
@@ -150,15 +158,12 @@ fun TimerScreen(
             ) {
                 Spacer(Modifier.height(32.dp))
 
-                // Контролы: стоп и звук
+                // Звук
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { showExitDialog = true }) {
-                        Icon(Icons.Default.Stop, contentDescription = "Завершить", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
                     IconButton(onClick = { viewModel.dispatch(TimerIntent.ToggleSound) }) {
                         Icon(
                             if (state.soundEnabled) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
@@ -280,8 +285,24 @@ fun TimerScreen(
                             tint = MaterialTheme.colorScheme.background
                         )
                     }
+
+                    // Завершить тренировку (справа от паузы)
+                    FilledIconButton(
+                        onClick = { showExitDialog = true },
+                        modifier = Modifier.size(56.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Icon(
+                            Icons.Default.Stop,
+                            contentDescription = "Завершить тренировку",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
+        }
         }
     }
 }

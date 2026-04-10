@@ -1,7 +1,9 @@
 package com.workout.android.ui.createworkout
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.DragHandle
+import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
@@ -46,7 +50,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,9 +61,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.workout.android.theme.BrownContainer
 import com.workout.android.theme.BrownPrimary
 import com.workout.android.theme.OnBrownContainer
@@ -68,9 +79,10 @@ import com.workout.android.ui.components.toTimeString
 import com.workout.core.model.Block
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
 import com.workout.shared.feature.createworkout.CreateWorkoutIntent
+import kotlin.math.abs
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CreateWorkoutScreen(
     workoutId: Long,
@@ -79,6 +91,9 @@ fun CreateWorkoutScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val blockCenters = remember { mutableStateMapOf<Int, Float>() }
+    var draggingIndex by remember { mutableIntStateOf(-1) }
+    var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
     LaunchedEffect(workoutId) {
         if (workoutId != 0L) viewModel.dispatch(CreateWorkoutIntent.LoadWorkout(workoutId))
@@ -139,16 +154,48 @@ fun CreateWorkoutScreen(
             }
 
             itemsIndexed(state.blocks, key = { _, block -> block.id.toString() + block.orderIndex }) { index, block ->
-                BlockCard(
-                    block = block,
-                    index = index,
-                    totalBlocks = state.blocks.size,
-                    onUpdate = { updated -> viewModel.dispatch(CreateWorkoutIntent.UpdateBlock(index, updated)) },
-                    onDelete = { viewModel.dispatch(CreateWorkoutIntent.RemoveBlock(index)) },
-                    onDuplicate = { viewModel.dispatch(CreateWorkoutIntent.DuplicateBlock(index)) },
-                    onMoveUp = { if (index > 0) viewModel.dispatch(CreateWorkoutIntent.MoveBlock(index, index - 1)) },
-                    onMoveDown = { if (index < state.blocks.size - 1) viewModel.dispatch(CreateWorkoutIntent.MoveBlock(index, index + 1)) }
-                )
+                Box(modifier = Modifier.animateItemPlacement()) {
+                    BlockCard(
+                        block = block,
+                        index = index,
+                        totalBlocks = state.blocks.size,
+                        isDragging = draggingIndex == index,
+                        dragOffsetY = if (draggingIndex == index) dragOffsetY else 0f,
+                        onMeasuredCenterY = { center -> blockCenters[index] = center },
+                        onStartDrag = {
+                            draggingIndex = index
+                            dragOffsetY = 0f
+                        },
+                        onDrag = { deltaY ->
+                            if (draggingIndex < 0) return@BlockCard
+                            dragOffsetY += deltaY
+
+                            val from = draggingIndex
+                            val currentCenter = blockCenters[from] ?: return@BlockCard
+                            val targetCenter = currentCenter + dragOffsetY
+
+                            val nearest = blockCenters
+                                .minByOrNull { (_, center) -> abs(center - targetCenter) }
+                                ?.key
+                                ?: return@BlockCard
+
+                            if (nearest != from && nearest in state.blocks.indices) {
+                                viewModel.dispatch(CreateWorkoutIntent.MoveBlock(from, nearest))
+                                draggingIndex = nearest
+                                dragOffsetY = 0f
+                            }
+                        },
+                        onEndDrag = {
+                            draggingIndex = -1
+                            dragOffsetY = 0f
+                        },
+                        onUpdate = { updated -> viewModel.dispatch(CreateWorkoutIntent.UpdateBlock(index, updated)) },
+                        onDelete = { viewModel.dispatch(CreateWorkoutIntent.RemoveBlock(index)) },
+                        onDuplicate = { viewModel.dispatch(CreateWorkoutIntent.DuplicateBlock(index)) },
+                        onMoveUp = { if (index > 0) viewModel.dispatch(CreateWorkoutIntent.MoveBlock(index, index - 1)) },
+                        onMoveDown = { if (index < state.blocks.size - 1) viewModel.dispatch(CreateWorkoutIntent.MoveBlock(index, index + 1)) }
+                    )
+                }
             }
 
             item {
@@ -158,13 +205,15 @@ fun CreateWorkoutScreen(
                 ) {
                     Button(
                         onClick = { viewModel.dispatch(CreateWorkoutIntent.AddExerciseBlock()) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("+ Упражнение")
                     }
                     Button(
                         onClick = { viewModel.dispatch(CreateWorkoutIntent.AddRestBlock()) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("+ Отдых")
                     }
@@ -184,6 +233,12 @@ private fun BlockCard(
     block: Block,
     index: Int,
     totalBlocks: Int,
+    isDragging: Boolean,
+    dragOffsetY: Float,
+    onMeasuredCenterY: (Float) -> Unit,
+    onStartDrag: () -> Unit,
+    onDrag: (Float) -> Unit,
+    onEndDrag: () -> Unit,
     onUpdate: (Block) -> Unit,
     onDelete: () -> Unit,
     onDuplicate: () -> Unit,
@@ -194,7 +249,28 @@ private fun BlockCard(
     val accentColor = if (isExercise) BrownPrimary else RestBlue
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .zIndex(if (isDragging) 1f else 0f)
+            .graphicsLayer {
+                translationY = dragOffsetY
+                shadowElevation = if (isDragging) 24f else 0f
+            }
+            .pointerInput(index) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { onStartDrag() },
+                    onDragCancel = { onEndDrag() },
+                    onDragEnd = { onEndDrag() },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        onDrag(dragAmount.y)
+                    }
+                )
+            }
+            .onGloballyPositioned { coordinates ->
+                val centerY = coordinates.positionInRoot().y + coordinates.size.height / 2f
+                onMeasuredCenterY(centerY)
+            },
         colors = CardDefaults.cardColors(containerColor = SurfaceVariant),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -220,23 +296,33 @@ private fun BlockCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                // Иконки действий — компактные
-                IconButton(onClick = onMoveUp, enabled = index > 0, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = "Вверх",
-                        modifier = Modifier.size(18.dp))
-                }
-                IconButton(onClick = onMoveDown, enabled = index < totalBlocks - 1, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Вниз",
-                        modifier = Modifier.size(18.dp))
-                }
-                IconButton(onClick = onDuplicate, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = "Дублировать",
-                        modifier = Modifier.size(18.dp))
-                }
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Outlined.DeleteOutline, contentDescription = "Удалить",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp))
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (isDragging) MaterialTheme.colorScheme.surface
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Outlined.DragHandle, contentDescription = "Перенести",
+                            modifier = Modifier.size(28.dp))
+                    }
+                    IconButton(onClick = onDuplicate, modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Outlined.ContentCopy, contentDescription = "Дублировать",
+                            modifier = Modifier.size(20.dp))
+                    }
+                    IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Outlined.DeleteOutline, contentDescription = "Удалить",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(28.dp))
+                    }
                 }
             }
 

@@ -1,14 +1,17 @@
 package com.workout.shared.feature.createworkout
 
 import com.workout.core.model.Block
+import kotlin.random.Random
 
 data class CreateWorkoutState(
     val workoutId: Long = 0L,
-    val name: String = "",
+    val name: String = defaultNewWorkoutName(),
     val blocks: List<Block> = emptyList(),
     val isSaving: Boolean = false,
     val totalDurationSeconds: Int = 0
 )
+
+private fun defaultNewWorkoutName(): String = "Тренировка ${Random.nextInt(101)}"
 
 sealed interface CreateWorkoutIntent {
     data class LoadWorkout(val workoutId: Long) : CreateWorkoutIntent
