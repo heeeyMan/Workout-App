@@ -130,6 +130,7 @@
     <string name="timer_notification_channel_desc">While the timer is running, the app stays in a high-priority mode</string>
     <string name="timer_notification_title_fallback">Workout</string>
     <string name="timer_notification_running">Timer</string>
+    <string name="training_time">Training time: %1$s</string>
 
     <plurals name="blocks_count">
         <item quantity="one">%d block</item>

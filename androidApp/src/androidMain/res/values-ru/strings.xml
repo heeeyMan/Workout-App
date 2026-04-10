@@ -130,6 +130,7 @@
     <string name="timer_notification_channel_desc">Пока таймер активен, приложение остаётся в приоритетном режиме</string>
     <string name="timer_notification_title_fallback">Тренировка</string>
     <string name="timer_notification_running">Таймер</string>
+    <string name="training_time">Время тренировки: %1$s</string>
 
     <plurals name="blocks_count">
         <item quantity="one">%d блок</item>

@@ -135,9 +135,11 @@ fun CreateWorkoutScreen(
                             }
                         )
                         if (state.totalDurationSeconds > 0) {
+                            val totalTime = state.totalDurationSeconds.toTimeString()
                             Text(
-                                text = state.totalDurationSeconds.toTimeString(),
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = stringResource(R.string.training_time, totalTime),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
