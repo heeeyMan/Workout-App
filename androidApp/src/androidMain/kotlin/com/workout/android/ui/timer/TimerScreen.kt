@@ -53,6 +53,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.workout.android.theme.TimerPrepGray
+import com.workout.android.theme.TimerPrepGrayDim
+import com.workout.android.theme.TimerRestGreen
+import com.workout.android.theme.TimerRestGreenDim
+import com.workout.android.theme.TimerWorkOrange
+import com.workout.android.theme.TimerWorkOrangeDim
 import com.workout.android.ui.components.toTimeString
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
@@ -86,13 +92,18 @@ fun TimerScreen(
         }
     }
 
-    val scheme = MaterialTheme.colorScheme
+    val inPrep = state.isPrepBeforeWork
     val isWorkPhase = state.currentPhase?.type == PhaseType.Work
-    val phaseAccentTarget =
-        if (isWorkPhase) scheme.onSurface else scheme.onSurfaceVariant
-    val phaseDimTarget =
-        if (isWorkPhase) scheme.onSurface.copy(alpha = 0.12f)
-        else scheme.onSurfaceVariant.copy(alpha = 0.18f)
+    val phaseAccentTarget = when {
+        inPrep -> TimerPrepGray
+        isWorkPhase -> TimerWorkOrange
+        else -> TimerRestGreen
+    }
+    val phaseDimTarget = when {
+        inPrep -> TimerPrepGrayDim
+        isWorkPhase -> TimerWorkOrangeDim
+        else -> TimerRestGreenDim
+    }
     val backgroundColor by animateColorAsState(
         targetValue = phaseDimTarget,
         animationSpec = tween(durationMillis = 600),
@@ -183,7 +194,11 @@ fun TimerScreen(
                         .padding(horizontal = 24.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = if (state.currentPhase?.type == PhaseType.Work) "РАБОТА" else "ОТДЫХ",
+                        text = when {
+                            state.isPrepBeforeWork -> "ПОДГОТОВКА"
+                            state.currentPhase?.type == PhaseType.Work -> "РАБОТА"
+                            else -> "ОТДЫХ"
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         color = accentColor,
                         fontWeight = FontWeight.Bold
@@ -212,7 +227,7 @@ fun TimerScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Главный таймер
+                // Главный таймер (цвет стадии: оранжевый / зелёный / серый)
                 Text(
                     text = state.secondsRemaining.toTimeString(),
                     fontSize = 88.sp,

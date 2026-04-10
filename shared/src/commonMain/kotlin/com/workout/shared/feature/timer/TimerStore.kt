@@ -15,7 +15,7 @@ class TimerStore(
 
     override fun dispatch(intent: TimerIntent) {
         when (intent) {
-            is TimerIntent.Load -> load(intent.workoutId)
+            is TimerIntent.Load -> load(intent.workoutId, intent.blockPrepDurationSeconds)
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
             is TimerIntent.Finish -> finish()
@@ -25,16 +25,27 @@ class TimerStore(
         }
     }
 
-    private fun load(workoutId: Long) {
+    private fun load(workoutId: Long, blockPrepDurationSeconds: Int) {
         scope.launch {
             val workout = workoutRepository.getWorkoutById(workoutId) ?: return@launch
             val phases = workout.blocks.flatMap { it.toPhases() }
+            val prepLen = blockPrepDurationSeconds.coerceAtLeast(0)
+            val first = phases.firstOrNull()
+            val startWithPrep = prepLen > 0 &&
+                first?.type == PhaseType.Work &&
+                first.needsBlockPrepStart
             setState {
                 copy(
                     workoutName = workout.name,
                     phases = phases,
                     currentPhaseIndex = 0,
-                    secondsRemaining = phases.firstOrNull()?.durationSeconds ?: 0,
+                    blockPrepDurationSeconds = prepLen,
+                    isPrepBeforeWork = startWithPrep,
+                    secondsRemaining = when {
+                        startWithPrep -> prepLen
+                        first != null -> first.durationSeconds
+                        else -> 0
+                    },
                     isLoading = false
                 )
             }
@@ -58,12 +69,28 @@ class TimerStore(
 
         val newSeconds = s.secondsRemaining - 1
 
-        if (newSeconds == 10 && s.alertAt10Seconds) {
+        if (!s.isPrepBeforeWork && newSeconds == 10 && s.alertAt10Seconds) {
             emitEffect(TimerEffect.Alert10Seconds)
         }
 
         if (newSeconds <= 0) {
-            advancePhase()
+            if (s.isPrepBeforeWork) {
+                val phase = s.currentPhase ?: return
+                setState {
+                    copy(
+                        isPrepBeforeWork = false,
+                        secondsRemaining = phase.durationSeconds
+                    )
+                }
+                if (state.value.soundEnabled) {
+                    emitEffect(TimerEffect.PlayWorkSound)
+                }
+                if (state.value.vibrationEnabled) {
+                    emitEffect(TimerEffect.Vibrate)
+                }
+            } else {
+                advancePhase()
+            }
         } else {
             setState { copy(secondsRemaining = newSeconds) }
         }
@@ -75,24 +102,53 @@ class TimerStore(
 
         if (nextIndex >= s.phases.size) {
             timerJob?.cancel()
-            setState { copy(isFinished = true, secondsRemaining = 0) }
+            setState { copy(isFinished = true, secondsRemaining = 0, isPrepBeforeWork = false) }
             emitEffect(TimerEffect.PlayFinishSound)
             return
         }
 
         val nextPhase = s.phases[nextIndex]
-        setState {
-            copy(
-                currentPhaseIndex = nextIndex,
-                secondsRemaining = nextPhase.durationSeconds
-            )
-        }
-
-        if (state.value.soundEnabled) {
-            emitEffect(if (nextPhase.type == PhaseType.Work) TimerEffect.PlayWorkSound else TimerEffect.PlayRestSound)
-        }
-        if (state.value.vibrationEnabled) {
-            emitEffect(TimerEffect.Vibrate)
+        val prepLen = s.blockPrepDurationSeconds
+        when {
+            nextPhase.type == PhaseType.Work && prepLen > 0 && nextPhase.needsBlockPrepStart -> {
+                setState {
+                    copy(
+                        currentPhaseIndex = nextIndex,
+                        isPrepBeforeWork = true,
+                        secondsRemaining = prepLen
+                    )
+                }
+            }
+            nextPhase.type == PhaseType.Work -> {
+                setState {
+                    copy(
+                        currentPhaseIndex = nextIndex,
+                        isPrepBeforeWork = false,
+                        secondsRemaining = nextPhase.durationSeconds
+                    )
+                }
+                if (state.value.soundEnabled) {
+                    emitEffect(TimerEffect.PlayWorkSound)
+                }
+                if (state.value.vibrationEnabled) {
+                    emitEffect(TimerEffect.Vibrate)
+                }
+            }
+            else -> {
+                setState {
+                    copy(
+                        currentPhaseIndex = nextIndex,
+                        isPrepBeforeWork = false,
+                        secondsRemaining = nextPhase.durationSeconds
+                    )
+                }
+                if (state.value.soundEnabled) {
+                    emitEffect(TimerEffect.PlayRestSound)
+                }
+                if (state.value.vibrationEnabled) {
+                    emitEffect(TimerEffect.Vibrate)
+                }
+            }
         }
     }
 
@@ -125,7 +181,8 @@ class TimerStore(
                         name = name,
                         type = PhaseType.Work,
                         durationSeconds = workDurationSeconds,
-                        repeatLabel = "$rep / $repeats"
+                        repeatLabel = "$rep / $repeats",
+                        needsBlockPrepStart = rep == 1
                     )
                 )
                 if (restDurationSeconds > 0) {

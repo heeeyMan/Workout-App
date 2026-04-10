@@ -5,6 +5,13 @@ data class TimerState(
     val phases: List<TimerPhase> = emptyList(),
     val currentPhaseIndex: Int = 0,
     val secondsRemaining: Int = 0,
+    /**
+     * Длительность паузы перед стартом блока (из настроек). 0 — без отсчёта.
+     * Хранится в состоянии, чтобы прогресс и таймер были согласованы на всю сессию.
+     */
+    val blockPrepDurationSeconds: Int = 0,
+    /** Обратный отсчёт перед первой фазой «Работа» в блоке (см. [TimerPhase.needsBlockPrepStart]). */
+    val isPrepBeforeWork: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
     val isLoading: Boolean = true,
@@ -19,7 +26,12 @@ data class TimerState(
         get() = if (phases.isEmpty()) 0f else currentPhaseIndex.toFloat() / phases.size
     val phaseProgress: Float
         get() {
-            val duration = currentPhase?.durationSeconds ?: return 0f
+            val phase = currentPhase ?: return 0f
+            if (isPrepBeforeWork && phase.type == PhaseType.Work) {
+                val prep = blockPrepDurationSeconds
+                return if (prep <= 0) 1f else 1f - (secondsRemaining.toFloat() / prep)
+            }
+            val duration = phase.durationSeconds
             return if (duration == 0) 1f else 1f - (secondsRemaining.toFloat() / duration)
         }
 }
@@ -28,13 +40,15 @@ data class TimerPhase(
     val name: String,
     val type: PhaseType,
     val durationSeconds: Int,
-    val repeatLabel: String? = null  // e.g. "2 / 5"
+    val repeatLabel: String? = null,  // e.g. "2 / 5"
+    /** True только для первого подхода в блоке упражнения — перед ним показывается пауза из настроек. */
+    val needsBlockPrepStart: Boolean = false
 )
 
 enum class PhaseType { Work, Rest }
 
 sealed interface TimerIntent {
-    data class Load(val workoutId: Long) : TimerIntent
+    data class Load(val workoutId: Long, val blockPrepDurationSeconds: Int) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent
     data object Finish : TimerIntent
