@@ -24,11 +24,31 @@ class TimerPreferences(context: Context) {
             prefs.edit().putBoolean(KEY_VIBRATION_ENABLED, value).apply()
         }
 
-    /** В фазе «Работа» в последние 10 с — короткий звук каждую секунду. */
-    var alertAt10Seconds: Boolean
-        get() = prefs.getBoolean(KEY_ALERT_10_SECONDS, true)
+    /**
+     * За сколько секунд до конца фазы «Работа» включать предупреждение (звук каждую секунду).
+     * 0 — выключено. По умолчанию 3 с.
+     */
+    var workPhaseEndWarningSeconds: Int
+        get() {
+            if (!prefs.contains(KEY_WORK_PHASE_END_WARN)) {
+                if (prefs.contains(KEY_ALERT_10_SECONDS_LEGACY)) {
+                    val legacyOn = prefs.getBoolean(KEY_ALERT_10_SECONDS_LEGACY, true)
+                    val migrated = if (legacyOn) 10 else 0
+                    prefs.edit()
+                        .putInt(KEY_WORK_PHASE_END_WARN, migrated)
+                        .remove(KEY_ALERT_10_SECONDS_LEGACY)
+                        .apply()
+                    return migrated.coerceIn(MIN_WORK_PHASE_WARN, MAX_WORK_PHASE_WARN)
+                }
+            }
+            return prefs.getInt(KEY_WORK_PHASE_END_WARN, DEFAULT_WORK_PHASE_WARN_SECONDS)
+                .coerceIn(MIN_WORK_PHASE_WARN, MAX_WORK_PHASE_WARN)
+        }
         set(value) {
-            prefs.edit().putBoolean(KEY_ALERT_10_SECONDS, value).apply()
+            prefs.edit().putInt(
+                KEY_WORK_PHASE_END_WARN,
+                value.coerceIn(MIN_WORK_PHASE_WARN, MAX_WORK_PHASE_WARN)
+            ).apply()
         }
 
     /** Пользователь нажал «Позже» в диалоге разрешения уведомлений — не показывать снова автоматически. */
@@ -75,7 +95,8 @@ class TimerPreferences(context: Context) {
         private const val KEY_BLOCK_PREP_SECONDS = "block_prep_seconds"
         private const val KEY_SOUND_ENABLED = "sound_enabled"
         private const val KEY_VIBRATION_ENABLED = "vibration_enabled"
-        private const val KEY_ALERT_10_SECONDS = "alert_at_10_seconds"
+        private const val KEY_WORK_PHASE_END_WARN = "work_phase_end_warning_seconds"
+        private const val KEY_ALERT_10_SECONDS_LEGACY = "alert_at_10_seconds"
         private const val KEY_SKIP_NOTIF_PROMPT = "skip_notification_permission_prompt"
         private const val KEY_WORK_SOUND_PRESET = "work_start_sound_preset"
         private const val KEY_REST_SOUND_PRESET = "rest_start_sound_preset"
@@ -83,5 +104,8 @@ class TimerPreferences(context: Context) {
         const val DEFAULT_BLOCK_PREP_SECONDS = 5
         const val MIN_PREP_SECONDS = 0
         const val MAX_PREP_SECONDS = 120
+        const val DEFAULT_WORK_PHASE_WARN_SECONDS = 3
+        const val MIN_WORK_PHASE_WARN = 0
+        const val MAX_WORK_PHASE_WARN = 120
     }
 }

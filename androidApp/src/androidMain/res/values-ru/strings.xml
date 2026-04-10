@@ -62,10 +62,13 @@
     <string name="sound_workout_finish">Звук окончания тренировки</string>
     <string name="timer_sound_enabled">Звук таймера</string>
     <string name="vibration">Вибрация</string>
-    <string name="warn_last_10_seconds">Предупреждать за 10 секунд</string>
+    <string name="work_phase_warn_title">Предупреждение перед концом работы</string>
+    <string name="work_phase_warn_dialog_title">За сколько секунд предупреждать</string>
+    <string name="work_phase_warn_dialog_hint">Звук каждую секунду в последние N секунд подхода. 0 — выключить.</string>
+    <string name="work_phase_warn_off">Выкл</string>
     <string name="cd_confirm_selection">Подтвердить выбор</string>
-    <string name="sound_picker_work_title">Звук перед началом работы</string>
-    <string name="sound_picker_rest_title">Звук перед отдыхом</string>
+    <string name="sound_picker_work_title">Звук начала подхода</string>
+    <string name="sound_picker_rest_title">Звук финаша подхода</string>
     <string name="sound_picker_finish_title">Звук окончания тренировки</string>
 
     <string name="preset_custom_mp3_start">Гонг старт</string>

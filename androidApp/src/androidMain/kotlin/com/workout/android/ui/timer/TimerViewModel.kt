@@ -33,7 +33,7 @@ class TimerViewModel(
                 workStartSoundPresetId = timerPreferences.workStartSoundPresetId,
                 restStartSoundPresetId = timerPreferences.restStartSoundPresetId,
                 finishSoundPresetId = timerPreferences.workoutFinishSoundPresetId,
-                alertAt10Seconds = timerPreferences.alertAt10Seconds,
+                workPhaseEndWarningSeconds = timerPreferences.workPhaseEndWarningSeconds,
                 restPhaseDisplayName = appContext.getString(R.string.phase_rest_name)
             )
         )

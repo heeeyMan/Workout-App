@@ -23,7 +23,7 @@ class TimerStore(
                 intent.workStartSoundPresetId,
                 intent.restStartSoundPresetId,
                 intent.finishSoundPresetId,
-                intent.alertAt10Seconds,
+                intent.workPhaseEndWarningSeconds,
                 intent.restPhaseDisplayName
             )
             is TimerIntent.TogglePause -> togglePause()
@@ -41,7 +41,7 @@ class TimerStore(
         workStartSoundPresetId: String,
         restStartSoundPresetId: String,
         finishSoundPresetId: String,
-        alertAt10Seconds: Boolean,
+        workPhaseEndWarningSeconds: Int,
         restPhaseDisplayName: String
     ) {
         scope.launch {
@@ -69,7 +69,7 @@ class TimerStore(
                     workStartSoundPresetId = workStartSoundPresetId,
                     restStartSoundPresetId = restStartSoundPresetId,
                     finishSoundPresetId = finishSoundPresetId,
-                    alertAt10Seconds = alertAt10Seconds,
+                    workPhaseEndWarningSeconds = workPhaseEndWarningSeconds.coerceAtLeast(0),
                     isLoading = false
                 )
             }
@@ -100,12 +100,13 @@ class TimerStore(
             emitEffect(TimerEffect.PlayPrepTickSound)
         }
 
-        if (!s.isPrepBeforeWork && s.alertAt10Seconds &&
+        val warnWindow = s.workPhaseEndWarningSeconds
+        if (warnWindow > 0 && !s.isPrepBeforeWork &&
             s.currentPhase?.type == PhaseType.Work &&
-            newSeconds in 1..10
+            newSeconds in 1..warnWindow
         ) {
             val playSound = s.soundEnabled
-            val vibOnce = s.vibrationEnabled && newSeconds == 10
+            val vibOnce = s.vibrationEnabled && newSeconds == warnWindow
             if (playSound || vibOnce) {
                 emitEffect(TimerEffect.Alert10Seconds(withVibration = vibOnce))
             }

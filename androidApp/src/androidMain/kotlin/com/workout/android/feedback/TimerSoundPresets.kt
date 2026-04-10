@@ -16,9 +16,10 @@ data class TimerSoundPreset(
 
 object TimerSoundPresets {
 
-    const val DEFAULT_WORK_ID = "beep_standard"
-    const val DEFAULT_REST_ID = "beep_soft"
-    const val DEFAULT_FINISH_ID = "finish_default"
+    /** Звук начала подхода по умолчанию — [R.raw.timer_custom_start]. */
+    const val DEFAULT_WORK_ID = "custom_mp3_start"
+    const val DEFAULT_REST_ID = "custom_mp3_end"
+    const val DEFAULT_FINISH_ID = "custom_mp3_end"
 
     val all: List<TimerSoundPreset> = listOf(
         TimerSoundPreset(

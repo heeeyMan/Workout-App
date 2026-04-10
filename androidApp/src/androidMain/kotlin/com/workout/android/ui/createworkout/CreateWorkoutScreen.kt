@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -73,10 +74,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
 import com.workout.android.R
 import com.workout.android.theme.BrownContainer
-import com.workout.android.theme.BrownPrimary
 import com.workout.android.theme.OnBrownContainer
-import com.workout.android.theme.RestBlue
 import com.workout.android.theme.SurfaceVariant
+import com.workout.android.theme.TimerRestGreen
+import com.workout.android.theme.TimerWorkOrange
 import com.workout.android.ui.components.WheelTimePicker
 import com.workout.android.ui.components.toTimeString
 import com.workout.core.model.Block
@@ -278,7 +279,7 @@ private fun BlockCard(
     onMoveDown: () -> Unit
 ) {
     val isExercise = block is Block.Exercise
-    val accentColor = if (isExercise) BrownPrimary else RestBlue
+    val accentColor = if (isExercise) TimerWorkOrange else TimerRestGreen
 
     Card(
         modifier = Modifier
@@ -427,14 +428,14 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         DurationChip(
             label = stringResource(R.string.work_label),
             seconds = block.workDurationSeconds,
-            color = BrownPrimary,
+            color = TimerWorkOrange,
             modifier = Modifier.weight(1f),
             onClick = { showWorkDialog = true }
         )
         DurationChip(
             label = stringResource(R.string.rest_label),
             seconds = block.restDurationSeconds,
-            color = RestBlue,
+            color = TimerRestGreen,
             modifier = Modifier.weight(1f),
             onClick = { showRestDialog = true }
         )
@@ -511,7 +512,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
     DurationChip(
         label = stringResource(R.string.duration_label),
         seconds = block.durationSeconds,
-        color = RestBlue,
+        color = TimerRestGreen,
         modifier = Modifier.fillMaxWidth(),
         onClick = { showDurationDialog = true }
     )
@@ -650,12 +651,29 @@ private fun DurationPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(minutes * 60 + secs) }) {
-                Text(stringResource(R.string.done))
+            Button(
+                onClick = { onConfirm(minutes * 60 + secs) },
+                modifier = Modifier.heightIn(min = 60.dp),
+                contentPadding = PaddingValues(horizontal = 35.dp, vertical = 14.dp)
+            ) {
+                Text(
+                    stringResource(R.string.done),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.heightIn(min = 58.dp),
+                contentPadding = PaddingValues(horizontal = 30.dp, vertical = 14.dp)
+            ) {
+                Text(
+                    stringResource(R.string.cancel),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
         }
     )
 }

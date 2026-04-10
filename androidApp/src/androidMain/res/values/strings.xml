@@ -62,10 +62,13 @@
     <string name="sound_workout_finish">Workout complete sound</string>
     <string name="timer_sound_enabled">Timer sound</string>
     <string name="vibration">Vibration</string>
-    <string name="warn_last_10_seconds">Warn in the last 10 seconds</string>
+    <string name="work_phase_warn_title">Warn before work ends</string>
+    <string name="work_phase_warn_dialog_title">Seconds before work ends</string>
+    <string name="work_phase_warn_dialog_hint">Sound each second in the last N seconds of work. Use 0 to turn off.</string>
+    <string name="work_phase_warn_off">Off</string>
     <string name="cd_confirm_selection">Confirm selection</string>
-    <string name="sound_picker_work_title">Sound before work</string>
-    <string name="sound_picker_rest_title">Sound before rest</string>
+    <string name="sound_picker_work_title">Sound start work</string>
+    <string name="sound_picker_rest_title">Sound end work</string>
     <string name="sound_picker_finish_title">Workout complete sound</string>
 
     <string name="preset_custom_mp3_start">Gong Start</string>

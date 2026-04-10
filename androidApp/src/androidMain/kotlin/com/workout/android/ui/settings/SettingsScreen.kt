@@ -59,7 +59,7 @@ fun SettingsScreen(
     val prepSeconds by viewModel.blockPrepSeconds.collectAsState()
     val soundEnabled by viewModel.soundEnabled.collectAsState()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsState()
-    val alertAt10Seconds by viewModel.alertAt10Seconds.collectAsState()
+    val workPhaseEndWarningSeconds by viewModel.workPhaseEndWarningSeconds.collectAsState()
     val workSoundPresetId by viewModel.workSoundPresetId.collectAsState()
     val restSoundPresetId by viewModel.restSoundPresetId.collectAsState()
     val finishSoundPresetId by viewModel.finishSoundPresetId.collectAsState()
@@ -68,6 +68,8 @@ fun SettingsScreen(
     val context = LocalContext.current
     var showPrepDialog by remember { mutableStateOf(false) }
     var prepInput by remember { mutableStateOf("") }
+    var showWorkWarnDialog by remember { mutableStateOf(false) }
+    var workWarnInput by remember { mutableStateOf("") }
 
     val pickerTarget = soundPickerTarget
     if (pickerTarget != null) {
@@ -173,6 +175,45 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showPrepDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showWorkWarnDialog) {
+        AlertDialog(
+            onDismissRequest = { showWorkWarnDialog = false },
+            title = { Text(stringResource(R.string.work_phase_warn_dialog_title)) },
+            text = {
+                OutlinedTextField(
+                    value = workWarnInput,
+                    onValueChange = { value ->
+                        workWarnInput = value.filter { it.isDigit() }.take(3)
+                    },
+                    label = { Text(stringResource(R.string.seconds_input_label)) },
+                    supportingText = { Text(stringResource(R.string.work_phase_warn_dialog_hint)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val v = if (workWarnInput.isBlank()) {
+                            0
+                        } else {
+                            workWarnInput.toIntOrNull() ?: workPhaseEndWarningSeconds
+                        }
+                        viewModel.setWorkPhaseEndWarningSeconds(v)
+                        showWorkWarnDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWorkWarnDialog = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -331,18 +372,28 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            workWarnInput = workPhaseEndWarningSeconds.toString()
+                            showWorkWarnDialog = true
+                        }
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.warn_last_10_seconds),
+                        text = stringResource(R.string.work_phase_warn_title),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
-                    Switch(
-                        checked = alertAt10Seconds,
-                        onCheckedChange = viewModel::setAlertAt10Seconds
+                    Text(
+                        text = if (workPhaseEndWarningSeconds <= 0) {
+                            stringResource(R.string.work_phase_warn_off)
+                        } else {
+                            stringResource(R.string.seconds_unit_suffix, workPhaseEndWarningSeconds)
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

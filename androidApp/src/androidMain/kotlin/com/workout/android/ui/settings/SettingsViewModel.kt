@@ -20,8 +20,9 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
     private val _vibrationEnabled = MutableStateFlow(timerPreferences.vibrationEnabled)
     val vibrationEnabled: StateFlow<Boolean> = _vibrationEnabled.asStateFlow()
 
-    private val _alertAt10Seconds = MutableStateFlow(timerPreferences.alertAt10Seconds)
-    val alertAt10Seconds: StateFlow<Boolean> = _alertAt10Seconds.asStateFlow()
+    private val _workPhaseEndWarningSeconds =
+        MutableStateFlow(timerPreferences.workPhaseEndWarningSeconds)
+    val workPhaseEndWarningSeconds: StateFlow<Int> = _workPhaseEndWarningSeconds.asStateFlow()
 
     private val _workSoundPresetId = MutableStateFlow(timerPreferences.workStartSoundPresetId)
     val workSoundPresetId: StateFlow<String> = _workSoundPresetId.asStateFlow()
@@ -54,9 +55,13 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
         _vibrationEnabled.value = enabled
     }
 
-    fun setAlertAt10Seconds(enabled: Boolean) {
-        timerPreferences.alertAt10Seconds = enabled
-        _alertAt10Seconds.value = enabled
+    fun setWorkPhaseEndWarningSeconds(seconds: Int) {
+        val v = seconds.coerceIn(
+            TimerPreferences.MIN_WORK_PHASE_WARN,
+            TimerPreferences.MAX_WORK_PHASE_WARN
+        )
+        timerPreferences.workPhaseEndWarningSeconds = v
+        _workPhaseEndWarningSeconds.value = v
     }
 
     fun openWorkSoundPicker() {

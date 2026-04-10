@@ -27,10 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 
-private val ItemHeight = 52.dp
+private val ItemHeight = 72.dp
 private const val VisibleItems = 5                // нечётное → чёткий центр
 private val PickerHeight = ItemHeight * VisibleItems
 private const val PaddingItems = VisibleItems / 2 // = 2
+private val ColumnWidth = 112.dp
 
 /**
  * Барабанный пикер времени (мм : сс).
@@ -53,14 +54,14 @@ fun WheelTimePicker(
             selectedIndex = minutes,
             onIndexChange = onMinutesChange,
             label = { "%02d".format(it) },
-            modifier = Modifier.width(88.dp)
+            modifier = Modifier.width(ColumnWidth)
         )
 
         Text(
             text = ":",
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 4.dp)
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
 
         WheelColumn(
@@ -68,7 +69,7 @@ fun WheelTimePicker(
             selectedIndex = seconds,
             onIndexChange = onSecondsChange,
             label = { "%02d".format(it) },
-            modifier = Modifier.width(88.dp)
+            modifier = Modifier.width(ColumnWidth)
         )
     }
 }
@@ -114,7 +115,7 @@ private fun WheelColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(ItemHeight)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
         )
 
@@ -146,7 +147,11 @@ private fun WheelColumn(
                 ) {
                     Text(
                         text = label(index),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = if (distance == 0) {
+                            MaterialTheme.typography.displaySmall
+                        } else {
+                            MaterialTheme.typography.headlineLarge
+                        },
                         fontWeight = if (distance == 0) FontWeight.Bold else FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface
                     )
