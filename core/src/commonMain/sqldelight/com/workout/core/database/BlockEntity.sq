@@ -1,0 +1,29 @@
+CREATE TABLE BlockEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    workout_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    order_index INTEGER NOT NULL,
+    name TEXT,
+    work_duration_seconds INTEGER,
+    rest_duration_seconds INTEGER,
+    repeats INTEGER,
+    video_path TEXT
+);
+
+insertBlock:
+INSERT INTO BlockEntity (
+    workout_id,
+    type,
+    order_index,
+    name,
+    work_duration_seconds,
+    rest_duration_seconds,
+    repeats,
+    video_path
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+selectBlocksByWorkoutId:
+SELECT * FROM BlockEntity WHERE workout_id = ? ORDER BY order_index ASC;
+
+deleteBlocksByWorkoutId:
+DELETE FROM BlockEntity WHERE workout_id = ?;
