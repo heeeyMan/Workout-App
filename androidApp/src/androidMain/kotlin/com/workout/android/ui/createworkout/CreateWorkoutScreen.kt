@@ -63,7 +63,7 @@ import com.workout.android.theme.BrownPrimary
 import com.workout.android.theme.OnBrownContainer
 import com.workout.android.theme.RestBlue
 import com.workout.android.theme.SurfaceVariant
-import com.workout.android.ui.components.DurationPicker
+import com.workout.android.ui.components.WheelTimePicker
 import com.workout.android.ui.components.toTimeString
 import com.workout.core.model.Block
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
@@ -500,7 +500,8 @@ private fun DurationPickerDialog(
     onConfirm: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var currentSeconds by remember { mutableIntStateOf(seconds) }
+    var minutes by remember { mutableIntStateOf(seconds / 60) }
+    var secs by remember { mutableIntStateOf(seconds % 60) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -510,15 +511,16 @@ private fun DurationPickerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                DurationPicker(
-                    label = "",
-                    totalSeconds = currentSeconds,
-                    onValueChange = { currentSeconds = it }
+                WheelTimePicker(
+                    minutes = minutes,
+                    seconds = secs,
+                    onMinutesChange = { minutes = it },
+                    onSecondsChange = { secs = it }
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(currentSeconds) }) {
+            TextButton(onClick = { onConfirm(minutes * 60 + secs) }) {
                 Text("Готово")
             }
         },
