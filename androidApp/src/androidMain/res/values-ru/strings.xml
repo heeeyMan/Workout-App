@@ -68,7 +68,7 @@
     <string name="sound_picker_rest_title">Звук перед отдыхом</string>
     <string name="sound_picker_finish_title">Звук окончания тренировки</string>
 
-    <string name="preset_custom_mp3_start">Старт (MP3)</string>
+    <string name="preset_custom_mp3_start">Гонг старт</string>
     <string name="preset_custom_mp3_end">Гонг конец</string>
     <string name="preset_custom_sound_1">Звук 1</string>
     <string name="preset_custom_sound_2">Звук 2</string>
