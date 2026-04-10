@@ -57,8 +57,8 @@
     <string name="prep_time_dialog_title">Время подготовки перед тренировкой</string>
     <string name="seconds_input_label">Секунды</string>
     <string name="seconds_unit_suffix">%1$d с</string>
-    <string name="sound_before_work">Звук перед началом работы</string>
-    <string name="sound_before_rest">Звук перед отдыхом</string>
+    <string name="sound_before_work">Звук начала подхода</string>
+    <string name="sound_before_rest">Звук конца подхода</string>
     <string name="sound_workout_finish">Звук окончания тренировки</string>
     <string name="timer_sound_enabled">Звук таймера</string>
     <string name="vibration">Вибрация</string>
