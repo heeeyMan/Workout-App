@@ -17,21 +17,17 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = koinViewModel()
+    isDarkTheme: Boolean,
+    onSetDarkTheme: (Boolean) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
-    val isDark by viewModel.isDarkTheme.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -62,8 +58,8 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Switch(
-                        checked = isDark,
-                        onCheckedChange = { viewModel.setDarkTheme(it) }
+                        checked = isDarkTheme,
+                        onCheckedChange = onSetDarkTheme
                     )
                 }
             }

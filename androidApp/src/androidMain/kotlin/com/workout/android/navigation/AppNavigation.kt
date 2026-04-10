@@ -13,7 +13,11 @@ import com.workout.android.ui.timer.TimerScreen
 import com.workout.android.ui.workoutlist.WorkoutListScreen
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(
+    navController: NavHostController,
+    isDarkTheme: Boolean,
+    onSetDarkTheme: (Boolean) -> Unit
+) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -27,7 +31,11 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onNavigateBack = { navController.popBackStack() })
+            SettingsScreen(
+                isDarkTheme = isDarkTheme,
+                onSetDarkTheme = onSetDarkTheme,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.WorkoutList.route) {
