@@ -57,8 +57,8 @@
     <string name="prep_time_dialog_title">Prep time before workout</string>
     <string name="seconds_input_label">Seconds</string>
     <string name="seconds_unit_suffix">%1$d s</string>
-    <string name="sound_before_work">Sound start work</string>
-    <string name="sound_before_rest">Sound end work</string>
+    <string name="sound_before_work">Start-up sound</string>
+    <string name="sound_before_rest">Sound of work completion</string>
     <string name="sound_workout_finish">Workout complete sound</string>
     <string name="timer_sound_enabled">Timer sound</string>
     <string name="vibration">Vibration</string>
