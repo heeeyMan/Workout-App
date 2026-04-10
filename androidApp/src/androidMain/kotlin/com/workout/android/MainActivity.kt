@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
 import com.workout.android.navigation.AppNavigation
 import com.workout.android.theme.WorkoutAppTheme
+import com.workout.android.ui.permissions.AppEntryPermissionHandler
 
 class MainActivity : ComponentActivity() {
 
@@ -16,6 +17,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             WorkoutAppTheme {
+                AppEntryPermissionHandler()
                 val navController = rememberNavController()
                 AppNavigation(navController = navController)
             }

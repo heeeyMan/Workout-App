@@ -48,20 +48,30 @@ data class TimerPhase(
 enum class PhaseType { Work, Rest }
 
 sealed interface TimerIntent {
-    data class Load(val workoutId: Long, val blockPrepDurationSeconds: Int) : TimerIntent
+    data class Load(
+        val workoutId: Long,
+        val blockPrepDurationSeconds: Int,
+        val soundEnabled: Boolean,
+        val vibrationEnabled: Boolean
+    ) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent
     data object Finish : TimerIntent
-    data object ToggleSound : TimerIntent
-    data object ToggleVibration : TimerIntent
     data object Tick : TimerIntent  // called every second by platform timer
 }
 
 sealed interface TimerEffect {
+    /** Короткий сигнал каждую секунду на этапе подготовки перед блоком. */
+    data object PlayPrepTickSound : TimerEffect
+    /** Конец подготовки — переход к работе: более протяжный звук. */
+    data object PlayPrepEndSound : TimerEffect
+    /** Конец подготовки — выраженная вибрация. */
+    data object VibratePrepEnd : TimerEffect
     data object PlayWorkSound : TimerEffect
     data object PlayRestSound : TimerEffect
     data object PlayFinishSound : TimerEffect
     data object Vibrate : TimerEffect
+    data object VibrateFinish : TimerEffect
     data object Alert10Seconds : TimerEffect
     data object NavigateBack : TimerEffect
 }

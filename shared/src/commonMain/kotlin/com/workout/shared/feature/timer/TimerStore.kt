@@ -15,17 +15,25 @@ class TimerStore(
 
     override fun dispatch(intent: TimerIntent) {
         when (intent) {
-            is TimerIntent.Load -> load(intent.workoutId, intent.blockPrepDurationSeconds)
+            is TimerIntent.Load -> load(
+                intent.workoutId,
+                intent.blockPrepDurationSeconds,
+                intent.soundEnabled,
+                intent.vibrationEnabled
+            )
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
             is TimerIntent.Finish -> finish()
-            is TimerIntent.ToggleSound -> setState { copy(soundEnabled = !soundEnabled) }
-            is TimerIntent.ToggleVibration -> setState { copy(vibrationEnabled = !vibrationEnabled) }
             is TimerIntent.Tick -> tick()
         }
     }
 
-    private fun load(workoutId: Long, blockPrepDurationSeconds: Int) {
+    private fun load(
+        workoutId: Long,
+        blockPrepDurationSeconds: Int,
+        soundEnabled: Boolean,
+        vibrationEnabled: Boolean
+    ) {
         scope.launch {
             val workout = workoutRepository.getWorkoutById(workoutId) ?: return@launch
             val phases = workout.blocks.flatMap { it.toPhases() }
@@ -46,8 +54,13 @@ class TimerStore(
                         first != null -> first.durationSeconds
                         else -> 0
                     },
+                    soundEnabled = soundEnabled,
+                    vibrationEnabled = vibrationEnabled,
                     isLoading = false
                 )
+            }
+            if (startWithPrep && soundEnabled) {
+                emitEffect(TimerEffect.PlayPrepTickSound)
             }
             startTimer()
         }
@@ -69,7 +82,13 @@ class TimerStore(
 
         val newSeconds = s.secondsRemaining - 1
 
-        if (!s.isPrepBeforeWork && newSeconds == 10 && s.alertAt10Seconds) {
+        if (s.isPrepBeforeWork && s.soundEnabled && newSeconds > 0) {
+            emitEffect(TimerEffect.PlayPrepTickSound)
+        }
+
+        if (!s.isPrepBeforeWork && newSeconds == 10 && s.alertAt10Seconds &&
+            (s.soundEnabled || s.vibrationEnabled)
+        ) {
             emitEffect(TimerEffect.Alert10Seconds)
         }
 
@@ -83,10 +102,10 @@ class TimerStore(
                     )
                 }
                 if (state.value.soundEnabled) {
-                    emitEffect(TimerEffect.PlayWorkSound)
+                    emitEffect(TimerEffect.PlayPrepEndSound)
                 }
                 if (state.value.vibrationEnabled) {
-                    emitEffect(TimerEffect.Vibrate)
+                    emitEffect(TimerEffect.VibratePrepEnd)
                 }
             } else {
                 advancePhase()
@@ -103,7 +122,12 @@ class TimerStore(
         if (nextIndex >= s.phases.size) {
             timerJob?.cancel()
             setState { copy(isFinished = true, secondsRemaining = 0, isPrepBeforeWork = false) }
-            emitEffect(TimerEffect.PlayFinishSound)
+            if (s.soundEnabled) {
+                emitEffect(TimerEffect.PlayFinishSound)
+            }
+            if (s.vibrationEnabled) {
+                emitEffect(TimerEffect.VibrateFinish)
+            }
             return
         }
 
@@ -117,6 +141,9 @@ class TimerStore(
                         isPrepBeforeWork = true,
                         secondsRemaining = prepLen
                     )
+                }
+                if (state.value.soundEnabled) {
+                    emitEffect(TimerEffect.PlayPrepTickSound)
                 }
             }
             nextPhase.type == PhaseType.Work -> {

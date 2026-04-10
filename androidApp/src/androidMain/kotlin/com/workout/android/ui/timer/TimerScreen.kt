@@ -24,13 +24,11 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.outlined.VolumeOff
-import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +57,7 @@ import com.workout.android.theme.TimerRestGreen
 import com.workout.android.theme.TimerRestGreenDim
 import com.workout.android.theme.TimerWorkOrange
 import com.workout.android.theme.TimerWorkOrangeDim
+import com.workout.android.feedback.TimerFeedback
 import com.workout.android.ui.components.toTimeString
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
@@ -77,6 +76,7 @@ fun TimerScreen(
 
     // Держать экран включённым
     val context = LocalContext.current
+    val appContext = context.applicationContext
     DisposableEffect(Unit) {
         val window = (context as? Activity)?.window
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -87,7 +87,19 @@ fun TimerScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is TimerEffect.NavigateBack -> onNavigateBack()
-                else -> { /* TODO: звук и вибрация */ }
+                is TimerEffect.PlayPrepTickSound -> TimerFeedback.playPrepTickTone(appContext)
+                is TimerEffect.PlayPrepEndSound -> TimerFeedback.playPrepEndTone(appContext)
+                is TimerEffect.VibratePrepEnd -> TimerFeedback.vibratePrepEnd(appContext)
+                is TimerEffect.PlayWorkSound -> TimerFeedback.playWorkTone(appContext)
+                is TimerEffect.PlayRestSound -> TimerFeedback.playRestTone(appContext)
+                is TimerEffect.PlayFinishSound -> TimerFeedback.playFinishTone(appContext)
+                is TimerEffect.Vibrate -> TimerFeedback.vibrateShort(appContext)
+                is TimerEffect.VibrateFinish -> TimerFeedback.vibrateFinish(appContext)
+                is TimerEffect.Alert10Seconds -> {
+                    val st = viewModel.state.value
+                    if (st.soundEnabled) TimerFeedback.playAlertTone(appContext)
+                    if (st.vibrationEnabled) TimerFeedback.vibrateAlert(appContext)
+                }
             }
         }
     }
@@ -167,22 +179,7 @@ fun TimerScreen(
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(32.dp))
-
-                // Звук
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { viewModel.dispatch(TimerIntent.ToggleSound) }) {
-                        Icon(
-                            if (state.soundEnabled) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeOff,
-                            contentDescription = "Звук",
-                            tint = if (state.soundEnabled) accentColor else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                Spacer(Modifier.height(24.dp))
 
                 Spacer(Modifier.weight(1f))
 
@@ -329,12 +326,22 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("✓", fontSize = 80.sp)
-        Spacer(Modifier.height(16.dp))
-        Text("Тренировка завершена!", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(8.dp))
-        Text(workoutName, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(32.dp))
+        Icon(
+            imageVector = Icons.Outlined.Celebration,
+            contentDescription = null,
+            modifier = Modifier.size(96.dp),
+            tint = TimerWorkOrange
+        )
+        Spacer(Modifier.height(28.dp))
+        Text(
+            text = "Тренировка $workoutName завершена",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        Spacer(Modifier.height(40.dp))
         TextButton(onClick = onBack) {
             Text("На главную")
         }

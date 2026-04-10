@@ -14,7 +14,14 @@ class TimerViewModel(
     val effects = store.effects
 
     init {
-        store.dispatch(TimerIntent.Load(workoutId, timerPreferences.blockPrepDurationSeconds))
+        store.dispatch(
+            TimerIntent.Load(
+                workoutId = workoutId,
+                blockPrepDurationSeconds = timerPreferences.blockPrepDurationSeconds,
+                soundEnabled = timerPreferences.soundEnabled,
+                vibrationEnabled = timerPreferences.vibrationEnabled
+            )
+        )
     }
 
     fun dispatch(intent: TimerIntent) = store.dispatch(intent)

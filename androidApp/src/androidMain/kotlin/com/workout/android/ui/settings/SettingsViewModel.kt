@@ -11,9 +11,25 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
     private val _blockPrepSeconds = MutableStateFlow(timerPreferences.blockPrepDurationSeconds)
     val blockPrepSeconds: StateFlow<Int> = _blockPrepSeconds.asStateFlow()
 
+    private val _soundEnabled = MutableStateFlow(timerPreferences.soundEnabled)
+    val soundEnabled: StateFlow<Boolean> = _soundEnabled.asStateFlow()
+
+    private val _vibrationEnabled = MutableStateFlow(timerPreferences.vibrationEnabled)
+    val vibrationEnabled: StateFlow<Boolean> = _vibrationEnabled.asStateFlow()
+
     fun setBlockPrepSeconds(seconds: Int) {
         val v = seconds.coerceIn(TimerPreferences.MIN_PREP_SECONDS, TimerPreferences.MAX_PREP_SECONDS)
         timerPreferences.blockPrepDurationSeconds = v
         _blockPrepSeconds.value = v
+    }
+
+    fun setSoundEnabled(enabled: Boolean) {
+        timerPreferences.soundEnabled = enabled
+        _soundEnabled.value = enabled
+    }
+
+    fun setVibrationEnabled(enabled: Boolean) {
+        timerPreferences.vibrationEnabled = enabled
+        _vibrationEnabled.value = enabled
     }
 }
