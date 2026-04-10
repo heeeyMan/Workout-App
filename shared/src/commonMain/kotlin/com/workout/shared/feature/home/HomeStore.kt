@@ -2,7 +2,6 @@ package com.workout.shared.feature.home
 
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.mvi.BaseStore
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class HomeStore(
@@ -10,23 +9,33 @@ class HomeStore(
 ) : BaseStore<HomeState, HomeIntent, HomeEffect>(HomeState()) {
 
     init {
-        dispatch(HomeIntent.LoadLastWorkout)
+        dispatch(HomeIntent.LoadWorkouts)
     }
 
     override fun dispatch(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.LoadLastWorkout -> loadLastWorkout()
+            is HomeIntent.LoadWorkouts -> loadWorkouts()
             is HomeIntent.StartWorkout -> emitEffect(HomeEffect.NavigateToTimer(intent.workoutId))
             is HomeIntent.CreateWorkout -> emitEffect(HomeEffect.NavigateToCreateWorkout)
-            is HomeIntent.OpenWorkoutList -> emitEffect(HomeEffect.NavigateToWorkoutList)
+            is HomeIntent.RequestDelete -> setState { copy(pendingDeleteId = intent.workoutId) }
+            is HomeIntent.ConfirmDelete -> confirmDelete()
+            is HomeIntent.CancelDelete -> setState { copy(pendingDeleteId = null) }
         }
     }
 
-    private fun loadLastWorkout() {
+    private fun loadWorkouts() {
         scope.launch {
-            setState { copy(isLoading = true) }
-            val workouts = workoutRepository.getWorkouts().first()
-            setState { copy(lastWorkout = workouts.firstOrNull(), isLoading = false) }
+            workoutRepository.getWorkouts().collect { workouts ->
+                setState { copy(workouts = workouts, isLoading = false) }
+            }
+        }
+    }
+
+    private fun confirmDelete() {
+        val id = state.value.pendingDeleteId ?: return
+        scope.launch {
+            workoutRepository.deleteWorkout(id)
+            setState { copy(pendingDeleteId = null) }
         }
     }
 }

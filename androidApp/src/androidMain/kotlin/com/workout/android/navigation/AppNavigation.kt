@@ -20,8 +20,7 @@ fun AppNavigation(navController: NavHostController) {
         composable(Screen.Home.route) {
             HomeScreen(
                 onNavigateToTimer = { id -> navController.navigate(Screen.Timer.route(id)) },
-                onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) },
-                onNavigateToWorkoutList = { navController.navigate(Screen.WorkoutList.route) }
+                onNavigateToCreateWorkout = { navController.navigate(Screen.CreateWorkout.route()) }
             )
         }
 
