@@ -140,8 +140,20 @@ object TimerFeedback {
         vibratePattern(context, longArrayOf(0, 60, 80, 60))
     }
 
+    /** Окончание тренировки — одна длинная вибрация (~1.2 с). */
     fun vibrateFinish(context: Context) {
-        vibratePattern(context, longArrayOf(0, 100, 120, 100, 120, 200))
+        val v = getVibrator(context) ?: return
+        val durationMs = 1200L
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(
+                    VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(durationMs)
+            }
+        } catch (_: Exception) { }
     }
 
     private fun vibrate(context: Context, ms: Int) {
