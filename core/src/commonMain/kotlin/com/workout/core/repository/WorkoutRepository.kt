@@ -8,4 +8,5 @@ interface WorkoutRepository {
     suspend fun getWorkoutById(id: Long): Workout?
     suspend fun saveWorkout(workout: Workout): Long
     suspend fun deleteWorkout(id: Long)
+    suspend fun markWorkoutStarted(id: Long)
 }

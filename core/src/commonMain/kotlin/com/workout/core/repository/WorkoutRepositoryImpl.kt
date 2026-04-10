@@ -72,6 +72,13 @@ class WorkoutRepositoryImpl(
         return insertedId
     }
 
+    override suspend fun markWorkoutStarted(id: Long) {
+        database.workoutEntityQueries.updateLastStartedAt(
+            last_started_at = Clock.System.now().toEpochMilliseconds(),
+            id = id
+        )
+    }
+
     override suspend fun deleteWorkout(id: Long) {
         database.transaction {
             database.blockEntityQueries.deleteBlocksByWorkoutId(id)
@@ -87,6 +94,7 @@ class WorkoutRepositoryImpl(
         id = id,
         name = name,
         createdAt = created_at,
+        lastStartedAt = last_started_at,
         blocks = blockEntities.mapIndexed { index, entity -> entity.toDomain(index) }
     )
 

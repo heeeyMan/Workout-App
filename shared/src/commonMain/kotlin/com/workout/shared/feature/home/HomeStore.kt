@@ -15,11 +15,18 @@ class HomeStore(
     override fun dispatch(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.LoadWorkouts -> loadWorkouts()
-            is HomeIntent.StartWorkout -> emitEffect(HomeEffect.NavigateToTimer(intent.workoutId))
+            is HomeIntent.StartWorkout -> startWorkout(intent.workoutId)
             is HomeIntent.CreateWorkout -> emitEffect(HomeEffect.NavigateToCreateWorkout)
             is HomeIntent.RequestDelete -> setState { copy(pendingDeleteId = intent.workoutId) }
             is HomeIntent.ConfirmDelete -> confirmDelete()
             is HomeIntent.CancelDelete -> setState { copy(pendingDeleteId = null) }
+        }
+    }
+
+    private fun startWorkout(workoutId: Long) {
+        scope.launch {
+            workoutRepository.markWorkoutStarted(workoutId)
+            emitEffect(HomeEffect.NavigateToTimer(workoutId))
         }
     }
 

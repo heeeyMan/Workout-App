@@ -99,32 +99,36 @@ fun HomeScreen(
             }
 
             else -> {
-                val lastWorkout = state.workouts.first()
+                val lastStarted = state.workouts
+                    .filter { it.lastStartedAt != null }
+                    .maxByOrNull { it.lastStartedAt!! }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item {
-                        Text(
-                            text = "Последняя тренировка",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    item(key = "last_${lastWorkout.id}") {
-                        WorkoutCard(
-                            workout = lastWorkout,
-                            onClick = { viewModel.dispatch(HomeIntent.StartWorkout(lastWorkout.id)) },
-                            onDeleteClick = { viewModel.dispatch(HomeIntent.RequestDelete(lastWorkout.id)) }
-                        )
+                    if (lastStarted != null) {
+                        item {
+                            Text(
+                                text = "Последняя тренировка",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        item(key = "last_${lastStarted.id}") {
+                            WorkoutCard(
+                                workout = lastStarted,
+                                onClick = { viewModel.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
+                                onDeleteClick = { viewModel.dispatch(HomeIntent.RequestDelete(lastStarted.id)) }
+                            )
+                        }
+                        item { }
                     }
                     item {
                         Text(
                             text = "Все тренировки",
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     items(state.workouts, key = { it.id }) { workout ->

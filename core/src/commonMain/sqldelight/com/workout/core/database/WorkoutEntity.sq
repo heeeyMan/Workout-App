@@ -1,7 +1,8 @@
 CREATE TABLE WorkoutEntity (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    last_started_at INTEGER
 );
 
 insertWorkout:
@@ -15,6 +16,9 @@ SELECT * FROM WorkoutEntity WHERE id = ?;
 
 deleteWorkout:
 DELETE FROM WorkoutEntity WHERE id = ?;
+
+updateLastStartedAt:
+UPDATE WorkoutEntity SET last_started_at = ? WHERE id = ?;
 
 lastInsertRowId:
 SELECT last_insert_rowid();
