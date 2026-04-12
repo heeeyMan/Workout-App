@@ -1,0 +1,345 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C1A000000000000000000001 /* WorkoutIosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000001 /* WorkoutIosApp.swift */; };
+		C1A000000000000000000002 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000002 /* HomeView.swift */; };
+		C1A000000000000000000003 /* CreateWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000003 /* CreateWorkoutView.swift */; };
+		C1A000000000000000000004 /* TimerUserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000004 /* TimerUserSettings.swift */; };
+		C1A000000000000000000005 /* TimerFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000005 /* TimerFeedback.swift */; };
+		C1A000000000000000000006 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000006 /* TimerView.swift */; };
+		C1A000000000000000000007 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000007 /* SettingsView.swift */; };
+		C1A000000000000000000008 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000008 /* L10n.swift */; };
+		C1A000000000000000000009 /* WorkoutListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000009 /* WorkoutListView.swift */; };
+		C1A00000000000000000000A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000A /* Localizable.strings */; };
+		C1A00000000000000000000B /* WorkoutTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000D /* WorkoutTheme.swift */; };
+		C1A00000000000000000000C /* WorkoutCellRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000E /* WorkoutCellRow.swift */; };
+		C1A000000000000000000013 /* TimerRaw in Resources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000F /* TimerRaw */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C2A000000000000000000001 /* WorkoutIosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutIosApp.swift; sourceTree = "<group>"; };
+		C2A000000000000000000002 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		C2A000000000000000000003 /* CreateWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateWorkoutView.swift; sourceTree = "<group>"; };
+		C2A000000000000000000004 /* TimerUserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerUserSettings.swift; sourceTree = "<group>"; };
+		C2A000000000000000000005 /* TimerFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerFeedback.swift; sourceTree = "<group>"; };
+		C2A000000000000000000006 /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
+		C2A000000000000000000007 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C2A000000000000000000008 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		C2A000000000000000000009 /* WorkoutListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutListView.swift; sourceTree = "<group>"; };
+		C2A00000000000000000000D /* WorkoutTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTheme.swift; sourceTree = "<group>"; };
+		C2A00000000000000000000E /* WorkoutCellRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCellRow.swift; sourceTree = "<group>"; };
+		C2A00000000000000000000F /* TimerRaw */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TimerRaw; sourceTree = "<group>"; };
+		C2A00000000000000000000B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C2A00000000000000000000C /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C2A000000000000000000010 /* WorkoutIos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorkoutIos.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXVariantGroup section */
+		C2A00000000000000000000A /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C2A00000000000000000000B /* en */,
+				C2A00000000000000000000C /* ru */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C3A000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C4A000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				C4A000000000000000000002 /* WorkoutIos */,
+				C4A000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C4A000000000000000000002 /* WorkoutIos */ = {
+			isa = PBXGroup;
+			children = (
+				C2A000000000000000000001 /* WorkoutIosApp.swift */,
+				C2A000000000000000000002 /* HomeView.swift */,
+				C2A000000000000000000003 /* CreateWorkoutView.swift */,
+				C2A000000000000000000004 /* TimerUserSettings.swift */,
+				C2A000000000000000000005 /* TimerFeedback.swift */,
+				C2A000000000000000000006 /* TimerView.swift */,
+				C2A000000000000000000007 /* SettingsView.swift */,
+				C2A000000000000000000008 /* L10n.swift */,
+				C2A000000000000000000009 /* WorkoutListView.swift */,
+				C2A00000000000000000000D /* WorkoutTheme.swift */,
+				C2A00000000000000000000E /* WorkoutCellRow.swift */,
+				C2A00000000000000000000F /* TimerRaw */,
+				C2A00000000000000000000A /* Localizable.strings */,
+			);
+			path = WorkoutIos;
+			sourceTree = "<group>";
+		};
+		C4A000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C2A000000000000000000010 /* WorkoutIos.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C5A000000000000000000001 /* WorkoutIos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C6A000000000000000000002 /* Build configuration list for PBXNativeTarget "WorkoutIos" */;
+			buildPhases = (
+				C7A000000000000000000001 /* Run Script — embed Shared.framework */,
+				C3A000000000000000000002 /* Sources */,
+				C3A000000000000000000001 /* Frameworks */,
+				C3A000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WorkoutIos;
+			productName = WorkoutIos;
+			productReference = C2A000000000000000000010 /* WorkoutIos.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C5A000000000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					C5A000000000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = C6A000000000000000000001 /* Build configuration list for PBXProject "WorkoutIos" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				ru,
+				Base,
+			);
+			mainGroup = C4A000000000000000000001;
+			productRefGroup = C4A000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C5A000000000000000000001 /* WorkoutIos */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C3A000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1A00000000000000000000A /* Localizable.strings in Resources */,
+				C1A000000000000000000013 /* TimerRaw in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C7A000000000000000000001 /* Run Script — embed Shared.framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script — embed Shared.framework";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C3A000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1A000000000000000000001 /* WorkoutIosApp.swift in Sources */,
+				C1A000000000000000000002 /* HomeView.swift in Sources */,
+				C1A000000000000000000003 /* CreateWorkoutView.swift in Sources */,
+				C1A000000000000000000004 /* TimerUserSettings.swift in Sources */,
+				C1A000000000000000000005 /* TimerFeedback.swift in Sources */,
+				C1A000000000000000000006 /* TimerView.swift in Sources */,
+				C1A000000000000000000007 /* SettingsView.swift in Sources */,
+				C1A000000000000000000008 /* L10n.swift in Sources */,
+				C1A000000000000000000009 /* WorkoutListView.swift in Sources */,
+				C1A00000000000000000000B /* WorkoutTheme.swift in Sources */,
+				C1A00000000000000000000C /* WorkoutCellRow.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C8A000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C8A000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C8A000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Workout;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+					"-lsqlite3",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.workout.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C8A000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Workout;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Shared,
+					"-lsqlite3",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.workout.ios;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C6A000000000000000000001 /* Build configuration list for PBXProject "WorkoutIos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8A000000000000000000001 /* Debug */,
+				C8A000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C6A000000000000000000002 /* Build configuration list for PBXNativeTarget "WorkoutIos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C8A000000000000000000003 /* Debug */,
+				C8A000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C5A000000000000000000002 /* Project object */;
+}
