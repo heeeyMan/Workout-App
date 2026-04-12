@@ -18,6 +18,8 @@ object TimerFeedback {
     @Volatile
     private var activeRawPlayer: MediaPlayer? = null
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     fun previewPreset(context: Context, presetId: String) {
         playPreset(context, TimerSoundPresets.byId(presetId))
     }
@@ -112,15 +114,29 @@ object TimerFeedback {
         playPreset(context, TimerSoundPresets.byId(presetId))
     }
 
+    /**
+     * Короткий сигнал предупреждения — строго с главного потока, чтобы ежесекундные вызовы
+     * не терялись из‑за ToneGenerator/потока коллектора эффектов.
+     */
     fun playAlertTone(context: Context) {
-        playTone(context, ToneGenerator.TONE_PROP_BEEP, 80)
+        mainHandler.post {
+            try {
+                val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 85)
+                tg.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
+                mainHandler.postDelayed({
+                    try {
+                        tg.release()
+                    } catch (_: Exception) { }
+                }, 200L)
+            } catch (_: Exception) { }
+        }
     }
 
     private fun playTone(context: Context, toneType: Int, durationMs: Int) {
         try {
             val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 85)
             tg.startTone(toneType, durationMs)
-            Handler(Looper.getMainLooper()).postDelayed({
+            mainHandler.postDelayed({
                 try {
                     tg.release()
                 } catch (_: Exception) { }

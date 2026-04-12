@@ -89,8 +89,12 @@ sealed interface TimerEffect {
     data object VibrateFinish : TimerEffect
     /**
      * Предупреждение в конце фазы «Работа»: короткий звук (если включён звук).
+     * [secondsRemainingAfterTick] — сколько секунд осталось в фазе после этого тика (1..N в окне предупреждения).
      * [withVibration] — однократная вибрация в первую секунду окна предупреждения.
      */
-    data class Alert10Seconds(val withVibration: Boolean) : TimerEffect
+    data class Alert10Seconds(
+        val secondsRemainingAfterTick: Int,
+        val withVibration: Boolean,
+    ) : TimerEffect
     data object NavigateBack : TimerEffect
 }

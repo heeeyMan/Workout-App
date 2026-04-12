@@ -110,7 +110,12 @@ class TimerStore(
             val playSound = s.soundEnabled
             val vibOnce = s.vibrationEnabled && newSeconds == warnWindow
             if (playSound || vibOnce) {
-                emitEffect(TimerEffect.Alert10Seconds(withVibration = vibOnce))
+                emitEffect(
+                    TimerEffect.Alert10Seconds(
+                        secondsRemainingAfterTick = newSeconds,
+                        withVibration = vibOnce,
+                    ),
+                )
             }
         }
 

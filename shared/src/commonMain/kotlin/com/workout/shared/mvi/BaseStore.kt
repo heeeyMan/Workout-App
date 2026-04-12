@@ -22,7 +22,8 @@ abstract class BaseStore<State, Intent, Effect>(
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<State> = _state.asStateFlow()
 
-    private val _effects = MutableSharedFlow<Effect>(extraBufferCapacity = 16)
+    /** Буфер побольше: подряд идущие эффекты таймера (например предупреждение каждую секунду) не должны теряться. */
+    private val _effects = MutableSharedFlow<Effect>(extraBufferCapacity = 64)
     override val effects: SharedFlow<Effect> = _effects.asSharedFlow()
 
     protected fun setState(reducer: State.() -> State) {
@@ -30,7 +31,9 @@ abstract class BaseStore<State, Intent, Effect>(
     }
 
     protected fun emitEffect(effect: Effect) {
-        scope.launch { _effects.emit(effect) }
+        if (!_effects.tryEmit(effect)) {
+            scope.launch { _effects.emit(effect) }
+        }
     }
 
     override fun destroy() {
