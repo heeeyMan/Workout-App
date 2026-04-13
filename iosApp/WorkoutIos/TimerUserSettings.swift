@@ -19,6 +19,7 @@ final class TimerUserSettings {
         static let workSound = "work_start_sound_preset"
         static let restSound = "rest_start_sound_preset"
         static let finishSound = "workout_finish_sound_preset"
+        static let warningSound = "work_phase_warning_sound_preset"
     }
 
     static let defaultBlockPrepSeconds = 5
@@ -26,6 +27,7 @@ final class TimerUserSettings {
     static let defaultWorkPresetId = "custom_mp3_start"
     static let defaultRestPresetId = "custom_mp3_end"
     static let defaultFinishPresetId = "custom_mp3_end"
+    static let defaultWarningPresetId = "beep_standard"
 
     var blockPrepDurationSeconds: Int {
         get {
@@ -79,6 +81,11 @@ final class TimerUserSettings {
     var workoutFinishSoundPresetId: String {
         get { normalizedPreset(defaults.string(forKey: Key.finishSound), defaultId: Self.defaultFinishPresetId) }
         set { defaults.set(normalizedPreset(newValue, defaultId: Self.defaultFinishPresetId), forKey: Key.finishSound) }
+    }
+
+    var workPhaseWarningSoundPresetId: String {
+        get { normalizedPreset(defaults.string(forKey: Key.warningSound), defaultId: Self.defaultWarningPresetId) }
+        set { defaults.set(normalizedPreset(newValue, defaultId: Self.defaultWarningPresetId), forKey: Key.warningSound) }
     }
 
     private let validPresetIds: Set<String> = [

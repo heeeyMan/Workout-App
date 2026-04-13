@@ -20,6 +20,7 @@
 		C1A00000000000000000000B /* WorkoutTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000D /* WorkoutTheme.swift */; };
 		C1A00000000000000000000C /* WorkoutCellRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000E /* WorkoutCellRow.swift */; };
 		C1A000000000000000000013 /* TimerRaw in Resources */ = {isa = PBXBuildFile; fileRef = C2A00000000000000000000F /* TimerRaw */; };
+		C1A000000000000000000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2A000000000000000000014 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		C2A00000000000000000000D /* WorkoutTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTheme.swift; sourceTree = "<group>"; };
 		C2A00000000000000000000E /* WorkoutCellRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCellRow.swift; sourceTree = "<group>"; };
 		C2A00000000000000000000F /* TimerRaw */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TimerRaw; sourceTree = "<group>"; };
+		C2A000000000000000000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2A00000000000000000000B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C2A00000000000000000000C /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C2A000000000000000000010 /* WorkoutIos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorkoutIos.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -86,6 +88,7 @@
 				C2A00000000000000000000D /* WorkoutTheme.swift */,
 				C2A00000000000000000000E /* WorkoutCellRow.swift */,
 				C2A00000000000000000000F /* TimerRaw */,
+				C2A000000000000000000014 /* Assets.xcassets */,
 				C2A00000000000000000000A /* Localizable.strings */,
 			);
 			path = WorkoutIos;
@@ -161,6 +164,7 @@
 			files = (
 				C1A00000000000000000000A /* Localizable.strings in Resources */,
 				C1A000000000000000000013 /* TimerRaw in Resources */,
+				C1A000000000000000000014 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +261,7 @@
 		C8A000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -289,6 +294,7 @@
 		C8A000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

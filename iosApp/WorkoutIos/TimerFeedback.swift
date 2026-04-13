@@ -31,7 +31,8 @@ enum TimerFeedback {
         case let alert as TimerEffectAlert10Seconds:
             // Отдельный цикл runloop на каждый тик — иначе одинаковые системные звуки подряд могут сливаться.
             DispatchQueue.main.async {
-                AudioServicesPlaySystemSound(1005)
+                let presetId = TimerUserSettings.shared.workPhaseWarningSoundPresetId
+                playPreset(presetId, fallback: 1005)
                 if alert.withVibration {
                     UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                 }
@@ -78,7 +79,9 @@ enum TimerFeedback {
     private static var mp3Player: AVAudioPlayer?
 
     private static func playBundledMp3(named baseName: String) {
-        guard let url = Bundle.main.url(forResource: baseName, withExtension: "mp3") else {
+        let url = Bundle.main.url(forResource: baseName, withExtension: "mp3")
+            ?? Bundle.main.url(forResource: baseName, withExtension: "mp3", subdirectory: "TimerRaw")
+        guard let url else {
             AudioServicesPlaySystemSound(1103)
             return
         }

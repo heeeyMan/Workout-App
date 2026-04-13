@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var blockPrep = 5
-    @State private var workWarn = 3
-    @State private var soundOn = true
-    @State private var vibrationOn = true
-    @State private var quickAdjust = false
-    @State private var workPreset = TimerUserSettings.defaultWorkPresetId
-    @State private var restPreset = TimerUserSettings.defaultRestPresetId
-    @State private var finishPreset = TimerUserSettings.defaultFinishPresetId
+    @State private var blockPrep = TimerUserSettings.shared.blockPrepDurationSeconds
+    @State private var workWarn = TimerUserSettings.shared.workPhaseEndWarningSeconds
+    @State private var soundOn = TimerUserSettings.shared.soundEnabled
+    @State private var vibrationOn = TimerUserSettings.shared.vibrationEnabled
+    @State private var quickAdjust = TimerUserSettings.shared.timerQuickAdjustEnabled
+    @State private var workPreset = TimerUserSettings.shared.workStartSoundPresetId
+    @State private var restPreset = TimerUserSettings.shared.restStartSoundPresetId
+    @State private var finishPreset = TimerUserSettings.shared.workoutFinishSoundPresetId
 
     /// Порядок как `TimerSoundPresets.all` на Android.
     private var presetChoices: [(id: String, titleKey: String)] {
@@ -103,16 +103,5 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .tint(WorkoutPalette.primary)
-        .onAppear {
-            let p = TimerUserSettings.shared
-            blockPrep = p.blockPrepDurationSeconds
-            workWarn = p.workPhaseEndWarningSeconds
-            soundOn = p.soundEnabled
-            vibrationOn = p.vibrationEnabled
-            quickAdjust = p.timerQuickAdjustEnabled
-            workPreset = p.workStartSoundPresetId
-            restPreset = p.restStartSoundPresetId
-            finishPreset = p.workoutFinishSoundPresetId
-        }
     }
 }
