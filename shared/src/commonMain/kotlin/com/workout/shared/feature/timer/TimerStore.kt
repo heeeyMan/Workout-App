@@ -12,6 +12,7 @@ class TimerStore(
 ) : BaseStore<TimerState, TimerIntent, TimerEffect>(TimerState()) {
 
     private var timerJob: Job? = null
+    private var phaseTransitionJob: Job? = null
 
     override fun dispatch(intent: TimerIntent) {
         when (intent) {
@@ -92,9 +93,24 @@ class TimerStore(
         }
     }
 
+    // Показываем полностью заполненный прогресс (secondsRemaining=0), затем через небольшую
+    // задержку переходим к следующей фазе и перезапускаем тикер.
+    private fun schedulePhaseTransition() {
+        phaseTransitionJob?.cancel()
+        phaseTransitionJob = scope.launch {
+            delay(100L)
+            phaseTransitionJob = null
+            advancePhase()
+            if (!state.value.isFinished && !state.value.isPaused) {
+                startTimer()
+            }
+        }
+    }
+
     private fun tick() {
         val s = state.value
         if (s.isPaused || s.isFinished || s.isLoading) return
+        if (phaseTransitionJob?.isActive == true) return  // ждём паузу отображения полного прогресса
 
         val newSeconds = s.secondsRemaining - 1
 
@@ -135,7 +151,10 @@ class TimerStore(
                     emitEffect(TimerEffect.VibratePrepEnd)
                 }
             } else {
-                advancePhase()
+                // Сначала показываем заполненный прогресс (100%), затем через 700мс переходим
+                setState { copy(secondsRemaining = 0) }
+                timerJob?.cancel()
+                schedulePhaseTransition()
             }
         } else {
             setState { copy(secondsRemaining = newSeconds) }
@@ -207,7 +226,13 @@ class TimerStore(
     }
 
     private fun skipPhase() {
+        val hadTransition = phaseTransitionJob?.isActive == true
+        phaseTransitionJob?.cancel()
+        phaseTransitionJob = null
         advancePhase()
+        if (hadTransition && !state.value.isFinished && !state.value.isPaused) {
+            startTimer()
+        }
     }
 
     private fun enterPhaseAtIndex(index: Int) {
@@ -226,6 +251,13 @@ class TimerStore(
     }
 
     private fun previousPhase() {
+        // Если тикер был остановлен из-за отображения полного прогресса — отменяем переход и перезапускаем
+        if (phaseTransitionJob?.isActive == true) {
+            phaseTransitionJob?.cancel()
+            phaseTransitionJob = null
+            if (!state.value.isPaused) startTimer()
+        }
+
         val s = state.value
         if (s.isFinished || s.isLoading) return
 
@@ -272,7 +304,18 @@ class TimerStore(
     private fun togglePause() {
         val paused = !state.value.isPaused
         setState { copy(isPaused = paused) }
-        if (!paused) startTimer() else timerJob?.cancel()
+        if (!paused) {
+            // Возобновление: если secondsRemaining==0, мы были на этапе отображения полного прогресса
+            if (state.value.secondsRemaining == 0 && !state.value.isFinished) {
+                schedulePhaseTransition()
+            } else {
+                startTimer()
+            }
+        } else {
+            timerJob?.cancel()
+            phaseTransitionJob?.cancel()
+            phaseTransitionJob = null
+        }
     }
 
     private fun finish() {
@@ -282,6 +325,7 @@ class TimerStore(
 
     override fun destroy() {
         timerJob?.cancel()
+        phaseTransitionJob?.cancel()
         super.destroy()
     }
 
