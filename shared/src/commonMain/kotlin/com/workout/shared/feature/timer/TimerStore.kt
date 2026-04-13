@@ -95,12 +95,21 @@ class TimerStore(
 
     // Показываем полностью заполненный прогресс (secondsRemaining=0), затем через небольшую
     // задержку переходим к следующей фазе и перезапускаем тикер.
-    private fun schedulePhaseTransition() {
+    // Обрабатывает как конец подготовки (isPrepBeforeWork=true), так и конец обычной фазы.
+    private fun scheduleTransition() {
         phaseTransitionJob?.cancel()
         phaseTransitionJob = scope.launch {
             delay(100L)
             phaseTransitionJob = null
-            advancePhase()
+            val s = state.value
+            if (s.isPrepBeforeWork) {
+                val phase = s.currentPhase ?: return@launch
+                setState { copy(isPrepBeforeWork = false, secondsRemaining = phase.durationSeconds) }
+                if (state.value.soundEnabled) emitEffect(TimerEffect.PlayPrepEndSound)
+                if (state.value.vibrationEnabled) emitEffect(TimerEffect.VibratePrepEnd)
+            } else {
+                advancePhase()
+            }
             if (!state.value.isFinished && !state.value.isPaused) {
                 startTimer()
             }
@@ -136,26 +145,10 @@ class TimerStore(
         }
 
         if (newSeconds <= 0) {
-            if (s.isPrepBeforeWork) {
-                val phase = s.currentPhase ?: return
-                setState {
-                    copy(
-                        isPrepBeforeWork = false,
-                        secondsRemaining = phase.durationSeconds
-                    )
-                }
-                if (state.value.soundEnabled) {
-                    emitEffect(TimerEffect.PlayPrepEndSound)
-                }
-                if (state.value.vibrationEnabled) {
-                    emitEffect(TimerEffect.VibratePrepEnd)
-                }
-            } else {
-                // Сначала показываем заполненный прогресс (100%), затем через 700мс переходим
-                setState { copy(secondsRemaining = 0) }
-                timerJob?.cancel()
-                schedulePhaseTransition()
-            }
+            // Сначала показываем заполненный прогресс (100%), затем через паузу переходим
+            setState { copy(secondsRemaining = 0) }
+            timerJob?.cancel()
+            scheduleTransition()
         } else {
             setState { copy(secondsRemaining = newSeconds) }
         }
@@ -179,8 +172,8 @@ class TimerStore(
 
         val nextPhase = s.phases[nextIndex]
         val prepLen = s.blockPrepDurationSeconds
-        when {
-            nextPhase.type == PhaseType.Work && prepLen > 0 && nextPhase.needsBlockPrepStart -> {
+        when (nextPhase.type) {
+            PhaseType.Work if prepLen > 0 && nextPhase.needsBlockPrepStart -> {
                 setState {
                     copy(
                         currentPhaseIndex = nextIndex,
@@ -192,7 +185,7 @@ class TimerStore(
                     emitEffect(TimerEffect.PlayPrepTickSound)
                 }
             }
-            nextPhase.type == PhaseType.Work -> {
+            PhaseType.Work -> {
                 setState {
                     copy(
                         currentPhaseIndex = nextIndex,
@@ -307,7 +300,7 @@ class TimerStore(
         if (!paused) {
             // Возобновление: если secondsRemaining==0, мы были на этапе отображения полного прогресса
             if (state.value.secondsRemaining == 0 && !state.value.isFinished) {
-                schedulePhaseTransition()
+                scheduleTransition()
             } else {
                 startTimer()
             }
