@@ -335,7 +335,7 @@ class TimerStore(
                         needsBlockPrepStart = rep == 1
                     )
                 )
-                if (restDurationSeconds > 0) {
+                if (restDurationSeconds > 0 && rep < repeats) {
                     add(
                         TimerPhase(
                             name = restPhaseDisplayName,

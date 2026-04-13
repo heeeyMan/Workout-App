@@ -15,7 +15,7 @@ sealed class Block {
         val videoPath: String? = null
     ) : Block() {
         override val totalDurationSeconds: Int
-            get() = (workDurationSeconds + restDurationSeconds) * repeats
+            get() = workDurationSeconds * repeats + restDurationSeconds * (repeats - 1).coerceAtLeast(0)
     }
 
     data class Rest(
