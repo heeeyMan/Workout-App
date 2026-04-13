@@ -19,8 +19,10 @@ struct TimerView: View {
     @State private var showExitConfirm = false
     @State private var gymMode = false
     @State private var gymControlsLocked = false
+    @State private var warningPulse = false
 
     private let uiPulse = Timer.publish(every: 0.25, on: .main, in: .common)
+    private let warningRed = Color(red: 0.898, green: 0.224, blue: 0.208)
 
     var body: some View {
         let _ = tick
@@ -111,6 +113,15 @@ struct TimerView: View {
         .onChange(of: gymMode) { isGym in
             if !isGym { gymControlsLocked = false }
         }
+        .onChange(of: store.flatMap { timerState($0) }?.isInWorkEndWarning ?? false) { isWarning in
+            if isWarning {
+                withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+                    warningPulse = true
+                }
+            } else {
+                warningPulse = false
+            }
+        }
     }
 
     @ViewBuilder
@@ -139,6 +150,7 @@ struct TimerView: View {
             if isWork { return WorkoutPalette.timerWorkOrange }
             return WorkoutPalette.timerRestGreen
         }()
+        let effectiveAccent: Color = state.isInWorkEndWarning && warningPulse ? warningRed : accent
         let dim = accent.opacity(0.22)
         let prefs = TimerUserSettings.shared
         let hideMeta = gymMode && gymControlsLocked
@@ -154,7 +166,7 @@ struct TimerView: View {
 
             Text(phaseTitle(state: state))
                 .font(.title2.weight(.bold))
-                .foregroundStyle(accent)
+                .foregroundStyle(effectiveAccent)
 
             Text(state.currentPhase?.name ?? "")
                 .font(gymMode ? .largeTitle.weight(.semibold) : .title.weight(.semibold))
@@ -170,11 +182,11 @@ struct TimerView: View {
             Text(formatTime(state.secondsRemaining))
                 .font(.system(size: gymMode ? 96 : 72, weight: .bold, design: .rounded))
                 .monospacedDigit()
-                .foregroundStyle(accent)
+                .foregroundStyle(effectiveAccent)
                 .padding(.vertical, 16)
 
             ProgressView(value: Double(state.phaseProgress))
-                .tint(accent)
+                .tint(effectiveAccent)
                 .padding(.horizontal)
 
             if !hideMeta {
