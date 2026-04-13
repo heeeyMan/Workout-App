@@ -3,6 +3,11 @@ package com.workout.android.ui.timer
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -58,7 +63,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -175,6 +182,21 @@ fun TimerScreen(
         label = "accent_color"
     )
 
+    val warningPulse by rememberInfiniteTransition(label = "warning_pulse").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "warning_pulse_value"
+    )
+    val effectiveAccentColor = if (state.isInWorkEndWarning) {
+        lerp(accentColor, Color(0xFFE53935), warningPulse)
+    } else {
+        accentColor
+    }
+
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
@@ -290,7 +312,7 @@ fun TimerScreen(
                             else -> stringResource(R.string.phase_rest)
                         },
                         style = MaterialTheme.typography.titleLarge,
-                        color = accentColor,
+                        color = effectiveAccentColor,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -319,7 +341,7 @@ fun TimerScreen(
                     text = state.secondsRemaining.toTimeString(),
                     fontSize = timerFontSize,
                     fontWeight = FontWeight.Bold,
-                    color = accentColor,
+                    color = effectiveAccentColor,
                     textAlign = TextAlign.Center
                 )
 
@@ -328,7 +350,7 @@ fun TimerScreen(
                 LinearProgressIndicator(
                     progress = { state.phaseProgress },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
-                    color = accentColor,
+                    color = effectiveAccentColor,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     strokeCap = StrokeCap.Round
                 )

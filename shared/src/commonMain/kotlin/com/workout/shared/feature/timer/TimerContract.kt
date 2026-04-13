@@ -39,6 +39,11 @@ data class TimerState(
             val duration = phase.durationSeconds
             return if (duration == 0) 1f else 1f - (secondsRemaining.toFloat() / duration)
         }
+    val isInWorkEndWarning: Boolean
+        get() = workPhaseEndWarningSeconds > 0 &&
+                !isPrepBeforeWork &&
+                currentPhase?.type == PhaseType.Work &&
+                secondsRemaining in 1..workPhaseEndWarningSeconds
 }
 
 data class TimerPhase(
