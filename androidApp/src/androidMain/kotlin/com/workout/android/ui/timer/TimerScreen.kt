@@ -3,6 +3,7 @@ package com.workout.android.ui.timer
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -82,7 +83,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -95,11 +95,21 @@ fun TimerScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val quickAdjust by viewModel.quickAdjustEnabled.collectAsState()
+    val overallProgressVis by animateFloatAsState(
+        targetValue = state.overallProgress,
+        animationSpec = tween(durationMillis = 260),
+        label = "overall_progress"
+    )
+    val phaseProgressVis by animateFloatAsState(
+        targetValue = state.phaseProgress,
+        animationSpec = tween(durationMillis = 220),
+        label = "phase_progress"
+    )
     var showExitDialog by remember { mutableStateOf(false) }
     var gymMode by remember { mutableStateOf(false) }
     var gymControlsLocked by remember { mutableStateOf(false) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshUiPrefs()
@@ -123,10 +133,7 @@ fun TimerScreen(
     val view = LocalView.current
     DisposableEffect(gymMode, view) {
         val activity = view.context as? Activity
-        val window = activity?.window
-        if (window == null) {
-            return@DisposableEffect onDispose { }
-        }
+        val window = activity?.window ?: return@DisposableEffect onDispose { }
         val controller = WindowCompat.getInsetsController(window, view)
         if (gymMode) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -225,8 +232,9 @@ fun TimerScreen(
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
+            // overallProgress / phaseProgress: доля текущей фазы и всей тренировки (shared TimerState).
             LinearProgressIndicator(
-                progress = { state.overallProgress },
+                progress = { overallProgressVis },
                 modifier = Modifier.fillMaxWidth().height(4.dp),
                 color = accentColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -329,7 +337,7 @@ fun TimerScreen(
                 Spacer(Modifier.height(24.dp))
 
                 LinearProgressIndicator(
-                    progress = { state.phaseProgress },
+                    progress = { phaseProgressVis },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
                     color = accentColor,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,

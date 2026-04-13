@@ -27,17 +27,35 @@ data class TimerState(
     val currentPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex)
     val nextPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex + 1)
     val totalPhases: Int get() = phases.size
+    /** Доля всей тренировки: завершённые фазы + доля текущей (см. [phaseProgress]). */
     val overallProgress: Float
-        get() = if (phases.isEmpty()) 0f else currentPhaseIndex.toFloat() / phases.size
+        get() {
+            val total = totalPhases
+            if (total <= 0) return 0f
+            return ((currentPhaseIndex.toFloat() + phaseProgress) / total).coerceIn(0f, 1f)
+        }
+    /**
+     * Доля текущего сегмента (подготовка / работа / отдых).
+     * На экране «1» и в момент `secondsRemaining == 0` перед сменой фазы полоска уже 1f —
+     * сначала визуальное завершение, затем звук и переход таймера.
+     */
     val phaseProgress: Float
         get() {
             val phase = currentPhase ?: return 0f
             if (isPrepBeforeWork && phase.type == PhaseType.Work) {
                 val prep = blockPrepDurationSeconds
-                return if (prep <= 0) 1f else 1f - (secondsRemaining.toFloat() / prep)
+                return when {
+                    prep <= 0 -> 1f
+                    secondsRemaining <= 1 -> 1f
+                    else -> 1f - (secondsRemaining.toFloat() / prep)
+                }
             }
             val duration = phase.durationSeconds
-            return if (duration == 0) 1f else 1f - (secondsRemaining.toFloat() / duration)
+            return when {
+                duration <= 0 -> 1f
+                secondsRemaining <= 1 -> 1f
+                else -> 1f - (secondsRemaining.toFloat() / duration)
+            }
         }
 }
 
