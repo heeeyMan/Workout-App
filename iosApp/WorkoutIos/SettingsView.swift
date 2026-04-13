@@ -7,6 +7,7 @@ struct SettingsView: View {
     @State private var vibrationOn = TimerUserSettings.shared.vibrationEnabled
     @State private var quickAdjust = TimerUserSettings.shared.timerQuickAdjustEnabled
     @State private var workPreset = TimerUserSettings.shared.workStartSoundPresetId
+    @State private var warnPreset = TimerUserSettings.shared.workPhaseWarningSoundPresetId
     @State private var restPreset = TimerUserSettings.shared.restStartSoundPresetId
     @State private var finishPreset = TimerUserSettings.shared.workoutFinishSoundPresetId
 
@@ -43,11 +44,24 @@ struct SettingsView: View {
                     .onChange(of: workWarn) { newValue in
                         TimerUserSettings.shared.workPhaseEndWarningSeconds = newValue
                     }
-                Picker(L10n.tr("sound_before_work"), selection: $workPreset) {
+                Picker(L10n.tr("sound_work_phase_warn"), selection: $warnPreset) {
                     ForEach(presetChoices, id: \.id) { row in
                         Text(L10n.tr(row.titleKey)).tag(row.id)
                     }
                 }
+                .pickerStyle(.menu)
+                .onChange(of: warnPreset) { newValue in
+                    TimerUserSettings.shared.workPhaseWarningSoundPresetId = newValue
+                    TimerFeedback.previewPreset(newValue, fallback: 1005)
+                }
+            }
+            Section(L10n.tr("sound_before_work")) {
+                Picker("", selection: $workPreset) {
+                    ForEach(presetChoices, id: \.id) { row in
+                        Text(L10n.tr(row.titleKey)).tag(row.id)
+                    }
+                }
+                .labelsHidden()
                 .pickerStyle(.menu)
                 .onChange(of: workPreset) { newValue in
                     TimerUserSettings.shared.workStartSoundPresetId = newValue

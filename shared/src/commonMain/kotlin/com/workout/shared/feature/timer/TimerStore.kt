@@ -24,6 +24,7 @@ class TimerStore(
                 intent.workStartSoundPresetId,
                 intent.restStartSoundPresetId,
                 intent.finishSoundPresetId,
+                intent.workPhaseWarningSoundPresetId,
                 intent.workPhaseEndWarningSeconds,
                 intent.restPhaseDisplayName
             )
@@ -44,6 +45,7 @@ class TimerStore(
         workStartSoundPresetId: String,
         restStartSoundPresetId: String,
         finishSoundPresetId: String,
+        workPhaseWarningSoundPresetId: String,
         workPhaseEndWarningSeconds: Int,
         restPhaseDisplayName: String
     ) {
@@ -72,6 +74,7 @@ class TimerStore(
                     workStartSoundPresetId = workStartSoundPresetId,
                     restStartSoundPresetId = restStartSoundPresetId,
                     finishSoundPresetId = finishSoundPresetId,
+                    workPhaseWarningSoundPresetId = workPhaseWarningSoundPresetId,
                     workPhaseEndWarningSeconds = workPhaseEndWarningSeconds.coerceAtLeast(0),
                     isLoading = false
                 )

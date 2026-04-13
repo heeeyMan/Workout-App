@@ -61,6 +61,7 @@
     <string name="sound_before_work">Start-up sound</string>
     <string name="sound_before_rest">Sound of work completion</string>
     <string name="sound_workout_finish">Workout complete sound</string>
+    <string name="sound_work_phase_warn">End-of-work warning sound</string>
     <string name="timer_sound_enabled">Timer sound</string>
     <string name="vibration">Vibration</string>
     <string name="work_phase_warn_title">Warn before work ends</string>
@@ -71,6 +72,7 @@
     <string name="sound_picker_work_title">Sound start work</string>
     <string name="sound_picker_rest_title">Sound end work</string>
     <string name="sound_picker_finish_title">Workout complete sound</string>
+    <string name="sound_picker_work_phase_warn_title">End-of-work warning sound</string>
 
     <string name="preset_custom_mp3_start">Gong Start</string>
     <string name="preset_custom_mp3_end">Gong End</string>

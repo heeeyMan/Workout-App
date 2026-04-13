@@ -45,6 +45,7 @@ class TimerViewModel(
                 workStartSoundPresetId = timerPreferences.workStartSoundPresetId,
                 restStartSoundPresetId = timerPreferences.restStartSoundPresetId,
                 finishSoundPresetId = timerPreferences.workoutFinishSoundPresetId,
+                workPhaseWarningSoundPresetId = timerPreferences.workPhaseWarningSoundPresetId,
                 workPhaseEndWarningSeconds = timerPreferences.workPhaseEndWarningSeconds,
                 restPhaseDisplayName = appContext.getString(R.string.phase_rest_name)
             )
@@ -82,7 +83,9 @@ class TimerViewModel(
                     is TimerEffect.VibrateFinish -> TimerFeedback.vibrateFinish(appContext)
                     is TimerEffect.Alert10Seconds -> {
                         val st = store.state.value
-                        if (st.soundEnabled) TimerFeedback.playAlertTone(appContext)
+                        if (st.soundEnabled) {
+                            TimerFeedback.playWarningTone(appContext, st.workPhaseWarningSoundPresetId)
+                        }
                         if (effect.withVibration && st.vibrationEnabled) {
                             TimerFeedback.vibrateAlert(appContext)
                         }

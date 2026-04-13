@@ -63,6 +63,7 @@ fun SettingsScreen(
     val workSoundPresetId by viewModel.workSoundPresetId.collectAsState()
     val restSoundPresetId by viewModel.restSoundPresetId.collectAsState()
     val finishSoundPresetId by viewModel.finishSoundPresetId.collectAsState()
+    val workPhaseWarnSoundPresetId by viewModel.workPhaseWarnSoundPresetId.collectAsState()
     val timerQuickAdjustEnabled by viewModel.timerQuickAdjustEnabled.collectAsState()
     val soundPickerTarget by viewModel.soundPickerTarget.collectAsState()
     val pendingSoundPresetId by viewModel.pendingSoundPresetId.collectAsState()
@@ -100,6 +101,8 @@ fun SettingsScreen(
                                 TimerSoundPickerTarget.WORK -> stringResource(R.string.sound_picker_work_title)
                                 TimerSoundPickerTarget.REST -> stringResource(R.string.sound_picker_rest_title)
                                 TimerSoundPickerTarget.FINISH -> stringResource(R.string.sound_picker_finish_title)
+                                TimerSoundPickerTarget.WORK_PHASE_WARN ->
+                                    stringResource(R.string.sound_picker_work_phase_warn_title)
                             },
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(vertical = 12.dp)
@@ -244,6 +247,44 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.timer_sound_enabled),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Switch(
+                        checked = soundEnabled,
+                        onCheckedChange = viewModel::setSoundEnabled
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.vibration),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Switch(
+                        checked = vibrationEnabled,
+                        onCheckedChange = viewModel::setVibrationEnabled
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .clickable {
                             prepInput = prepSeconds.toString()
@@ -335,56 +376,21 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = viewModel::openWorkPhaseWarnSoundPicker)
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(R.string.timer_sound_enabled),
+                        text = stringResource(R.string.sound_work_phase_warn),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
-                    Switch(
-                        checked = soundEnabled,
-                        onCheckedChange = viewModel::setSoundEnabled
-                    )
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Text(
-                        text = stringResource(R.string.vibration),
+                        text = stringResource(TimerSoundPresets.byId(workPhaseWarnSoundPresetId).labelRes),
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Switch(
-                        checked = vibrationEnabled,
-                        onCheckedChange = viewModel::setVibrationEnabled
-                    )
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.timer_quick_adjust_title),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Switch(
-                        checked = timerQuickAdjustEnabled,
-                        onCheckedChange = viewModel::setTimerQuickAdjustEnabled
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -414,6 +420,25 @@ fun SettingsScreen(
                         },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.timer_quick_adjust_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Switch(
+                        checked = timerQuickAdjustEnabled,
+                        onCheckedChange = viewModel::setTimerQuickAdjustEnabled
                     )
                 }
             }

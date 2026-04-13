@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-enum class TimerSoundPickerTarget { WORK, REST, FINISH }
+enum class TimerSoundPickerTarget { WORK, REST, FINISH, WORK_PHASE_WARN }
 
 class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewModel() {
 
@@ -32,6 +32,10 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
 
     private val _finishSoundPresetId = MutableStateFlow(timerPreferences.workoutFinishSoundPresetId)
     val finishSoundPresetId: StateFlow<String> = _finishSoundPresetId.asStateFlow()
+
+    private val _workPhaseWarnSoundPresetId =
+        MutableStateFlow(timerPreferences.workPhaseWarningSoundPresetId)
+    val workPhaseWarnSoundPresetId: StateFlow<String> = _workPhaseWarnSoundPresetId.asStateFlow()
 
     private val _timerQuickAdjustEnabled = MutableStateFlow(timerPreferences.timerQuickAdjustEnabled)
     val timerQuickAdjustEnabled: StateFlow<Boolean> = _timerQuickAdjustEnabled.asStateFlow()
@@ -87,6 +91,11 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
         _soundPickerTarget.value = TimerSoundPickerTarget.FINISH
     }
 
+    fun openWorkPhaseWarnSoundPicker() {
+        _pendingSoundPresetId.value = _workPhaseWarnSoundPresetId.value
+        _soundPickerTarget.value = TimerSoundPickerTarget.WORK_PHASE_WARN
+    }
+
     fun setPendingSoundPresetId(id: String) {
         _pendingSoundPresetId.value = id
     }
@@ -104,6 +113,10 @@ class SettingsViewModel(private val timerPreferences: TimerPreferences) : ViewMo
             TimerSoundPickerTarget.FINISH -> {
                 timerPreferences.workoutFinishSoundPresetId = _pendingSoundPresetId.value
                 _finishSoundPresetId.value = timerPreferences.workoutFinishSoundPresetId
+            }
+            TimerSoundPickerTarget.WORK_PHASE_WARN -> {
+                timerPreferences.workPhaseWarningSoundPresetId = _pendingSoundPresetId.value
+                _workPhaseWarnSoundPresetId.value = timerPreferences.workPhaseWarningSoundPresetId
             }
         }
         _soundPickerTarget.value = null

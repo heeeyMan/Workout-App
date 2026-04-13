@@ -17,10 +17,12 @@ data class TimerState(
     val isLoading: Boolean = true,
     val soundEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
-    /** Идентификаторы пресетов звука (Android), задаются при [TimerIntent.Load]. */
+    /** Идентификаторы пресетов звука, задаются при [TimerIntent.Load]. */
     val workStartSoundPresetId: String = "",
     val restStartSoundPresetId: String = "",
     val finishSoundPresetId: String = "",
+    /** Звук каждую секунду в окне предупреждения перед концом фазы «Работа». */
+    val workPhaseWarningSoundPresetId: String = "",
     /** 0 — без предупреждения; иначе в последние N секунд фазы «Работа» — сигнал каждую секунду. */
     val workPhaseEndWarningSeconds: Int = 0
 ) {
@@ -66,6 +68,7 @@ sealed interface TimerIntent {
         val workStartSoundPresetId: String,
         val restStartSoundPresetId: String,
         val finishSoundPresetId: String,
+        val workPhaseWarningSoundPresetId: String,
         val workPhaseEndWarningSeconds: Int,
         /** Локализованная подпись фазы отдыха (для таймера и блоков). */
         val restPhaseDisplayName: String

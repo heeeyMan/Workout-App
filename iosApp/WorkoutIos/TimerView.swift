@@ -98,6 +98,7 @@ struct TimerView: View {
                     workStartSoundPresetId: prefs.workStartSoundPresetId,
                     restStartSoundPresetId: prefs.restStartSoundPresetId,
                     finishSoundPresetId: prefs.workoutFinishSoundPresetId,
+                    workPhaseWarningSoundPresetId: prefs.workPhaseWarningSoundPresetId,
                     workPhaseEndWarningSeconds: Int32(prefs.workPhaseEndWarningSeconds),
                     restPhaseDisplayName: L10n.tr("phase_rest_name")
                 )

@@ -115,19 +115,13 @@ object TimerFeedback {
     }
 
     /**
-     * Короткий сигнал предупреждения — строго с главного потока, чтобы ежесекундные вызовы
+     * Сигнал в окне «конец работы» — с главного потока, чтобы ежесекундные вызовы
      * не терялись из‑за ToneGenerator/потока коллектора эффектов.
      */
-    fun playAlertTone(context: Context) {
+    fun playWarningTone(context: Context, presetId: String) {
         mainHandler.post {
             try {
-                val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 85)
-                tg.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
-                mainHandler.postDelayed({
-                    try {
-                        tg.release()
-                    } catch (_: Exception) { }
-                }, 200L)
+                playPreset(context, TimerSoundPresets.byId(presetId))
             } catch (_: Exception) { }
         }
     }

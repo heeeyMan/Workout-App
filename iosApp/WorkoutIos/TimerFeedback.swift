@@ -31,7 +31,7 @@ enum TimerFeedback {
         case let alert as TimerEffectAlert10Seconds:
             // Отдельный цикл runloop на каждый тик — иначе одинаковые системные звуки подряд могут сливаться.
             DispatchQueue.main.async {
-                let presetId = TimerUserSettings.shared.workPhaseWarningSoundPresetId
+                let presetId = (store.state.value as? TimerState)?.workPhaseWarningSoundPresetId ?? ""
                 playPreset(presetId, fallback: 1005)
                 if alert.withVibration {
                     UIImpactFeedbackGenerator(style: .rigid).impactOccurred()

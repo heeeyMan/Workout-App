@@ -54,6 +54,7 @@
 "sound_before_work" = "Start work sound";
 "sound_before_rest" = "End work sound";
 "sound_workout_finish" = "Workout complete sound";
+"sound_work_phase_warn" = "End-of-work warning sound";
 "timer_sound_enabled" = "Timer sound";
 "vibration" = "Vibration";
 "timer_quick_adjust_title" = "+10 s / −10 s on timer screen";

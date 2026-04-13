@@ -95,6 +95,18 @@ class TimerPreferences(context: Context) {
             ).apply()
         }
 
+    var workPhaseWarningSoundPresetId: String
+        get() = normalizePresetId(
+            prefs.getString(KEY_WORK_PHASE_WARN_SOUND_PRESET, null),
+            TimerSoundPresets.DEFAULT_WARNING_ID
+        )
+        set(value) {
+            prefs.edit().putString(
+                KEY_WORK_PHASE_WARN_SOUND_PRESET,
+                normalizePresetId(value, TimerSoundPresets.DEFAULT_WARNING_ID)
+            ).apply()
+        }
+
     private fun normalizePresetId(raw: String?, defaultId: String): String {
         val id = raw ?: defaultId
         return if (TimerSoundPresets.isValidId(id)) id else defaultId
@@ -112,6 +124,7 @@ class TimerPreferences(context: Context) {
         private const val KEY_WORK_SOUND_PRESET = "work_start_sound_preset"
         private const val KEY_REST_SOUND_PRESET = "rest_start_sound_preset"
         private const val KEY_FINISH_SOUND_PRESET = "workout_finish_sound_preset"
+        private const val KEY_WORK_PHASE_WARN_SOUND_PRESET = "work_phase_warning_sound_preset"
         const val DEFAULT_BLOCK_PREP_SECONDS = 5
         const val MIN_PREP_SECONDS = 0
         const val MAX_PREP_SECONDS = 120

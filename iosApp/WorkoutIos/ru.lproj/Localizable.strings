@@ -54,6 +54,7 @@
 "sound_before_work" = "Звук начала подхода";
 "sound_before_rest" = "Звук конца подхода";
 "sound_workout_finish" = "Звук окончания тренировки";
+"sound_work_phase_warn" = "Звук предупреждения в конце подхода";
 "timer_sound_enabled" = "Звук таймера";
 "vibration" = "Вибрация";
 "timer_quick_adjust_title" = "Кнопки +10 с / −10 с на таймере";
