@@ -286,31 +286,6 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            prepInput = prepSeconds.toString()
-                            showPrepDialog = true
-                        }
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.prep_time_title),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.seconds_unit_suffix, prepSeconds),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
                         .clickable(onClick = viewModel::openWorkSoundPicker)
                         .padding(vertical = 16.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -439,6 +414,31 @@ fun SettingsScreen(
                     Switch(
                         checked = timerQuickAdjustEnabled,
                         onCheckedChange = viewModel::setTimerQuickAdjustEnabled
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            prepInput = prepSeconds.toString()
+                            showPrepDialog = true
+                        }
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.prep_time_title),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.seconds_unit_suffix, prepSeconds),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
