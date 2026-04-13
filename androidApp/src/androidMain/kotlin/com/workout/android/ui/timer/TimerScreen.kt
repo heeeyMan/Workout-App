@@ -82,7 +82,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -123,10 +123,7 @@ fun TimerScreen(
     val view = LocalView.current
     DisposableEffect(gymMode, view) {
         val activity = view.context as? Activity
-        val window = activity?.window
-        if (window == null) {
-            return@DisposableEffect onDispose { }
-        }
+        val window = activity?.window ?: return@DisposableEffect onDispose { }
         val controller = WindowCompat.getInsetsController(window, view)
         if (gymMode) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
