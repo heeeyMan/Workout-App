@@ -31,7 +31,6 @@ struct CreateWorkoutView: View {
             }
         }
         .background(WorkoutPalette.background)
-        .navigationTitle(workoutId == 0 ? L10n.tr("create_workout_title_new") : L10n.tr("create_workout_title_edit"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .tint(WorkoutPalette.primary)
@@ -129,11 +128,16 @@ struct CreateWorkoutView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                if state.totalDurationSeconds > 0 {
-                    Text(formatTotalTime(Int(state.totalDurationSeconds)))
-                        .font(.subheadline)
-                        .foregroundStyle(WorkoutPalette.onSurfaceMuted)
+            ToolbarItem(placement: .principal) {
+                VStack(spacing: 2) {
+                    Text(workoutId == 0 ? L10n.tr("create_workout_title_new") : L10n.tr("create_workout_title_edit"))
+                        .font(.headline)
+                        .foregroundStyle(WorkoutPalette.onSurface)
+                    if state.totalDurationSeconds > 0 {
+                        Text(formatTotalTime(Int(state.totalDurationSeconds)))
+                            .font(.subheadline)
+                            .foregroundStyle(WorkoutPalette.onSurfaceMuted)
+                    }
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
