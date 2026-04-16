@@ -15,8 +15,8 @@ import org.koin.dsl.module
 
 val androidPlatformModule = module {
     single<TimerSettings> { AndroidTimerSettings(androidContext()) }
-    single<AudioFeedback> { AndroidAudioFeedback() }
-    single<HapticFeedback> { AndroidHapticFeedback() }
+    single<AudioFeedback> { AndroidAudioFeedback(androidContext()) }
+    single<HapticFeedback> { AndroidHapticFeedback(androidContext()) }
     single<ScreenWakeLock> { AndroidScreenWakeLock() }
     single<ForegroundTimerService> { AndroidForegroundTimerService() }
 }
