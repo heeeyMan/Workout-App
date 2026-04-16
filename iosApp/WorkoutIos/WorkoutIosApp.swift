@@ -1,25 +1,24 @@
-import Shared
 import SwiftUI
+import Shared
 
 @main
 struct WorkoutIosApp: App {
-    @StateObject private var appModel = AppModel()
-
     init() {
-        WorkoutTheme.applyUIKitChrome()
+        KoinIosHelperKt.doInitKoinIos()
     }
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environmentObject(appModel)
+            ComposeViewRepresentable()
+                .ignoresSafeArea()
                 .preferredColorScheme(.dark)
-                .tint(WorkoutPalette.primary)
         }
     }
 }
 
-/// Держит [WorkoutIosAppController] на время работы приложения.
-final class AppModel: ObservableObject {
-    let controller = WorkoutIosAppController()
+struct ComposeViewRepresentable: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        MainKt.MainViewController()
+    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }

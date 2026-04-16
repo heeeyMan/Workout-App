@@ -5,6 +5,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 configure<LibraryExtension> {
@@ -34,10 +37,23 @@ configure<KotlinMultiplatformExtension> {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":core"))
+            api(project(":core"))
             implementation(libs.koin.core)
             implementation(libs.coroutines.core)
             implementation(libs.datetime)
+            implementation(libs.serialization.json)
+
+            // Compose Multiplatform
+            api(compose.runtime)
+            api(compose.foundation)
+            api(compose.material3)
+            api(compose.ui)
+            api(compose.materialIconsExtended)
+            implementation(compose.components.resources)
+            api(libs.navigation.compose)
+            api(libs.lifecycle.viewmodel.compose)
+            api(libs.koin.compose)
+            api(libs.koin.compose.viewmodel)
         }
     }
 }

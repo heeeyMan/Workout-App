@@ -4,10 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.navigation.compose.rememberNavController
-import com.workout.android.navigation.AppNavigation
-import com.workout.android.theme.WorkoutAppTheme
 import com.workout.android.ui.permissions.AppEntryPermissionHandler
+import com.workout.shared.ui.navigation.WorkoutApp
 
 class MainActivity : ComponentActivity() {
 
@@ -16,11 +14,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            WorkoutAppTheme {
-                AppEntryPermissionHandler()
-                val navController = rememberNavController()
-                AppNavigation(navController = navController)
-            }
+            AppEntryPermissionHandler()
+            WorkoutApp()
         }
     }
 }

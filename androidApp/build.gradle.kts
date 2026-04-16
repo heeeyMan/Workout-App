@@ -38,27 +38,9 @@ dependencies {
 
     // Koin
     implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-
-    // Compose BOM
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.icons.extended)
-
-    // Navigation
-    implementation(libs.navigation.compose)
-
-    // Lifecycle
-    implementation(libs.lifecycle.viewmodel)
-    implementation(libs.lifecycle.viewmodel.compose)
 
     // Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.coroutines.core)
-
-    debugImplementation(libs.compose.ui.tooling)
 }

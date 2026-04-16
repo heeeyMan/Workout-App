@@ -17,7 +17,7 @@
     <string name="confirm_delete_workout_message">Это действие нельзя отменить.</string>
     <string name="last_workout">Последняя тренировка</string>
     <string name="all_workouts">Все тренировки</string>
-    <string name="empty_home_subtitle">Нет тренировок.\nНажми + чтобы создать первую.</string>
+    <string name="empty_home_subtitle">Нажми + чтобы создать первую тренировку</string>
 
     <string name="create">Создать</string>
     <string name="no_workouts">Нет тренировок</string>

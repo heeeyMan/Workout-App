@@ -5,7 +5,7 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.core.model.Workout
 import com.workout.shared.mvi.BaseStore
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class CreateWorkoutStore(
     private val workoutRepository: WorkoutRepository
