@@ -130,10 +130,11 @@ struct CreateWorkoutView: View {
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(L10n.tr("cancel")) {
-                    store.dispatch(intent: CreateWorkoutIntentDiscard.shared)
+                if state.totalDurationSeconds > 0 {
+                    Text(formatTotalTime(Int(state.totalDurationSeconds)))
+                        .font(.subheadline)
+                        .foregroundStyle(WorkoutPalette.onSurfaceMuted)
                 }
-                .disabled(state.isSaving)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(L10n.tr("save")) {
@@ -142,6 +143,12 @@ struct CreateWorkoutView: View {
                 .disabled(state.isSaving)
             }
         }
+    }
+
+    private func formatTotalTime(_ totalSeconds: Int) -> String {
+        let m = totalSeconds / 60
+        let s = totalSeconds % 60
+        return String(format: "%02d:%02d", m, s)
     }
 }
 
