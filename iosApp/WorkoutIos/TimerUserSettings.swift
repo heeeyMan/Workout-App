@@ -64,7 +64,10 @@ final class TimerUserSettings {
     }
 
     var timerQuickAdjustEnabled: Bool {
-        get { defaults.bool(forKey: Key.quickAdjust) }
+        get {
+            if defaults.object(forKey: Key.quickAdjust) == nil { return true }
+            return defaults.bool(forKey: Key.quickAdjust)
+        }
         set { defaults.set(newValue, forKey: Key.quickAdjust) }
     }
 

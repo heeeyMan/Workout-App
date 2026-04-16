@@ -53,10 +53,10 @@ class TimerPreferences(context: Context) {
 
     /**
      * Кнопки «+10 с / −10 с» на экране таймера для текущей фазы.
-     * По умолчанию выключено — включается в настройках.
+     * По умолчанию включено.
      */
     var timerQuickAdjustEnabled: Boolean
-        get() = prefs.getBoolean(KEY_TIMER_QUICK_ADJUST, false)
+        get() = prefs.getBoolean(KEY_TIMER_QUICK_ADJUST, true)
         set(value) {
             prefs.edit().putBoolean(KEY_TIMER_QUICK_ADJUST, value).apply()
         }
