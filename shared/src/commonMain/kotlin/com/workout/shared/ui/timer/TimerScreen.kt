@@ -121,16 +121,13 @@ fun TimerScreen(
         )
     }
 
-    // Keep screen on
+    // Start foreground service + keep screen on
     DisposableEffect(Unit) {
+        foregroundService.start("") { intent -> store.dispatch(intent) }
         screenWakeLock.acquire()
-        onDispose { screenWakeLock.release() }
-    }
-
-    // Clean up store
-    DisposableEffect(Unit) {
         onDispose {
             foregroundService.stop()
+            screenWakeLock.release()
             store.destroy()
         }
     }

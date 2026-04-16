@@ -7,26 +7,26 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
-import androidx.core.content.ContextCompat
 import com.workout.android.MainActivity
 import com.workout.android.R
+import com.workout.shared.feature.timer.TimerIntent
+import com.workout.shared.platform.AndroidForegroundTimerService
 
-/**
- * Foreground service на время активной тренировки: процесс остаётся приоритетным в фоне,
- * таймер и звуки продолжают работать после сворачивания приложения.
- * Кнопки «Пауза» и «Дальше» в уведомлении дублируются на связанных часах Wear OS.
- */
 class WorkoutTimerForegroundService : Service() {
+
+    private var mediaSession: MediaSession? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         createChannelIfNeeded()
+        setupMediaSession()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -35,106 +35,65 @@ class WorkoutTimerForegroundService : Service() {
             return START_NOT_STICKY
         }
 
-        val workoutName = intent?.getStringExtra(EXTRA_WORKOUT_NAME).orEmpty()
-        val phaseLine = intent?.getStringExtra(EXTRA_PHASE_LINE).orEmpty()
-        val detailLine = intent?.getStringExtra(EXTRA_DETAIL_LINE).orEmpty()
-        val timeLine = intent?.getStringExtra(EXTRA_TIME_LINE).orEmpty()
-        val isPaused = intent?.getBooleanExtra(EXTRA_IS_PAUSED, false) ?: false
+        val workoutName = intent.getStringExtra(AndroidForegroundTimerService.EXTRA_WORKOUT_NAME).orEmpty()
+        val phaseLine = intent.getStringExtra(AndroidForegroundTimerService.EXTRA_PHASE_LINE).orEmpty()
+        val detailLine = intent.getStringExtra(AndroidForegroundTimerService.EXTRA_DETAIL_LINE).orEmpty()
+        val isPaused = intent.getBooleanExtra(AndroidForegroundTimerService.EXTRA_IS_PAUSED, false)
+        val phaseType = intent.getStringExtra(AndroidForegroundTimerService.EXTRA_PHASE_TYPE).orEmpty()
 
-        val notification = buildNotification(workoutName, phaseLine, detailLine, timeLine, isPaused)
+        updateMediaSessionPlaybackState(isPaused)
+
+        // Первый вызов — startForeground, дальнейшие обновления через NotificationManager.notify напрямую
+        val notification = buildNotificationInternal(workoutName, phaseLine, detailLine, "", isPaused, phaseType)
         startForeground(NOTIFICATION_ID, notification)
         return START_NOT_STICKY
     }
 
-    private fun buildNotification(
-        workoutName: String,
-        phaseLine: String,
-        detailLine: String,
-        timeLine: String,
-        isPaused: Boolean
-    ): Notification {
-        val openApp = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        val contentPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openApp,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val title = workoutName.ifBlank { getString(R.string.timer_notification_title_fallback) }
-        val text = buildString {
-            append(phaseLine)
-            if (timeLine.isNotBlank()) {
-                if (isNotEmpty()) append(" · ")
-                append(timeLine)
-            }
-        }.ifBlank { getString(R.string.timer_notification_running) }
-
-        val style = NotificationCompat.BigTextStyle()
-            .setBigContentTitle(title)
-            .bigText(
-                buildString {
-                    append(text)
-                    if (detailLine.isNotBlank()) {
-                        append("\n")
-                        append(detailLine)
-                    }
+    private fun setupMediaSession() {
+        mediaSession = MediaSession(this, "WorkoutTimer").apply {
+            setCallback(object : MediaSession.Callback() {
+                override fun onPlay() {
+                    AndroidForegroundTimerService.dispatchCallback?.invoke(TimerIntent.TogglePause)
                 }
-            )
-
-        val pauseIntent = Intent(this, TimerNotificationActionReceiver::class.java).apply {
-            action = TimerNotificationActionReceiver.ACTION_TOGGLE_PAUSE
-            setPackage(packageName)
+                override fun onPause() {
+                    AndroidForegroundTimerService.dispatchCallback?.invoke(TimerIntent.TogglePause)
+                }
+                override fun onSkipToNext() {
+                    AndroidForegroundTimerService.dispatchCallback?.invoke(TimerIntent.SkipPhase)
+                }
+                override fun onSkipToPrevious() {
+                    AndroidForegroundTimerService.dispatchCallback?.invoke(TimerIntent.PreviousPhase)
+                }
+            })
+            isActive = true
         }
-        val pausePendingIntent = PendingIntent.getBroadcast(
-            this,
-            REQ_PAUSE,
-            pauseIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        val skipIntent = Intent(this, TimerNotificationActionReceiver::class.java).apply {
-            action = TimerNotificationActionReceiver.ACTION_SKIP_PHASE
-            setPackage(packageName)
-        }
-        val skipPendingIntent = PendingIntent.getBroadcast(
-            this,
-            REQ_SKIP,
-            skipIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    }
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSubText(detailLine.takeIf { it.isNotBlank() })
-            .setStyle(style)
-            .setContentIntent(contentPendingIntent)
-            .addAction(
-                NotificationCompat.Action(
-                    0,
-                    getString(if (isPaused) R.string.notif_action_resume else R.string.notif_action_pause),
-                    pausePendingIntent
+    private fun updateMediaSessionPlaybackState(isPaused: Boolean) {
+        val state = if (isPaused) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING
+        mediaSession?.setPlaybackState(
+            PlaybackState.Builder()
+                .setActions(
+                    PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or
+                    PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+                    PlaybackState.ACTION_PLAY_PAUSE
                 )
-            )
-            .addAction(
-                NotificationCompat.Action(
-                    0,
-                    getString(R.string.notif_action_next_phase),
-                    skipPendingIntent
-                )
-            )
-            .setOngoing(true)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)
-            .build()
+                .setState(state, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1f)
+                .build()
+        )
+    }
+
+    private fun buildNotificationInternal(
+        workoutName: String, phaseLine: String, detailLine: String,
+        timeLine: String, isPaused: Boolean, phaseType: String
+    ): Notification {
+        return buildNotificationWithContext(this, workoutName, phaseLine, detailLine, timeLine, isPaused, phaseType,
+            mediaSession?.sessionToken)
     }
 
     override fun onDestroy() {
+        mediaSession?.apply { isActive = false; release() }
+        mediaSession = null
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         } catch (_: Exception) { }
@@ -142,7 +101,6 @@ class WorkoutTimerForegroundService : Service() {
     }
 
     private fun createChannelIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val nm = getSystemService(NotificationManager::class.java) ?: return
         if (nm.getNotificationChannel(CHANNEL_ID) != null) return
         val channel = NotificationChannel(
@@ -159,41 +117,106 @@ class WorkoutTimerForegroundService : Service() {
     companion object {
         private const val CHANNEL_ID = "workout_timer_foreground"
         const val NOTIFICATION_ID = 71001
-
         private const val ACTION_RUN = "com.workout.android.timer.RUN"
-
-        private const val EXTRA_WORKOUT_NAME = "workout_name"
-        private const val EXTRA_PHASE_LINE = "phase_line"
-        private const val EXTRA_DETAIL_LINE = "detail_line"
-        private const val EXTRA_TIME_LINE = "time_line"
-        private const val EXTRA_IS_PAUSED = "is_paused"
 
         private const val REQ_PAUSE = 71002
         private const val REQ_SKIP = 71003
+        private const val REQ_PREVIOUS = 71004
 
-        fun update(
+        private const val COLOR_WORK_ORANGE = 0xFFFF6B35.toInt()
+        private const val COLOR_REST_GREEN = 0xFF4CAF50.toInt()
+        private const val COLOR_PREP_GRAY = 0xFF9E9E9E.toInt()
+
+        /** Вызывается из [AndroidForegroundTimerService] через reflection для обновления без startForegroundService. */
+        @JvmStatic
+        fun buildNotificationStatic(
             context: Context,
-            workoutName: String,
-            phaseLine: String,
-            detailLine: String,
-            timeLine: String,
-            isPaused: Boolean
-        ) {
-            val app = context.applicationContext
-            val intent = Intent(app, WorkoutTimerForegroundService::class.java).apply {
-                action = ACTION_RUN
-                putExtra(EXTRA_WORKOUT_NAME, workoutName)
-                putExtra(EXTRA_PHASE_LINE, phaseLine)
-                putExtra(EXTRA_DETAIL_LINE, detailLine)
-                putExtra(EXTRA_TIME_LINE, timeLine)
-                putExtra(EXTRA_IS_PAUSED, isPaused)
+            workoutName: String, phaseLine: String, detailLine: String,
+            timeLine: String, isPaused: Boolean, phaseType: String
+        ): Notification {
+            // Для static вызова — без mediaSession token (он в Service instance)
+            return buildNotificationWithContext(context, workoutName, phaseLine, detailLine, timeLine, isPaused, phaseType, null)
+        }
+
+        private fun buildNotificationWithContext(
+            context: Context,
+            workoutName: String, phaseLine: String, detailLine: String,
+            timeLine: String, isPaused: Boolean, phaseType: String,
+            sessionToken: android.media.session.MediaSession.Token?
+        ): Notification {
+            val openApp = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
-            ContextCompat.startForegroundService(app, intent)
+            val contentPI = PendingIntent.getActivity(
+                context, 0, openApp,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val title = workoutName.ifBlank { context.getString(R.string.timer_notification_title_fallback) }
+
+            // contentText: "Work · Exercise 1 · Set 1/5 · 00:40"
+            val text = buildString {
+                if (phaseLine.isNotBlank()) append(phaseLine)
+                if (detailLine.isNotBlank()) { if (isNotEmpty()) append(" · "); append(detailLine) }
+                if (timeLine.isNotBlank()) { if (isNotEmpty()) append(" · "); append(timeLine) }
+            }.ifBlank { context.getString(R.string.timer_notification_running) }
+
+            val previousPI = actionPI(context, TimerNotificationActionReceiver.ACTION_PREVIOUS_PHASE, REQ_PREVIOUS)
+            val pausePI = actionPI(context, TimerNotificationActionReceiver.ACTION_TOGGLE_PAUSE, REQ_PAUSE)
+            val skipPI = actionPI(context, TimerNotificationActionReceiver.ACTION_SKIP_PHASE, REQ_SKIP)
+
+            val pauseIcon = if (isPaused) android.R.drawable.ic_media_play else android.R.drawable.ic_media_pause
+            val pauseLabel = context.getString(if (isPaused) R.string.notif_action_resume else R.string.notif_action_pause)
+
+            val accentColor = when (phaseType) {
+                "work" -> COLOR_WORK_ORANGE
+                "rest" -> COLOR_REST_GREEN
+                else -> COLOR_PREP_GRAY
+            }
+
+            val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(contentPI)
+                .setColor(accentColor)
+                .setColorized(true)
+                .addAction(NotificationCompat.Action(android.R.drawable.ic_media_previous, context.getString(R.string.cd_previous_phase), previousPI))
+                .addAction(NotificationCompat.Action(pauseIcon, pauseLabel, pausePI))
+                .addAction(NotificationCompat.Action(android.R.drawable.ic_media_next, context.getString(R.string.notif_action_next_phase), skipPI))
+                .setOngoing(true)
+                .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSilent(true)
+                .setOnlyAlertOnce(true)
+
+            if (sessionToken != null) {
+                val style = androidx.media.app.NotificationCompat.MediaStyle()
+                    .setMediaSession(
+                        android.support.v4.media.session.MediaSessionCompat.Token.fromToken(sessionToken)
+                    )
+                    .setShowActionsInCompactView(0, 1, 2)
+                builder.setStyle(style)
+            }
+
+            return builder.build()
+        }
+
+        private fun actionPI(context: Context, action: String, requestCode: Int): PendingIntent {
+            val intent = Intent(context, TimerNotificationActionReceiver::class.java).apply {
+                this.action = action
+                setPackage(context.packageName)
+            }
+            return PendingIntent.getBroadcast(
+                context, requestCode, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
         fun stop(context: Context) {
-            val app = context.applicationContext
-            app.stopService(Intent(app, WorkoutTimerForegroundService::class.java))
+            context.applicationContext.stopService(
+                Intent(context.applicationContext, WorkoutTimerForegroundService::class.java)
+            )
         }
     }
 }

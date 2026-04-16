@@ -18,5 +18,5 @@ val androidPlatformModule = module {
     single<AudioFeedback> { AndroidAudioFeedback(androidContext()) }
     single<HapticFeedback> { AndroidHapticFeedback(androidContext()) }
     single<ScreenWakeLock> { AndroidScreenWakeLock() }
-    single<ForegroundTimerService> { AndroidForegroundTimerService() }
+    single<ForegroundTimerService> { AndroidForegroundTimerService(androidContext()) }
 }

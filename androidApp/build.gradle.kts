@@ -41,6 +41,7 @@ dependencies {
 
     // Android
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.media)
     implementation(libs.androidx.activity.compose)
     implementation(libs.coroutines.core)
 }

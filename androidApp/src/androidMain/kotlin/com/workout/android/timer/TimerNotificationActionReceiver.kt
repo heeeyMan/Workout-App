@@ -4,26 +4,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.workout.shared.feature.timer.TimerIntent
-import org.koin.core.context.GlobalContext
+import com.workout.shared.platform.AndroidForegroundTimerService
 
 class TimerNotificationActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        val bridge = try {
-            GlobalContext.get().get<TimerSessionBridge>()
-        } catch (_: Exception) {
-            return
-        }
+        val callback = AndroidForegroundTimerService.dispatchCallback ?: return
         when (intent?.action) {
-            ACTION_TOGGLE_PAUSE -> bridge.dispatch(TimerIntent.TogglePause)
-            ACTION_SKIP_PHASE -> bridge.dispatch(TimerIntent.SkipPhase)
-            else -> return
+            ACTION_TOGGLE_PAUSE -> callback(TimerIntent.TogglePause)
+            ACTION_SKIP_PHASE -> callback(TimerIntent.SkipPhase)
+            ACTION_PREVIOUS_PHASE -> callback(TimerIntent.PreviousPhase)
         }
-        bridge.refreshNotificationIfActive(context)
     }
 
     companion object {
         const val ACTION_TOGGLE_PAUSE = "com.workout.android.timer.TOGGLE_PAUSE"
         const val ACTION_SKIP_PHASE = "com.workout.android.timer.SKIP_PHASE"
+        const val ACTION_PREVIOUS_PHASE = "com.workout.android.timer.PREVIOUS_PHASE"
     }
 }
