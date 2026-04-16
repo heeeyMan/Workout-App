@@ -14,7 +14,7 @@ androidxActivityCompose = "1.9.2"
 androidxCoreKtx = "1.13.1"
 compileSdk = "36"
 minSdk = "28"
-targetSdk = "35"
+targetSdk = "36"
 
 [libraries]
 # Coroutines
