@@ -12,7 +12,7 @@
 "confirm_delete_workout_message" = "Это действие нельзя отменить.";
 "last_workout" = "Последняя тренировка";
 "all_workouts" = "Все тренировки";
-"empty_home_subtitle" = "Нет тренировок.\nНажми + чтобы создать первую.";
+"empty_home_subtitle" = "Нажми + чтобы создать первую тренировку";
 "no_workouts" = "Нет тренировок";
 "seconds_unit_suffix" = "%d с";
 "seconds_short" = "с";
@@ -45,6 +45,8 @@
 "duration_label" = "Длительность";
 "edit_exercise_title" = "Упражнение";
 "edit_rest_title" = "Отдых";
+"block_type_exercise" = "УПРАЖНЕНИЕ";
+"block_type_rest" = "ОТДЫХ";
 "error_workout_name_required" = "Введите название тренировки";
 "default_workout_name_pattern" = "Тренировка %d";
 "default_exercise_name_pattern" = "Упражнение %d";

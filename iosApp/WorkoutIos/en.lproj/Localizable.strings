@@ -45,6 +45,8 @@
 "duration_label" = "Duration";
 "edit_exercise_title" = "Edit exercise";
 "edit_rest_title" = "Edit rest";
+"block_type_exercise" = "EXERCISE";
+"block_type_rest" = "REST";
 "error_workout_name_required" = "Enter a workout name";
 "default_workout_name_pattern" = "Workout %d";
 "default_exercise_name_pattern" = "Exercise %d";

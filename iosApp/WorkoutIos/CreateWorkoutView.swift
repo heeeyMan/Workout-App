@@ -15,8 +15,6 @@ struct CreateWorkoutView: View {
     @State private var store: CreateWorkoutStore?
     @State private var cancelEffects: (() -> Void)?
     @State private var emptyNameAlert = false
-    @State private var exerciseEditor: ExerciseEditorPayload?
-    @State private var restEditor: RestEditorPayload?
 
     private var uiPulse: Timer.TimerPublisher {
         Timer.publish(every: 0.2, on: .main, in: .common)
@@ -65,30 +63,6 @@ struct CreateWorkoutView: View {
         .alert(L10n.tr("error_workout_name_required"), isPresented: $emptyNameAlert) {
             Button(L10n.tr("ok"), role: .cancel) {}
         }
-        .sheet(item: $exerciseEditor) { payload in
-            Group {
-                if let store {
-                    ExerciseBlockEditorView(
-                        controller: appModel.controller,
-                        store: store,
-                        payload: payload,
-                        onDone: { exerciseEditor = nil }
-                    )
-                }
-            }
-        }
-        .sheet(item: $restEditor) { payload in
-            Group {
-                if let store {
-                    RestBlockEditorView(
-                        controller: appModel.controller,
-                        store: store,
-                        payload: payload,
-                        onDone: { restEditor = nil }
-                    )
-                }
-            }
-        }
     }
 
     @ViewBuilder
@@ -122,12 +96,16 @@ struct CreateWorkoutView: View {
                 } else {
                     ForEach(Array(0..<blocks.count), id: \.self) { index in
                         let block = blocks[index]
-                        blockRow(
+                        BlockCardView(
+                            controller: appModel.controller,
                             store: store,
                             block: block,
                             index: index,
                             count: blocks.count
                         )
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                     .onMove { source, destination in
                         guard let from = source.first else { return }
@@ -165,152 +143,389 @@ struct CreateWorkoutView: View {
             }
         }
     }
+}
+
+// MARK: - Block Card
+
+private struct BlockCardView: View {
+    let controller: WorkoutIosAppController
+    let store: CreateWorkoutStore
+    let block: CoreBlock
+    let index: Int
+    let count: Int
+
+    @State private var showNameDialog = false
+    @State private var showWorkPicker = false
+    @State private var showRestPicker = false
+    @State private var showDurationPicker = false
+
+    private var isExercise: Bool { controller.blockKind(block: block) == "exercise" }
+    private var accentColor: Color { isExercise ? WorkoutPalette.timerWorkOrange : WorkoutPalette.timerRestGreen }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(accentColor)
+                    .frame(width: 8, height: 8)
+                Text(isExercise ? L10n.tr("block_type_exercise") : L10n.tr("block_type_rest"))
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(accentColor)
+                Spacer()
+                Button {
+                    store.dispatch(intent: CreateWorkoutIntentDuplicateBlock(index: Int32(index)))
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                        .font(.caption)
+                        .foregroundStyle(WorkoutPalette.onSurfaceMuted)
+                }
+                .buttonStyle(.plain)
+                Button(role: .destructive) {
+                    store.dispatch(intent: CreateWorkoutIntentRemoveBlock(index: Int32(index)))
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.callout)
+                        .foregroundStyle(WorkoutPalette.dangerRed)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.bottom, 12)
+
+            Divider()
+                .overlay(Color.white.opacity(0.15))
+                .padding(.bottom, 16)
+
+            // Content
+            if isExercise, let fields = controller.exerciseBlockFields(block: block) {
+                exerciseContent(fields: fields)
+            } else if let fields = controller.restBlockFields(block: block) {
+                restContent(fields: fields)
+            }
+        }
+        .padding(16)
+        .background(WorkoutPalette.surfaceVariant)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: Exercise content
 
     @ViewBuilder
-    private func blockRow(store: CreateWorkoutStore, block: CoreBlock, index: Int, count: Int) -> some View {
-        let kind = appModel.controller.blockKind(block: block)
-        HStack(alignment: .center, spacing: 10) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(appModel.controller.blockSummaryLine(block: block))
-                    .font(.subheadline)
+    private func exerciseContent(fields: IosExerciseBlockFields) -> some View {
+        // Name row
+        Button {
+            showNameDialog = true
+        } label: {
+            HStack {
+                Text(fields.name)
+                    .font(.title3)
+                    .foregroundStyle(WorkoutPalette.onSurface)
+                Spacer()
+                Image(systemName: "pencil")
+                    .font(.caption)
+                    .foregroundStyle(WorkoutPalette.onSurfaceMuted)
             }
-            Spacer(minLength: 0)
-            Menu {
-                Button(L10n.tr("menu_edit")) {
-                    if kind == "exercise", let f = appModel.controller.exerciseBlockFields(block: block) {
-                        exerciseEditor = ExerciseEditorPayload(index: index, fields: f)
-                    } else if kind == "rest", let f = appModel.controller.restBlockFields(block: block) {
-                        restEditor = RestEditorPayload(index: index, fields: f)
-                    }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(WorkoutPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .alert(L10n.tr("dialog_exercise_name_title"), isPresented: $showNameDialog) {
+            NameEditAlert(
+                currentName: fields.name,
+                onConfirm: { newName in
+                    controller.dispatchUpdateExerciseBlock(
+                        store: store,
+                        index: Int32(index),
+                        id: fields.id,
+                        orderIndex: fields.orderIndex,
+                        name: newName,
+                        workDurationSeconds: fields.workDurationSeconds,
+                        restDurationSeconds: fields.restDurationSeconds,
+                        repeats: fields.repeats
+                    )
                 }
-                Button(L10n.tr("menu_duplicate")) {
-                    store.dispatch(intent: CreateWorkoutIntentDuplicateBlock(index: Int32(index)))
+            )
+        }
+
+        Spacer().frame(height: 16)
+
+        // Work & Rest chips
+        HStack(spacing: 12) {
+            DurationChipView(
+                label: L10n.tr("work_label"),
+                seconds: Int(fields.workDurationSeconds),
+                color: WorkoutPalette.timerWorkOrange
+            ) {
+                showWorkPicker = true
+            }
+
+            DurationChipView(
+                label: L10n.tr("rest_label"),
+                seconds: Int(fields.restDurationSeconds),
+                color: WorkoutPalette.timerRestGreen
+            ) {
+                showRestPicker = true
+            }
+        }
+        .sheet(isPresented: $showWorkPicker) {
+            DurationPickerSheet(
+                title: L10n.tr("work_label"),
+                seconds: Int(fields.workDurationSeconds)
+            ) { newSeconds in
+                controller.dispatchUpdateExerciseBlock(
+                    store: store,
+                    index: Int32(index),
+                    id: fields.id,
+                    orderIndex: fields.orderIndex,
+                    name: fields.name,
+                    workDurationSeconds: Int32(newSeconds),
+                    restDurationSeconds: fields.restDurationSeconds,
+                    repeats: fields.repeats
+                )
+            }
+        }
+        .sheet(isPresented: $showRestPicker) {
+            DurationPickerSheet(
+                title: L10n.tr("rest_label"),
+                seconds: Int(fields.restDurationSeconds)
+            ) { newSeconds in
+                controller.dispatchUpdateExerciseBlock(
+                    store: store,
+                    index: Int32(index),
+                    id: fields.id,
+                    orderIndex: fields.orderIndex,
+                    name: fields.name,
+                    workDurationSeconds: fields.workDurationSeconds,
+                    restDurationSeconds: Int32(newSeconds),
+                    repeats: fields.repeats
+                )
+            }
+        }
+
+        Spacer().frame(height: 16)
+
+        Divider()
+            .overlay(Color.white.opacity(0.15))
+
+        Spacer().frame(height: 12)
+
+        // Repeats row
+        HStack {
+            Text(L10n.tr("repeats_label"))
+                .font(.body)
+                .foregroundStyle(WorkoutPalette.onSurfaceMuted)
+            Spacer()
+            HStack(spacing: 0) {
+                RepeatButtonView(label: "\u{2212}", enabled: fields.repeats > 1) {
+                    controller.dispatchUpdateExerciseBlock(
+                        store: store,
+                        index: Int32(index),
+                        id: fields.id,
+                        orderIndex: fields.orderIndex,
+                        name: fields.name,
+                        workDurationSeconds: fields.workDurationSeconds,
+                        restDurationSeconds: fields.restDurationSeconds,
+                        repeats: fields.repeats - 1
+                    )
                 }
-                if index > 0 {
-                    Button(L10n.tr("menu_move_up")) {
-                        store.dispatch(intent: CreateWorkoutIntentMoveBlock(fromIndex: Int32(index), toIndex: Int32(index - 1)))
-                    }
+                Text("\(fields.repeats)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(WorkoutPalette.onSurface)
+                    .frame(width: 48)
+                    .multilineTextAlignment(.center)
+                RepeatButtonView(label: "+", enabled: true) {
+                    controller.dispatchUpdateExerciseBlock(
+                        store: store,
+                        index: Int32(index),
+                        id: fields.id,
+                        orderIndex: fields.orderIndex,
+                        name: fields.name,
+                        workDurationSeconds: fields.workDurationSeconds,
+                        restDurationSeconds: fields.restDurationSeconds,
+                        repeats: fields.repeats + 1
+                    )
                 }
-                if index < count - 1 {
-                    Button(L10n.tr("menu_move_down")) {
-                        store.dispatch(intent: CreateWorkoutIntentMoveBlock(fromIndex: Int32(index), toIndex: Int32(index + 1)))
-                    }
-                }
-                Divider()
-                Button(L10n.tr("menu_delete"), role: .destructive) {
-                    store.dispatch(intent: CreateWorkoutIntentRemoveBlock(index: Int32(index)))
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .imageScale(.large)
+            }
+        }
+    }
+
+    // MARK: Rest content
+
+    @ViewBuilder
+    private func restContent(fields: IosRestBlockFields) -> some View {
+        DurationChipView(
+            label: L10n.tr("duration_label"),
+            seconds: Int(fields.durationSeconds),
+            color: WorkoutPalette.timerRestGreen
+        ) {
+            showDurationPicker = true
+        }
+        .sheet(isPresented: $showDurationPicker) {
+            DurationPickerSheet(
+                title: L10n.tr("duration_label"),
+                seconds: Int(fields.durationSeconds)
+            ) { newSeconds in
+                controller.dispatchUpdateRestBlock(
+                    store: store,
+                    index: Int32(index),
+                    id: fields.id,
+                    orderIndex: fields.orderIndex,
+                    durationSeconds: Int32(newSeconds)
+                )
             }
         }
     }
 }
 
-private struct ExerciseEditorPayload: Identifiable {
-    var id: String { "ex-\(index)-\(fields.id)" }
-    let index: Int
-    let fields: IosExerciseBlockFields
-}
+// MARK: - Duration Chip
 
-private struct ExerciseBlockEditorView: View {
-    let controller: WorkoutIosAppController
-    let store: CreateWorkoutStore
-    let payload: ExerciseEditorPayload
-    let onDone: () -> Void
-
-    @State private var name: String = ""
-    @State private var workSec: Int = 40
-    @State private var restSec: Int = 20
-    @State private var repeats: Int = 3
+private struct DurationChipView: View {
+    let label: String
+    let seconds: Int
+    let color: Color
+    let onTap: () -> Void
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section(L10n.tr("edit_exercise_title")) {
-                    TextField(L10n.tr("dialog_exercise_name_title"), text: $name)
-                    Stepper("\(L10n.tr("work_label")): \(workSec) \(L10n.tr("seconds_short"))", value: $workSec, in: 1...3600, step: 1)
-                    Stepper("\(L10n.tr("rest_label")): \(restSec) \(L10n.tr("seconds_short"))", value: $restSec, in: 0...3600, step: 1)
-                    Stepper("\(L10n.tr("repeats_label")): \(repeats)", value: $repeats, in: 1...99, step: 1)
-                }
+        Button(action: onTap) {
+            VStack(spacing: 4) {
+                Text(label)
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(color)
+                Text(formatTime(seconds))
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(WorkoutPalette.onSurface)
             }
-            .navigationTitle(L10n.tr("edit_exercise_title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("cancel"), action: onDone)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.tr("save")) {
-                        controller.dispatchUpdateExerciseBlock(
-                            store: store,
-                            index: Int32(payload.index),
-                            id: payload.fields.id,
-                            orderIndex: payload.fields.orderIndex,
-                            name: name,
-                            workDurationSeconds: Int32(workSec),
-                            restDurationSeconds: Int32(restSec),
-                            repeats: Int32(repeats)
-                        )
-                        onDone()
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .onAppear {
-                name = payload.fields.name
-                workSec = Int(payload.fields.workDurationSeconds)
-                restSec = Int(payload.fields.restDurationSeconds)
-                repeats = Int(payload.fields.repeats)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(color.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func formatTime(_ sec: Int) -> String {
+        String(format: "%02d:%02d", sec / 60, sec % 60)
+    }
+}
+
+// MARK: - Repeat Button
+
+private struct RepeatButtonView: View {
+    let label: String
+    let enabled: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            Text(label)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundStyle(enabled ? WorkoutPalette.onSurface : WorkoutPalette.onSurfaceMuted)
+                .frame(width: 40, height: 40)
+                .background(enabled ? WorkoutPalette.surface : WorkoutPalette.surfaceVariant)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+    }
+}
+
+// MARK: - Name Edit Alert
+
+private struct NameEditAlert: View {
+    let currentName: String
+    let onConfirm: (String) -> Void
+
+    @State private var text = ""
+
+    var body: some View {
+        TextField(L10n.tr("dialog_exercise_name_title"), text: $text)
+            .autocorrectionDisabled(false)
+            .textInputAutocapitalization(.sentences)
+            .onAppear { text = currentName }
+        Button(L10n.tr("cancel"), role: .cancel) {}
+        Button(L10n.tr("done")) {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                onConfirm(trimmed)
             }
         }
     }
 }
 
-private struct RestEditorPayload: Identifiable {
-    var id: String { "rest-\(index)-\(fields.id)" }
-    let index: Int
-    let fields: IosRestBlockFields
-}
+// MARK: - Duration Picker Sheet
 
-private struct RestBlockEditorView: View {
-    let controller: WorkoutIosAppController
-    let store: CreateWorkoutStore
-    let payload: RestEditorPayload
-    let onDone: () -> Void
+private struct DurationPickerSheet: View {
+    let title: String
+    let seconds: Int
+    let onConfirm: (Int) -> Void
 
-    @State private var duration: Int = 60
+    @Environment(\.dismiss) private var dismiss
+    @State private var minutes: Int = 0
+    @State private var secs: Int = 0
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(L10n.tr("edit_rest_title")) {
-                    Stepper("\(L10n.tr("duration_label")): \(duration) \(L10n.tr("seconds_short"))", value: $duration, in: 1...7200, step: 1)
+            VStack(spacing: 0) {
+                Spacer()
+                HStack(spacing: 0) {
+                    Picker("", selection: $minutes) {
+                        ForEach(0..<100, id: \.self) { m in
+                            Text(String(format: "%02d", m))
+                                .tag(m)
+                                .foregroundStyle(WorkoutPalette.onSurface)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: 100)
+                    .clipped()
+
+                    Text(":")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundStyle(WorkoutPalette.onSurface)
+
+                    Picker("", selection: $secs) {
+                        ForEach(0..<60, id: \.self) { s in
+                            Text(String(format: "%02d", s))
+                                .tag(s)
+                                .foregroundStyle(WorkoutPalette.onSurface)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: 100)
+                    .clipped()
                 }
+                Spacer()
             }
-            .navigationTitle(L10n.tr("edit_rest_title"))
+            .frame(maxWidth: .infinity)
+            .background(WorkoutPalette.background)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("cancel"), action: onDone)
+                    Button(L10n.tr("cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.tr("save")) {
-                        controller.dispatchUpdateRestBlock(
-                            store: store,
-                            index: Int32(payload.index),
-                            id: payload.fields.id,
-                            orderIndex: payload.fields.orderIndex,
-                            durationSeconds: Int32(duration)
-                        )
-                        onDone()
+                    Button(L10n.tr("done")) {
+                        onConfirm(minutes * 60 + secs)
+                        dismiss()
                     }
                 }
             }
-            .onAppear {
-                duration = Int(payload.fields.durationSeconds)
-            }
         }
+        .onAppear {
+            minutes = seconds / 60
+            secs = seconds % 60
+        }
+        .presentationDetents([.medium])
     }
 }
