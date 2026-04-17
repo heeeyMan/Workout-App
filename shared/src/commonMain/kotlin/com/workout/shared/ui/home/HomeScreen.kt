@@ -35,7 +35,19 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
 import com.workout.shared.feature.home.HomeStore
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.all_workouts
+import workoutapp.shared.generated.resources.cancel
+import workoutapp.shared.generated.resources.confirm_delete_workout_message
+import workoutapp.shared.generated.resources.confirm_delete_workout_title
+import workoutapp.shared.generated.resources.create_first_workout
+import workoutapp.shared.generated.resources.delete
+import workoutapp.shared.generated.resources.last_workout
+import workoutapp.shared.generated.resources.my_workouts
+import workoutapp.shared.generated.resources.new_workout
+import workoutapp.shared.generated.resources.settings_cd
 import com.workout.shared.ui.components.WorkoutCard
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,16 +77,16 @@ fun HomeScreen(
     if (state.pendingDeleteId != null) {
         AlertDialog(
             onDismissRequest = { store.dispatch(HomeIntent.CancelDelete) },
-            title = { Text("Delete workout?") }, // TODO: CMP resources
-            text = { Text("This workout will be permanently deleted.") }, // TODO: CMP resources
+            title = { Text(stringResource(Res.string.confirm_delete_workout_title)) },
+            text = { Text(stringResource(Res.string.confirm_delete_workout_message)) },
             confirmButton = {
                 TextButton(onClick = { store.dispatch(HomeIntent.ConfirmDelete) }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error) // TODO: CMP resources
+                    Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { store.dispatch(HomeIntent.CancelDelete) }) {
-                    Text("Cancel") // TODO: CMP resources
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
@@ -83,10 +95,10 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Workouts") }, // TODO: CMP resources
+                title = { Text(stringResource(Res.string.my_workouts)) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings") // TODO: CMP resources
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings_cd))
                     }
                 }
             )
@@ -95,7 +107,7 @@ fun HomeScreen(
             ExtendedFloatingActionButton(
                 onClick = { store.dispatch(HomeIntent.CreateWorkout) },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("New Workout") } // TODO: CMP resources
+                text = { Text(stringResource(Res.string.new_workout)) }
             )
         }
     ) { padding ->
@@ -109,7 +121,7 @@ fun HomeScreen(
             state.workouts.isEmpty() -> {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Create your first workout!", // TODO: CMP resources
+                        text = stringResource(Res.string.create_first_workout),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -129,7 +141,7 @@ fun HomeScreen(
                     if (lastStarted != null) {
                         item {
                             Text(
-                                text = "Last Workout", // TODO: CMP resources
+                                text = stringResource(Res.string.last_workout),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -146,7 +158,7 @@ fun HomeScreen(
                     }
                     item {
                         Text(
-                            text = "All Workouts", // TODO: CMP resources
+                            text = stringResource(Res.string.all_workouts),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -34,7 +34,17 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.workoutlist.WorkoutListEffect
 import com.workout.shared.feature.workoutlist.WorkoutListIntent
 import com.workout.shared.feature.workoutlist.WorkoutListStore
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.back
+import workoutapp.shared.generated.resources.cancel
+import workoutapp.shared.generated.resources.confirm_delete_workout_message
+import workoutapp.shared.generated.resources.confirm_delete_workout_title
+import workoutapp.shared.generated.resources.create
+import workoutapp.shared.generated.resources.delete
+import workoutapp.shared.generated.resources.my_workouts
+import workoutapp.shared.generated.resources.no_workouts
 import com.workout.shared.ui.components.WorkoutCard
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,16 +74,16 @@ fun WorkoutListScreen(
     if (state.pendingDeleteId != null) {
         AlertDialog(
             onDismissRequest = { store.dispatch(WorkoutListIntent.CancelDelete) },
-            title = { Text("Delete workout?") }, // TODO: CMP resources
-            text = { Text("This workout will be permanently deleted.") }, // TODO: CMP resources
+            title = { Text(stringResource(Res.string.confirm_delete_workout_title)) },
+            text = { Text(stringResource(Res.string.confirm_delete_workout_message)) },
             confirmButton = {
                 TextButton(onClick = { store.dispatch(WorkoutListIntent.ConfirmDelete) }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error) // TODO: CMP resources
+                    Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { store.dispatch(WorkoutListIntent.CancelDelete) }) {
-                    Text("Cancel") // TODO: CMP resources
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
@@ -82,10 +92,10 @@ fun WorkoutListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Workouts") }, // TODO: CMP resources
+                title = { Text(stringResource(Res.string.my_workouts)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") // TODO: CMP resources
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )
@@ -94,7 +104,7 @@ fun WorkoutListScreen(
             ExtendedFloatingActionButton(
                 onClick = { store.dispatch(WorkoutListIntent.CreateWorkout) },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Create") } // TODO: CMP resources
+                text = { Text(stringResource(Res.string.create)) }
             )
         }
     ) { padding ->
@@ -105,7 +115,7 @@ fun WorkoutListScreen(
         } else if (state.workouts.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text(
-                    "No workouts yet", // TODO: CMP resources
+                    stringResource(Res.string.no_workouts),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

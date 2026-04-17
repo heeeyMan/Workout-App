@@ -73,6 +73,33 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
 import com.workout.shared.feature.createworkout.CreateWorkoutIntent
 import com.workout.shared.feature.createworkout.CreateWorkoutStore
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.add_exercise
+import workoutapp.shared.generated.resources.add_rest
+import workoutapp.shared.generated.resources.back
+import workoutapp.shared.generated.resources.block_type_exercise
+import workoutapp.shared.generated.resources.block_type_rest
+import workoutapp.shared.generated.resources.cancel
+import workoutapp.shared.generated.resources.cd_duplicate
+import workoutapp.shared.generated.resources.cd_edit
+import workoutapp.shared.generated.resources.cd_reorder
+import workoutapp.shared.generated.resources.create_workout_title_edit
+import workoutapp.shared.generated.resources.create_workout_title_new
+import workoutapp.shared.generated.resources.default_exercise_name_pattern
+import workoutapp.shared.generated.resources.default_workout_name_pattern
+import workoutapp.shared.generated.resources.delete
+import workoutapp.shared.generated.resources.dialog_exercise_name_title
+import workoutapp.shared.generated.resources.dialog_rest_duration_title
+import workoutapp.shared.generated.resources.dialog_work_duration_title
+import workoutapp.shared.generated.resources.done
+import workoutapp.shared.generated.resources.duration_label
+import workoutapp.shared.generated.resources.error_workout_name_required
+import workoutapp.shared.generated.resources.repeats_label
+import workoutapp.shared.generated.resources.rest_label
+import workoutapp.shared.generated.resources.save
+import workoutapp.shared.generated.resources.training_time
+import workoutapp.shared.generated.resources.work_label
+import workoutapp.shared.generated.resources.workout_name_label
 import com.workout.shared.ui.components.WheelTimePicker
 import com.workout.shared.ui.components.toTimeString
 import com.workout.shared.ui.theme.BrownContainer
@@ -82,6 +109,8 @@ import com.workout.shared.ui.theme.TimerRestGreen
 import com.workout.shared.ui.theme.TimerWorkOrange
 import kotlin.math.abs
 import kotlin.random.Random
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,8 +133,7 @@ fun CreateWorkoutScreen(
         if (workoutId != 0L) {
             store.dispatch(CreateWorkoutIntent.LoadWorkout(workoutId))
         } else {
-            // TODO: CMP resources
-            val defaultName = "Workout ${Random.nextInt(101)}"
+            val defaultName = getString(Res.string.default_workout_name_pattern, Random.nextInt(101))
             store.dispatch(CreateWorkoutIntent.SetDefaultWorkoutNameIfEmpty(defaultName))
         }
     }
@@ -115,11 +143,13 @@ fun CreateWorkoutScreen(
             when (effect) {
                 is CreateWorkoutEffect.NavigateBack -> onNavigateBack()
                 is CreateWorkoutEffect.ShowErrorEmptyWorkoutName -> snackbarHostState.showSnackbar(
-                    "Workout name is required" // TODO: CMP resources
+                    getString(Res.string.error_workout_name_required)
                 )
             }
         }
     }
+
+    val nextExerciseName = stringResource(Res.string.default_exercise_name_pattern, state.blocks.size + 1)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -128,14 +158,13 @@ fun CreateWorkoutScreen(
                 title = {
                     Column {
                         Text(
-                            // TODO: CMP resources
-                            if (workoutId == 0L) "New Workout" else "Edit Workout"
+                            if (workoutId == 0L) stringResource(Res.string.create_workout_title_new)
+                            else stringResource(Res.string.create_workout_title_edit)
                         )
                         if (state.totalDurationSeconds > 0) {
                             val totalTime = state.totalDurationSeconds.toTimeString()
                             Text(
-                                // TODO: CMP resources
-                                text = "Training time: $totalTime",
+                                text = stringResource(Res.string.training_time, totalTime),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -147,13 +176,13 @@ fun CreateWorkoutScreen(
                     IconButton(onClick = { store.dispatch(CreateWorkoutIntent.Discard) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back" // TODO: CMP resources
+                            contentDescription = stringResource(Res.string.back)
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { store.dispatch(CreateWorkoutIntent.Save) }) {
-                        Icon(Icons.Default.Check, contentDescription = "Save") // TODO: CMP resources
+                        Icon(Icons.Default.Check, contentDescription = stringResource(Res.string.save))
                     }
                 }
             )
@@ -169,7 +198,7 @@ fun CreateWorkoutScreen(
                     value = state.name,
                     onValueChange = { store.dispatch(CreateWorkoutIntent.UpdateName(it)) },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Workout name") }, // TODO: CMP resources
+                    label = { Text(stringResource(Res.string.workout_name_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
                 )
@@ -227,26 +256,24 @@ fun CreateWorkoutScreen(
                 ) {
                     Button(
                         onClick = {
-                            val n = state.blocks.size + 1
                             store.dispatch(
                                 CreateWorkoutIntent.AddExerciseBlock(
                                     afterIndex = null,
-                                    // TODO: CMP resources
-                                    defaultExerciseName = "Exercise $n"
+                                    defaultExerciseName = nextExerciseName
                                 )
                             )
                         },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Add Exercise") // TODO: CMP resources
+                        Text(stringResource(Res.string.add_exercise))
                     }
                     Button(
                         onClick = { store.dispatch(CreateWorkoutIntent.AddRestBlock()) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Add Rest") // TODO: CMP resources
+                        Text(stringResource(Res.string.add_rest))
                     }
                 }
                 Spacer(Modifier.height(80.dp))
@@ -321,8 +348,8 @@ private fun BlockCard(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    // TODO: CMP resources
-                    text = if (isExercise) "EXERCISE" else "REST",
+                    text = if (isExercise) stringResource(Res.string.block_type_exercise)
+                           else stringResource(Res.string.block_type_rest),
                     style = MaterialTheme.typography.labelSmall,
                     color = accentColor,
                     fontWeight = FontWeight.Bold,
@@ -345,21 +372,21 @@ private fun BlockCard(
                     ) {
                         Icon(
                             Icons.Outlined.DragHandle,
-                            contentDescription = "Reorder", // TODO: CMP resources
+                            contentDescription = stringResource(Res.string.cd_reorder),
                             modifier = Modifier.size(28.dp)
                         )
                     }
                     IconButton(onClick = onDuplicate, modifier = Modifier.size(40.dp)) {
                         Icon(
                             Icons.Outlined.ContentCopy,
-                            contentDescription = "Duplicate", // TODO: CMP resources
+                            contentDescription = stringResource(Res.string.cd_duplicate),
                             modifier = Modifier.size(20.dp)
                         )
                     }
                     IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
                         Icon(
                             Icons.Outlined.DeleteOutline,
-                            contentDescription = "Delete", // TODO: CMP resources
+                            contentDescription = stringResource(Res.string.delete),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(28.dp)
                         )
@@ -408,7 +435,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         )
         Icon(
             Icons.Outlined.Edit,
-            contentDescription = "Edit", // TODO: CMP resources
+            contentDescription = stringResource(Res.string.cd_edit),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
@@ -422,14 +449,14 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         DurationChip(
-            label = "Work", // TODO: CMP resources
+            label = stringResource(Res.string.work_label),
             seconds = block.workDurationSeconds,
             color = TimerWorkOrange,
             modifier = Modifier.weight(1f),
             onClick = { showWorkDialog = true }
         )
         DurationChip(
-            label = "Rest", // TODO: CMP resources
+            label = stringResource(Res.string.rest_label),
             seconds = block.restDurationSeconds,
             color = TimerRestGreen,
             modifier = Modifier.weight(1f),
@@ -448,7 +475,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Repeats", // TODO: CMP resources
+            text = stringResource(Res.string.repeats_label),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -481,7 +508,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     }
     if (showWorkDialog) {
         DurationPickerDialog(
-            title = "Work Duration", // TODO: CMP resources
+            title = stringResource(Res.string.dialog_work_duration_title),
             seconds = block.workDurationSeconds,
             onConfirm = { onUpdate(block.copy(workDurationSeconds = it)); showWorkDialog = false },
             onDismiss = { showWorkDialog = false }
@@ -489,7 +516,7 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     }
     if (showRestDialog) {
         DurationPickerDialog(
-            title = "Rest Duration", // TODO: CMP resources
+            title = stringResource(Res.string.dialog_rest_duration_title),
             seconds = block.restDurationSeconds,
             onConfirm = { onUpdate(block.copy(restDurationSeconds = it)); showRestDialog = false },
             onDismiss = { showRestDialog = false }
@@ -506,7 +533,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
     var showDurationDialog by remember { mutableStateOf(false) }
 
     DurationChip(
-        label = "Duration", // TODO: CMP resources
+        label = stringResource(Res.string.duration_label),
         seconds = block.durationSeconds,
         color = TimerRestGreen,
         modifier = Modifier.fillMaxWidth(),
@@ -515,7 +542,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
 
     if (showDurationDialog) {
         DurationPickerDialog(
-            title = "Rest Duration", // TODO: CMP resources
+            title = stringResource(Res.string.dialog_rest_duration_title),
             seconds = block.durationSeconds,
             onConfirm = { onUpdate(block.copy(durationSeconds = it)); showDurationDialog = false },
             onDismiss = { showDurationDialog = false }
@@ -596,7 +623,7 @@ private fun NameEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Exercise Name") }, // TODO: CMP resources
+        title = { Text(stringResource(Res.string.dialog_exercise_name_title)) },
         text = {
             OutlinedTextField(
                 value = text,
@@ -611,11 +638,11 @@ private fun NameEditDialog(
         },
         confirmButton = {
             TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
-                Text("Done") // TODO: CMP resources
+                Text(stringResource(Res.string.done))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") } // TODO: CMP resources
+            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
         }
     )
 }
@@ -653,7 +680,7 @@ private fun DurationPickerDialog(
                 contentPadding = PaddingValues(horizontal = 35.dp, vertical = 14.dp)
             ) {
                 Text(
-                    "Done", // TODO: CMP resources
+                    stringResource(Res.string.done),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -666,7 +693,7 @@ private fun DurationPickerDialog(
                 contentPadding = PaddingValues(horizontal = 30.dp, vertical = 14.dp)
             ) {
                 Text(
-                    "Cancel", // TODO: CMP resources
+                    stringResource(Res.string.cancel),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

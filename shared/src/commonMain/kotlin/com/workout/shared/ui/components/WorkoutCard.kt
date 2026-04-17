@@ -22,7 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.workout.core.model.Block
 import com.workout.core.model.Workout
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.blocks_count
+import workoutapp.shared.generated.resources.cd_edit_workout
+import workoutapp.shared.generated.resources.cd_start_workout
+import workoutapp.shared.generated.resources.delete
+import workoutapp.shared.generated.resources.rest_label
 import com.workout.shared.ui.theme.DangerRed
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun WorkoutCard(
@@ -33,11 +41,9 @@ fun WorkoutCard(
     modifier: Modifier = Modifier
 ) {
     val blocksCount = workout.blocks.size
-    // TODO: replace with CMP string resources when available
-    val blocksPart = "$blocksCount ${pluralBlocks(blocksCount)}"
+    val blocksPart = pluralStringResource(Res.plurals.blocks_count, blocksCount, blocksCount)
     val subtitle = "${workout.totalDurationSeconds.toTimeString()} \u00B7 $blocksPart"
-    // TODO: replace with CMP string resource for rest label
-    val restLabel = "\u041E\u0442\u0434\u044B\u0445" // "Отдых"
+    val restLabel = stringResource(Res.string.rest_label)
     val structurePreview = workout.toStructurePreview(restLabel)
 
     Card(
@@ -65,41 +71,28 @@ fun WorkoutCard(
                     )
                 }
             }
-            // TODO: replace contentDescription with CMP string resources
             IconButton(onClick = onClick) {
                 Icon(
                     Icons.Outlined.PlayArrow,
-                    contentDescription = "Start workout",
+                    contentDescription = stringResource(Res.string.cd_start_workout),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
             IconButton(onClick = onEditClick) {
                 Icon(
                     Icons.Outlined.Edit,
-                    contentDescription = "Edit workout",
+                    contentDescription = stringResource(Res.string.cd_edit_workout),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     Icons.Outlined.DeleteOutline,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(Res.string.delete),
                     tint = DangerRed
                 )
             }
         }
-    }
-}
-
-// TODO: replace with proper pluralization from CMP resources
-private fun pluralBlocks(count: Int): String {
-    val mod10 = count % 10
-    val mod100 = count % 100
-    return when {
-        mod100 in 11..19 -> "\u0431\u043B\u043E\u043A\u043E\u0432"
-        mod10 == 1 -> "\u0431\u043B\u043E\u043A"
-        mod10 in 2..4 -> "\u0431\u043B\u043E\u043A\u0430"
-        else -> "\u0431\u043B\u043E\u043A\u043E\u0432"
     }
 }
 

@@ -42,14 +42,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.back
+import workoutapp.shared.generated.resources.cancel
+import workoutapp.shared.generated.resources.cd_confirm_selection
+import workoutapp.shared.generated.resources.prep_time_dialog_title
+import workoutapp.shared.generated.resources.prep_time_title
+import workoutapp.shared.generated.resources.save
+import workoutapp.shared.generated.resources.seconds_input_label
+import workoutapp.shared.generated.resources.seconds_unit_suffix
+import workoutapp.shared.generated.resources.settings_title
+import workoutapp.shared.generated.resources.sound_before_rest
+import workoutapp.shared.generated.resources.sound_before_work
+import workoutapp.shared.generated.resources.sound_picker_finish_title
+import workoutapp.shared.generated.resources.sound_picker_rest_title
+import workoutapp.shared.generated.resources.sound_picker_work_phase_warn_title
+import workoutapp.shared.generated.resources.sound_picker_work_title
+import workoutapp.shared.generated.resources.sound_work_phase_warn
+import workoutapp.shared.generated.resources.sound_workout_finish
+import workoutapp.shared.generated.resources.timer_quick_adjust_title
+import workoutapp.shared.generated.resources.timer_sound_enabled
+import workoutapp.shared.generated.resources.vibration
+import workoutapp.shared.generated.resources.work_phase_warn_dialog_title
+import workoutapp.shared.generated.resources.work_phase_warn_disabled_hint
+import workoutapp.shared.generated.resources.work_phase_warn_off
+import workoutapp.shared.generated.resources.work_phase_warn_title
 import com.workout.shared.platform.AudioFeedback
 import com.workout.shared.platform.SoundPresets
 import com.workout.shared.platform.TimerSettings
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 private enum class SoundPickerTarget { WORK, REST, FINISH, WORK_PHASE_WARN }
-
-// TODO: CMP resources - replace all hardcoded English strings below with localized resources
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,11 +106,6 @@ fun SettingsScreen(
     var showWorkWarnDialog by remember { mutableStateOf(false) }
     var workWarnInput by remember { mutableStateOf("") }
 
-    // Preset label lookup
-    val presetLabel: (String) -> String = { id ->
-        SoundPresets.all.find { it.id == id }?.labelKey ?: id
-    }
-
     val pickerTarget = soundPickerTarget
     if (pickerTarget != null) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -112,10 +131,10 @@ fun SettingsScreen(
                     item {
                         Text(
                             text = when (pickerTarget) {
-                                SoundPickerTarget.WORK -> "Work start sound" // TODO: CMP resources
-                                SoundPickerTarget.REST -> "Rest start sound" // TODO: CMP resources
-                                SoundPickerTarget.FINISH -> "Finish sound" // TODO: CMP resources
-                                SoundPickerTarget.WORK_PHASE_WARN -> "Work phase warning sound" // TODO: CMP resources
+                                SoundPickerTarget.WORK -> stringResource(Res.string.sound_picker_work_title)
+                                SoundPickerTarget.REST -> stringResource(Res.string.sound_picker_rest_title)
+                                SoundPickerTarget.FINISH -> stringResource(Res.string.sound_picker_finish_title)
+                                SoundPickerTarget.WORK_PHASE_WARN -> stringResource(Res.string.sound_picker_work_phase_warn_title)
                             },
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(vertical = 12.dp)
@@ -141,7 +160,7 @@ fun SettingsScreen(
                                 }
                             )
                             Text(
-                                text = preset.labelKey, // TODO: CMP resources - resolve labelKey to localized string
+                                text = stringResource(preset.label),
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
@@ -174,7 +193,7 @@ fun SettingsScreen(
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)
                 ) {
-                    Icon(Icons.Default.Check, contentDescription = "Confirm selection") // TODO: CMP resources
+                    Icon(Icons.Default.Check, contentDescription = stringResource(Res.string.cd_confirm_selection))
                 }
             }
         }
@@ -183,14 +202,14 @@ fun SettingsScreen(
     if (showPrepDialog) {
         AlertDialog(
             onDismissRequest = { showPrepDialog = false },
-            title = { Text("Preparation time") }, // TODO: CMP resources
+            title = { Text(stringResource(Res.string.prep_time_dialog_title)) },
             text = {
                 OutlinedTextField(
                     value = prepInput,
                     onValueChange = { value ->
                         prepInput = value.filter { it.isDigit() }.take(3)
                     },
-                    label = { Text("Seconds") }, // TODO: CMP resources
+                    label = { Text(stringResource(Res.string.seconds_input_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -198,23 +217,19 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val v = if (prepInput.isBlank()) {
-                            0
-                        } else {
-                            prepInput.toIntOrNull() ?: prepSeconds
-                        }
+                        val v = if (prepInput.isBlank()) 0 else prepInput.toIntOrNull() ?: prepSeconds
                         val clamped = v.coerceIn(0, 999)
                         settings.blockPrepDurationSeconds = clamped
                         prepSeconds = clamped
                         showPrepDialog = false
                     }
                 ) {
-                    Text("Save") // TODO: CMP resources
+                    Text(stringResource(Res.string.save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPrepDialog = false }) {
-                    Text("Cancel") // TODO: CMP resources
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
@@ -223,15 +238,15 @@ fun SettingsScreen(
     if (showWorkWarnDialog) {
         AlertDialog(
             onDismissRequest = { showWorkWarnDialog = false },
-            title = { Text("Work phase end warning") }, // TODO: CMP resources
+            title = { Text(stringResource(Res.string.work_phase_warn_dialog_title)) },
             text = {
                 OutlinedTextField(
                     value = workWarnInput,
                     onValueChange = { value ->
                         workWarnInput = value.filter { it.isDigit() }.take(3)
                     },
-                    label = { Text("Seconds") }, // TODO: CMP resources
-                    supportingText = { Text("0 = disabled") }, // TODO: CMP resources
+                    label = { Text(stringResource(Res.string.seconds_input_label)) },
+                    supportingText = { Text(stringResource(Res.string.work_phase_warn_disabled_hint)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -239,23 +254,20 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val v = if (workWarnInput.isBlank()) {
-                            0
-                        } else {
-                            workWarnInput.toIntOrNull() ?: workPhaseEndWarningSeconds
-                        }
+                        val v = if (workWarnInput.isBlank()) 0
+                                else workWarnInput.toIntOrNull() ?: workPhaseEndWarningSeconds
                         val clamped = v.coerceIn(0, 999)
                         settings.workPhaseEndWarningSeconds = clamped
                         workPhaseEndWarningSeconds = clamped
                         showWorkWarnDialog = false
                     }
                 ) {
-                    Text("Save") // TODO: CMP resources
+                    Text(stringResource(Res.string.save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showWorkWarnDialog = false }) {
-                    Text("Cancel") // TODO: CMP resources
+                    Text(stringResource(Res.string.cancel))
                 }
             }
         )
@@ -264,10 +276,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") }, // TODO: CMP resources
+                title = { Text(stringResource(Res.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") // TODO: CMP resources
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )
@@ -289,7 +301,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Timer sound", // TODO: CMP resources
+                        text = stringResource(Res.string.timer_sound_enabled),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
@@ -311,7 +323,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Vibration", // TODO: CMP resources
+                        text = stringResource(Res.string.vibration),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
@@ -325,104 +337,44 @@ fun SettingsScreen(
                 }
             }
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            pendingSoundPresetId = workSoundPresetId
-                            soundPickerTarget = SoundPickerTarget.WORK
-                        }
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Sound before work", // TODO: CMP resources
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Text(
-                        text = presetLabel(workSoundPresetId),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SettingsPresetRow(
+                    label = stringResource(Res.string.sound_before_work),
+                    presetId = workSoundPresetId,
+                    onClick = {
+                        pendingSoundPresetId = workSoundPresetId
+                        soundPickerTarget = SoundPickerTarget.WORK
+                    }
+                )
             }
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            pendingSoundPresetId = restSoundPresetId
-                            soundPickerTarget = SoundPickerTarget.REST
-                        }
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Sound before rest", // TODO: CMP resources
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Text(
-                        text = presetLabel(restSoundPresetId),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SettingsPresetRow(
+                    label = stringResource(Res.string.sound_before_rest),
+                    presetId = restSoundPresetId,
+                    onClick = {
+                        pendingSoundPresetId = restSoundPresetId
+                        soundPickerTarget = SoundPickerTarget.REST
+                    }
+                )
             }
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            pendingSoundPresetId = finishSoundPresetId
-                            soundPickerTarget = SoundPickerTarget.FINISH
-                        }
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Workout finish sound", // TODO: CMP resources
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Text(
-                        text = presetLabel(finishSoundPresetId),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SettingsPresetRow(
+                    label = stringResource(Res.string.sound_workout_finish),
+                    presetId = finishSoundPresetId,
+                    onClick = {
+                        pendingSoundPresetId = finishSoundPresetId
+                        soundPickerTarget = SoundPickerTarget.FINISH
+                    }
+                )
             }
             item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
-                            pendingSoundPresetId = workPhaseWarnSoundPresetId
-                            soundPickerTarget = SoundPickerTarget.WORK_PHASE_WARN
-                        }
-                        .padding(vertical = 16.dp, horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Work phase warning sound", // TODO: CMP resources
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                    )
-                    Text(
-                        text = presetLabel(workPhaseWarnSoundPresetId),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                SettingsPresetRow(
+                    label = stringResource(Res.string.sound_work_phase_warn),
+                    presetId = workPhaseWarnSoundPresetId,
+                    onClick = {
+                        pendingSoundPresetId = workPhaseWarnSoundPresetId
+                        soundPickerTarget = SoundPickerTarget.WORK_PHASE_WARN
+                    }
+                )
             }
             item {
                 Row(
@@ -438,15 +390,15 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Work phase end warning", // TODO: CMP resources
+                        text = stringResource(Res.string.work_phase_warn_title),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Text(
                         text = if (workPhaseEndWarningSeconds <= 0) {
-                            "Off" // TODO: CMP resources
+                            stringResource(Res.string.work_phase_warn_off)
                         } else {
-                            "${workPhaseEndWarningSeconds}s" // TODO: CMP resources
+                            stringResource(Res.string.seconds_unit_suffix, workPhaseEndWarningSeconds)
                         },
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -462,7 +414,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Quick time adjust", // TODO: CMP resources
+                        text = stringResource(Res.string.timer_quick_adjust_title),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
@@ -489,17 +441,48 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Preparation time", // TODO: CMP resources
+                        text = stringResource(Res.string.prep_time_title),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f).padding(end = 12.dp)
                     )
                     Text(
-                        text = "${prepSeconds}s", // TODO: CMP resources
+                        text = stringResource(Res.string.seconds_unit_suffix, prepSeconds),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsPresetRow(
+    label: String,
+    presetId: String,
+    onClick: () -> Unit
+) {
+    val presetLabel = SoundPresets.all.find { it.id == presetId }
+        ?.let { stringResource(it.label) }
+        ?: presetId
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f).padding(end = 12.dp)
+        )
+        Text(
+            text = presetLabel,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

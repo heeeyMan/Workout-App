@@ -72,6 +72,30 @@ import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
 import com.workout.shared.feature.timer.TimerIntent
 import com.workout.shared.feature.timer.TimerStore
+import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.back_to_home
+import workoutapp.shared.generated.resources.cd_end_workout
+import workoutapp.shared.generated.resources.cd_exit_gym_mode
+import workoutapp.shared.generated.resources.cd_gym_mode
+import workoutapp.shared.generated.resources.cd_lock_controls
+import workoutapp.shared.generated.resources.cd_pause
+import workoutapp.shared.generated.resources.cd_resume
+import workoutapp.shared.generated.resources.cd_skip
+import workoutapp.shared.generated.resources.continue_workout
+import workoutapp.shared.generated.resources.end_workout
+import workoutapp.shared.generated.resources.phase_prep
+import workoutapp.shared.generated.resources.phase_rest
+import workoutapp.shared.generated.resources.phase_rest_name
+import workoutapp.shared.generated.resources.phase_work
+import workoutapp.shared.generated.resources.timer_exit_message
+import workoutapp.shared.generated.resources.timer_exit_title
+import workoutapp.shared.generated.resources.timer_hold_to_unlock
+import workoutapp.shared.generated.resources.timer_minus_10
+import workoutapp.shared.generated.resources.timer_next_phase_format
+import workoutapp.shared.generated.resources.timer_plus_10
+import workoutapp.shared.generated.resources.timer_previous_phase
+import workoutapp.shared.generated.resources.timer_round_format
+import workoutapp.shared.generated.resources.workout_finished_format
 import com.workout.shared.platform.AudioFeedback
 import com.workout.shared.platform.ForegroundTimerService
 import com.workout.shared.platform.HapticFeedback
@@ -84,6 +108,8 @@ import com.workout.shared.ui.theme.TimerRestGreen
 import com.workout.shared.ui.theme.TimerRestGreenDim
 import com.workout.shared.ui.theme.TimerWorkOrange
 import com.workout.shared.ui.theme.TimerWorkOrangeDim
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -116,7 +142,7 @@ fun TimerScreen(
                 finishSoundPresetId = timerSettings.workoutFinishSoundPresetId,
                 workPhaseWarningSoundPresetId = timerSettings.workPhaseWarningSoundPresetId,
                 workPhaseEndWarningSeconds = timerSettings.workPhaseEndWarningSeconds,
-                restPhaseDisplayName = "Rest" // TODO: CMP resources
+                restPhaseDisplayName = getString(Res.string.phase_rest_name)
             )
         )
     }
@@ -183,9 +209,6 @@ fun TimerScreen(
     var gymMode by remember { mutableStateOf(false) }
     var gymControlsLocked by remember { mutableStateOf(false) }
 
-    // BackHandler is Android-specific; in CMP we handle exit via the dialog only
-    // TODO: expect/actual BackHandler if needed on each platform
-
     val timerFontSize = if (gymMode) 120.sp else 88.sp
     val titleStyle =
         if (gymMode) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium
@@ -231,8 +254,8 @@ fun TimerScreen(
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("End workout?") }, // TODO: CMP resources
-            text = { Text("Current progress will be lost.") }, // TODO: CMP resources
+            title = { Text(stringResource(Res.string.timer_exit_title)) },
+            text = { Text(stringResource(Res.string.timer_exit_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -240,12 +263,12 @@ fun TimerScreen(
                         store.dispatch(TimerIntent.Finish)
                     }
                 ) {
-                    Text("End Workout", color = MaterialTheme.colorScheme.error) // TODO: CMP resources
+                    Text(stringResource(Res.string.end_workout), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExitDialog = false }) {
-                    Text("Continue") // TODO: CMP resources
+                    Text(stringResource(Res.string.continue_workout))
                 }
             }
         )
@@ -299,14 +322,14 @@ fun TimerScreen(
                         ) {
                             Icon(
                                 Icons.Default.FullscreenExit,
-                                contentDescription = "Exit gym mode" // TODO: CMP resources
+                                contentDescription = stringResource(Res.string.cd_exit_gym_mode)
                             )
                         }
                         if (!gymControlsLocked) {
                             IconButton(onClick = { gymControlsLocked = true }) {
                                 Icon(
                                     Icons.Default.Lock,
-                                    contentDescription = "Lock controls" // TODO: CMP resources
+                                    contentDescription = stringResource(Res.string.cd_lock_controls)
                                 )
                             }
                         }
@@ -314,7 +337,7 @@ fun TimerScreen(
                         IconButton(onClick = { gymMode = true }) {
                             Icon(
                                 Icons.Default.Fullscreen,
-                                contentDescription = "Gym mode" // TODO: CMP resources
+                                contentDescription = stringResource(Res.string.cd_gym_mode)
                             )
                         }
                     }
@@ -337,11 +360,10 @@ fun TimerScreen(
                             .padding(horizontal = 24.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            // TODO: CMP resources
                             text = when {
-                                state.isPrepBeforeWork -> "PREP"
-                                state.currentPhase?.type == PhaseType.Work -> "WORK"
-                                else -> "REST"
+                                state.isPrepBeforeWork -> stringResource(Res.string.phase_prep)
+                                state.currentPhase?.type == PhaseType.Work -> stringResource(Res.string.phase_work)
+                                else -> stringResource(Res.string.phase_rest)
                             },
                             style = MaterialTheme.typography.titleLarge,
                             color = effectiveAccentColor,
@@ -361,8 +383,7 @@ fun TimerScreen(
                     state.currentPhase?.repeatLabel?.let { label ->
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            // TODO: CMP resources
-                            text = "Round $label",
+                            text = stringResource(Res.string.timer_round_format, label),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -393,20 +414,16 @@ fun TimerScreen(
                     if (!gymControlsLocked || !gymMode) {
                         state.nextPhase?.let { next ->
                             Text(
-                                // TODO: CMP resources
-                                text = "Next: ${next.name} ${next.durationSeconds.toTimeString()}",
+                                text = stringResource(
+                                    Res.string.timer_next_phase_format,
+                                    next.name,
+                                    next.durationSeconds.toTimeString()
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
                         }
-
-                        Text(
-                            // TODO: CMP resources
-                            text = "${state.currentPhaseIndex + 1} / ${state.totalPhases}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
 
                     Spacer(Modifier.weight(1f))
@@ -426,7 +443,7 @@ fun TimerScreen(
                                     },
                                     modifier = Modifier.height(48.dp)
                                 ) {
-                                    Text("-10s") // TODO: CMP resources
+                                    Text(stringResource(Res.string.timer_minus_10))
                                 }
                                 Spacer(Modifier.width(12.dp))
                                 FilledTonalButton(
@@ -435,7 +452,7 @@ fun TimerScreen(
                                     },
                                     modifier = Modifier.height(48.dp)
                                 ) {
-                                    Text("+10s") // TODO: CMP resources
+                                    Text(stringResource(Res.string.timer_plus_10))
                                 }
                             }
                         }
@@ -457,7 +474,7 @@ fun TimerScreen(
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 ) {
-                                    Icon(Icons.Default.SkipNext, contentDescription = "Skip") // TODO: CMP resources
+                                    Icon(Icons.Default.SkipNext, contentDescription = stringResource(Res.string.cd_skip))
                                 }
 
                                 FilledIconButton(
@@ -468,9 +485,9 @@ fun TimerScreen(
                                     Icon(
                                         if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                                         contentDescription = if (state.isPaused) {
-                                            "Resume" // TODO: CMP resources
+                                            stringResource(Res.string.cd_resume)
                                         } else {
-                                            "Pause" // TODO: CMP resources
+                                            stringResource(Res.string.cd_pause)
                                         },
                                         modifier = Modifier.size(38.dp),
                                         tint = MaterialTheme.colorScheme.background
@@ -486,7 +503,7 @@ fun TimerScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.Stop,
-                                        contentDescription = "End workout", // TODO: CMP resources
+                                        contentDescription = stringResource(Res.string.cd_end_workout),
                                         tint = MaterialTheme.colorScheme.error
                                     )
                                 }
@@ -507,7 +524,7 @@ fun TimerScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "Previous", // TODO: CMP resources
+                                    text = stringResource(Res.string.timer_previous_phase),
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }
@@ -526,7 +543,7 @@ fun TimerScreen(
                                 .padding(vertical = 20.dp, horizontal = 16.dp)
                         ) {
                             Text(
-                                text = "Hold to unlock", // TODO: CMP resources
+                                text = stringResource(Res.string.timer_hold_to_unlock),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
@@ -555,8 +572,7 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         )
         Spacer(Modifier.height(28.dp))
         Text(
-            // TODO: CMP resources
-            text = "$workoutName completed!",
+            text = stringResource(Res.string.workout_finished_format, workoutName),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -565,7 +581,7 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         )
         Spacer(Modifier.height(40.dp))
         TextButton(onClick = onBack) {
-            Text("Back to Home") // TODO: CMP resources
+            Text(stringResource(Res.string.back_to_home))
         }
     }
 }

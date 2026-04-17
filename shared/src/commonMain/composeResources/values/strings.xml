@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="delete">Delete</string>
+
+    <!-- Home screen -->
+    <string name="my_workouts">My Workouts</string>
+    <string name="settings_cd">Settings</string>
+    <string name="new_workout">New Workout</string>
+    <string name="create_first_workout">Create your first workout!</string>
+    <string name="last_workout">Last Workout</string>
+    <string name="all_workouts">All Workouts</string>
+    <string name="confirm_delete_workout_title">Delete workout?</string>
+    <string name="confirm_delete_workout_message">This workout will be permanently deleted.</string>
+
+    <!-- Workout list screen -->
+    <string name="create">Create</string>
+    <string name="no_workouts">No workouts yet</string>
+
+    <!-- Workout card -->
+    <string name="cd_start_workout">Start workout</string>
+    <string name="cd_edit_workout">Edit workout</string>
+    <plurals name="blocks_count">
+        <item quantity="one">%1$d block</item>
+        <item quantity="other">%1$d blocks</item>
+    </plurals>
+
+    <!-- Create workout screen -->
+    <string name="error_workout_name_required">Workout name is required</string>
+    <string name="create_workout_title_new">New Workout</string>
+    <string name="create_workout_title_edit">Edit Workout</string>
+    <string name="training_time">Training time: %1$s</string>
+    <string name="workout_name_label">Workout name</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="add_rest">Add Rest</string>
+    <string name="block_type_exercise">EXERCISE</string>
+    <string name="block_type_rest">REST</string>
+    <string name="cd_reorder">Reorder</string>
+    <string name="cd_duplicate">Duplicate</string>
+    <string name="cd_edit">Edit</string>
+    <string name="work_label">Work</string>
+    <string name="rest_label">Rest</string>
+    <string name="duration_label">Duration</string>
+    <string name="repeats_label">Repeats</string>
+    <string name="dialog_exercise_name_title">Exercise Name</string>
+    <string name="dialog_work_duration_title">Work Duration</string>
+    <string name="dialog_rest_duration_title">Rest Duration</string>
+    <string name="default_workout_name_pattern">Workout %1$d</string>
+    <string name="default_exercise_name_pattern">Exercise %1$d</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="timer_sound_enabled">Timer sound</string>
+    <string name="vibration">Vibration</string>
+    <string name="sound_before_work">Sound before work</string>
+    <string name="sound_before_rest">Sound before rest</string>
+    <string name="sound_workout_finish">Workout finish sound</string>
+    <string name="sound_work_phase_warn">Work phase warning sound</string>
+    <string name="work_phase_warn_title">Work phase end warning</string>
+    <string name="work_phase_warn_off">Off</string>
+    <string name="timer_quick_adjust_title">Quick time adjust</string>
+    <string name="prep_time_title">Preparation time</string>
+    <string name="sound_picker_work_title">Work start sound</string>
+    <string name="sound_picker_rest_title">Rest start sound</string>
+    <string name="sound_picker_finish_title">Finish sound</string>
+    <string name="sound_picker_work_phase_warn_title">Work phase warning sound</string>
+    <string name="cd_confirm_selection">Confirm selection</string>
+    <string name="prep_time_dialog_title">Preparation time</string>
+    <string name="seconds_input_label">Seconds</string>
+    <string name="work_phase_warn_dialog_title">Work phase end warning</string>
+    <string name="work_phase_warn_disabled_hint">0 = disabled</string>
+    <string name="seconds_unit_suffix">%1$ds</string>
+
+    <!-- Timer screen -->
+    <string name="timer_exit_title">End workout?</string>
+    <string name="timer_exit_message">Current progress will be lost.</string>
+    <string name="end_workout">End Workout</string>
+    <string name="continue_workout">Continue</string>
+    <string name="phase_prep">PREP</string>
+    <string name="phase_work">WORK</string>
+    <string name="phase_rest">REST</string>
+    <string name="phase_rest_name">Rest</string>
+    <string name="timer_round_format">Round %1$s</string>
+    <string name="timer_next_phase_format">Next: %1$s %2$s</string>
+    <string name="cd_exit_gym_mode">Exit gym mode</string>
+    <string name="cd_lock_controls">Lock controls</string>
+    <string name="cd_gym_mode">Gym mode</string>
+    <string name="timer_minus_10">−10s</string>
+    <string name="timer_plus_10">+10s</string>
+    <string name="cd_skip">Skip</string>
+    <string name="cd_resume">Resume</string>
+    <string name="cd_pause">Pause</string>
+    <string name="cd_end_workout">End workout</string>
+    <string name="timer_previous_phase">Previous</string>
+    <string name="timer_hold_to_unlock">Hold to unlock</string>
+    <string name="workout_finished_format">%1$s completed!</string>
+    <string name="back_to_home">Back to Home</string>
+
+    <!-- Sound presets -->
+    <string name="preset_custom_mp3_start">Gong Start</string>
+    <string name="preset_custom_mp3_end">Gong End</string>
+    <string name="preset_custom_sound_1">Sound 1</string>
+    <string name="preset_custom_sound_2">Sound 2</string>
+    <string name="preset_custom_sound_3">Sound 3</string>
+    <string name="preset_beep_standard">Short beep</string>
+    <string name="preset_beep_soft">Soft beep</string>
+    <string name="preset_ack">Click</string>
+    <string name="preset_cdma_incall">Reminder</string>
+    <string name="preset_cdma_guard">Call signal</string>
+    <string name="preset_dtmf_1">Tone 1</string>
+    <string name="preset_dtmf_3">Tone 3</string>
+    <string name="preset_cdma_high">High tone</string>
+    <string name="preset_finish_default">Workout complete (default)</string>
+</resources>
