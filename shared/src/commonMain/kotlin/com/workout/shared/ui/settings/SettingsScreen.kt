@@ -319,9 +319,25 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             item {
+                val onSoundToggle = {
+                    val checked = !soundEnabled
+                    if (checked && !notificationPermission.isGranted) {
+                        if (notificationPermission.shouldOpenSettings) {
+                            showPermissionRationaleDialog = true
+                        } else {
+                            awaitingPermissionToEnable = true
+                            notificationPermission.request()
+                        }
+                    } else {
+                        settings.soundEnabled = checked
+                        soundEnabled = checked
+                    }
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onSoundToggle() }
                         .padding(vertical = 8.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -333,19 +349,7 @@ fun SettingsScreen(
                     )
                     Switch(
                         checked = soundEnabled,
-                        onCheckedChange = { checked ->
-                            if (checked && !notificationPermission.isGranted) {
-                                if (notificationPermission.shouldOpenSettings) {
-                                    showPermissionRationaleDialog = true
-                                } else {
-                                    awaitingPermissionToEnable = true
-                                    notificationPermission.request()
-                                }
-                            } else {
-                                settings.soundEnabled = checked
-                                soundEnabled = checked
-                            }
-                        }
+                        onCheckedChange = null
                     )
                 }
             }
@@ -353,6 +357,11 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            settings.vibrationEnabled = !vibrationEnabled
+                            vibrationEnabled = !vibrationEnabled
+                        }
                         .padding(vertical = 8.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -364,10 +373,7 @@ fun SettingsScreen(
                     )
                     Switch(
                         checked = vibrationEnabled,
-                        onCheckedChange = {
-                            settings.vibrationEnabled = it
-                            vibrationEnabled = it
-                        }
+                        onCheckedChange = null
                     )
                 }
             }
@@ -444,6 +450,11 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            settings.timerQuickAdjustEnabled = !timerQuickAdjustEnabled
+                            timerQuickAdjustEnabled = !timerQuickAdjustEnabled
+                        }
                         .padding(vertical = 8.dp, horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -455,10 +466,7 @@ fun SettingsScreen(
                     )
                     Switch(
                         checked = timerQuickAdjustEnabled,
-                        onCheckedChange = {
-                            settings.timerQuickAdjustEnabled = it
-                            timerQuickAdjustEnabled = it
-                        }
+                        onCheckedChange = null
                     )
                 }
             }
