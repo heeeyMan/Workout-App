@@ -19,4 +19,12 @@
     <string name="timer_notification_channel_desc">While the timer is running, the app stays in a high-priority mode</string>
     <string name="timer_notification_title_fallback">Workout Timer</string>
     <string name="timer_notification_running">Timer</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Quick start your last workout</string>
+    <string name="widget_no_last_workout">No workouts yet</string>
+    <string name="widget_duration_hours">%1$dh %2$dm</string>
+    <string name="widget_duration_minutes">%1$d min</string>
+    <string name="widget_duration_seconds">%1$d s</string>
+    <string name="widget_create_hint">Create a workout</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.workout.shared.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,8 +13,21 @@ import com.workout.shared.ui.timer.TimerScreen
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController
+    navController: NavHostController,
+    startWorkoutId: Long? = null,
+    openCreate: Boolean = false
 ) {
+    LaunchedEffect(startWorkoutId) {
+        if (startWorkoutId != null) {
+            navController.navigate(TimerRoute(startWorkoutId))
+        }
+    }
+    LaunchedEffect(openCreate) {
+        if (openCreate) {
+            navController.navigate(CreateWorkoutRoute())
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = HomeRoute

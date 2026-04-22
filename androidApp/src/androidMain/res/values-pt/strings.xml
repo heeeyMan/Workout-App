@@ -19,4 +19,12 @@
     <string name="timer_notification_channel_desc">Enquanto o cronômetro estiver ativo, o app permanece em modo prioritário</string>
     <string name="timer_notification_title_fallback">Treino</string>
     <string name="timer_notification_running">Cronômetro</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Inicie rapidamente seu último treino</string>
+    <string name="widget_no_last_workout">Sem treinos</string>
+    <string name="widget_duration_hours">%1$dh %2$dm</string>
+    <string name="widget_duration_minutes">%1$d min</string>
+    <string name="widget_duration_seconds">%1$d s</string>
+    <string name="widget_create_hint">Criar treino</string>
 </resources>
