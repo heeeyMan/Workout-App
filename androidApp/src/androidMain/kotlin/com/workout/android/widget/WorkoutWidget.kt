@@ -20,7 +20,6 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.wrapContentSize
@@ -90,13 +89,11 @@ class WorkoutWidget : GlanceAppWidget() {
             ) {
                 Column(
                     modifier = GlanceModifier
-                        .defaultWeight()
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         workout.name,
-                        modifier = GlanceModifier.fillMaxWidth(),
                         style = TextStyle(
                             color = ColorProvider(R.color.widget_text_primary),
                             fontSize = 15.sp,

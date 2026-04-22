@@ -12,10 +12,15 @@ import android.media.session.PlaybackState
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.workout.android.MainActivity
 import com.workout.android.R
+import com.workout.android.widget.WorkoutWidget
 import com.workout.shared.feature.timer.TimerIntent
 import com.workout.shared.platform.AndroidForegroundTimerService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class WorkoutTimerForegroundService : Service() {
 
@@ -97,7 +102,17 @@ class WorkoutTimerForegroundService : Service() {
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         } catch (_: Exception) { }
+        updateWidget()
         super.onDestroy()
+    }
+
+    private fun updateWidget() {
+        val context = applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            val manager = GlanceAppWidgetManager(context)
+            manager.getGlanceIds(WorkoutWidget::class.java)
+                .forEach { id -> WorkoutWidget().update(context, id) }
+        }
     }
 
     private fun createChannelIfNeeded() {
