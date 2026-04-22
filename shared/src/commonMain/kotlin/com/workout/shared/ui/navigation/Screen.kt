@@ -13,3 +13,6 @@ data class CreateWorkoutRoute(val id: Long = 0L)
 
 @Serializable
 data class TimerRoute(val workoutId: Long)
+
+@Serializable
+data object OnboardingRoute

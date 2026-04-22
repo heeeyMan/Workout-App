@@ -99,6 +99,14 @@ class AndroidTimerSettings(context: Context) : TimerSettings {
             ).apply()
         }
 
+    override var onboardingCompleted: Boolean
+        get() = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+        set(value) { prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, value).apply() }
+
+    override var workoutsCompletedCount: Int
+        get() = prefs.getInt(KEY_WORKOUTS_COMPLETED, 0)
+        set(value) { prefs.edit().putInt(KEY_WORKOUTS_COMPLETED, value).apply() }
+
     private fun normalizePresetId(raw: String?, defaultId: String): String {
         val id = raw ?: defaultId
         return if (SoundPresets.isValidId(id)) id else defaultId
@@ -117,6 +125,8 @@ class AndroidTimerSettings(context: Context) : TimerSettings {
         private const val KEY_REST_SOUND_PRESET = "rest_start_sound_preset"
         private const val KEY_FINISH_SOUND_PRESET = "workout_finish_sound_preset"
         private const val KEY_WORK_PHASE_WARN_SOUND_PRESET = "work_phase_warning_sound_preset"
+        private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val KEY_WORKOUTS_COMPLETED = "workouts_completed_count"
         const val DEFAULT_BLOCK_PREP_SECONDS = 5
         const val MIN_PREP_SECONDS = 0
         const val MAX_PREP_SECONDS = 120

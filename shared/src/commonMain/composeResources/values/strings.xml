@@ -111,6 +111,28 @@
     <string name="notif_set_format">Set %1$s</string>
 
     <!-- Settings — contacts -->
+    <string name="ok">OK</string>
+    <string name="exercise_label">Exercise</string>
+    <string name="onboarding_title">Welcome!</string>
+    <string name="onboarding_subtitle">Choose templates to get started, or create your own workout</string>
+    <string name="onboarding_add_selected">Add selected (%1$d)</string>
+    <string name="onboarding_skip">Start without templates</string>
+    <string name="template_tabata_name">Tabata</string>
+    <string name="template_tabata_desc">20s work / 10s rest × 8 rounds</string>
+    <string name="template_hiit_name">HIIT</string>
+    <string name="template_hiit_desc">3 exercises × 3 sets, 60s rest between</string>
+    <string name="template_strength_name">Strength</string>
+    <string name="template_strength_desc">4 exercises × 5 sets, 30s rest</string>
+    <string name="template_warmup_name">Warmup</string>
+    <string name="template_warmup_desc">3 exercises × 2 sets, light intensity</string>
+    <string name="backup_section">Backup</string>
+    <string name="export_workouts">Export workouts</string>
+    <string name="import_workouts">Import workouts</string>
+    <string name="import_result_title">Import</string>
+    <string name="import_success">Imported %1$d workouts</string>
+    <string name="import_error">Import error. Check the file format.</string>
+    <string name="share_workout_cd">Share</string>
+    <string name="workout_backup_filename">workout_backup.json</string>
     <string name="settings_contact_section">Contact</string>
     <string name="settings_contact_email_label">Write to developer</string>
     <string name="settings_developer_email">alexvasin373@gmail.com</string>

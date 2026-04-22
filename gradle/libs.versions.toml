@@ -16,6 +16,7 @@ androidxActivityCompose = "1.13.0"
 androidxCoreKtx = "1.18.0"
 androidxMedia = "1.7.1"
 glance = "1.1.1"
+playReview = "2.0.2"
 compileSdk = "36"
 minSdk = "28"
 targetSdk = "36"
@@ -61,6 +62,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
 androidx-media = { group = "androidx.media", name = "media", version.ref = "androidxMedia" }
 glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+play-review = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

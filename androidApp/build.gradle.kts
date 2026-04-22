@@ -124,6 +124,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.coroutines.core)
     implementation(libs.glance.appwidget)
+    implementation(libs.play.review)
 }
 
 // Wire :shared Compose Multiplatform resources into each Android variant's asset source set.

@@ -113,6 +113,28 @@
     <string name="notif_set_format">Повтор %1$s</string>
 
     <!-- Settings — contacts -->
+    <string name="ok">ОК</string>
+    <string name="exercise_label">Упражнение</string>
+    <string name="onboarding_title">Добро пожаловать!</string>
+    <string name="onboarding_subtitle">Выбери шаблоны для старта или создай тренировку сам</string>
+    <string name="onboarding_add_selected">Добавить выбранные (%1$d)</string>
+    <string name="onboarding_skip">Начать без шаблонов</string>
+    <string name="template_tabata_name">Табата</string>
+    <string name="template_tabata_desc">20с работа / 10с отдых × 8 раундов</string>
+    <string name="template_hiit_name">HIIT</string>
+    <string name="template_hiit_desc">3 упражнения × 3 подхода, 60с отдых между</string>
+    <string name="template_strength_name">Силовая</string>
+    <string name="template_strength_desc">4 упражнения × 5 подходов, 30с отдых</string>
+    <string name="template_warmup_name">Разминка</string>
+    <string name="template_warmup_desc">3 упражнения × 2 подхода, лёгкая нагрузка</string>
+    <string name="backup_section">Бекап</string>
+    <string name="export_workouts">Экспортировать тренировки</string>
+    <string name="import_workouts">Импортировать тренировки</string>
+    <string name="import_result_title">Импорт</string>
+    <string name="import_success">Импортировано тренировок: %1$d</string>
+    <string name="import_error">Ошибка импорта. Проверьте формат файла.</string>
+    <string name="share_workout_cd">Поделиться</string>
+    <string name="workout_backup_filename">workout_backup.json</string>
     <string name="settings_contact_section">Контакты</string>
     <string name="settings_contact_email_label">Написать разработчику</string>
     <string name="settings_developer_email">alexvasin373@gmail.com</string>

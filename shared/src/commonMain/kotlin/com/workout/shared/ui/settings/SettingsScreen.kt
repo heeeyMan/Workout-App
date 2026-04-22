@@ -47,10 +47,18 @@ import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.back
 import workoutapp.shared.generated.resources.cancel
 import workoutapp.shared.generated.resources.cd_confirm_selection
+import workoutapp.shared.generated.resources.backup_section
+import workoutapp.shared.generated.resources.export_workouts
 import workoutapp.shared.generated.resources.go_to_settings
+import workoutapp.shared.generated.resources.import_error
+import workoutapp.shared.generated.resources.import_result_title
+import workoutapp.shared.generated.resources.import_success
+import workoutapp.shared.generated.resources.import_workouts
 import workoutapp.shared.generated.resources.notification_permission_rationale_body
 import workoutapp.shared.generated.resources.notification_permission_rationale_title
+import workoutapp.shared.generated.resources.ok
 import workoutapp.shared.generated.resources.settings_contact_email_label
+import workoutapp.shared.generated.resources.workout_backup_filename
 import workoutapp.shared.generated.resources.settings_contact_section
 import workoutapp.shared.generated.resources.settings_developer_email
 import workoutapp.shared.generated.resources.prep_time_dialog_title
@@ -74,10 +82,16 @@ import workoutapp.shared.generated.resources.work_phase_warn_dialog_title
 import workoutapp.shared.generated.resources.work_phase_warn_disabled_hint
 import workoutapp.shared.generated.resources.work_phase_warn_off
 import workoutapp.shared.generated.resources.work_phase_warn_title
+import androidx.compose.runtime.rememberCoroutineScope
+import com.workout.core.repository.WorkoutRepository
+import com.workout.shared.backup.WorkoutBackupManager
 import com.workout.shared.platform.AudioFeedback
 import com.workout.shared.platform.SoundPresets
 import com.workout.shared.platform.TimerSettings
+import com.workout.shared.platform.rememberJsonExporter
+import com.workout.shared.platform.rememberJsonImporter
 import com.workout.shared.platform.rememberNotificationPermissionState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -90,6 +104,10 @@ fun SettingsScreen(
 ) {
     val settings = koinInject<TimerSettings>()
     val audioFeedback = koinInject<AudioFeedback>()
+    val repository = koinInject<WorkoutRepository>()
+    val backupManager = remember { WorkoutBackupManager(repository) }
+    val scope = rememberCoroutineScope()
+    var importResultMessage by remember { mutableStateOf<String?>(null) }
     val uriHandler = LocalUriHandler.current
     val developerEmail = stringResource(Res.string.settings_developer_email)
     val notificationPermission = rememberNotificationPermissionState()
@@ -121,6 +139,23 @@ fun SettingsScreen(
     // Sound picker state
     var soundPickerTarget by remember { mutableStateOf<SoundPickerTarget?>(null) }
     var pendingSoundPresetId by remember { mutableStateOf(SoundPresets.DEFAULT_WORK_ID) }
+
+    val importErrorText = stringResource(Res.string.import_error)
+    val importSuccessText = stringResource(Res.string.import_success)
+    val backupFilename = stringResource(Res.string.workout_backup_filename)
+
+    val exportJson = rememberJsonExporter { /* success is implicit via OS file picker */ }
+    val importJson = rememberJsonImporter { content ->
+        if (content == null) return@rememberJsonImporter
+        scope.launch {
+            try {
+                val count = backupManager.importFromJson(content)
+                importResultMessage = importSuccessText.replace("%1\$d", count.toString())
+            } catch (e: Exception) {
+                importResultMessage = importErrorText
+            }
+        }
+    }
 
     // Permission rationale dialog state
     var showPermissionRationaleDialog by remember { mutableStateOf(false) }
@@ -224,6 +259,17 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    val resultMessage = importResultMessage
+    if (resultMessage != null) {
+        WorkoutDialog(
+            onDismissRequest = { importResultMessage = null },
+            title = stringResource(Res.string.import_result_title),
+            confirmText = stringResource(Res.string.ok),
+            onConfirm = { importResultMessage = null },
+            content = { Text(resultMessage) }
+        )
     }
 
     if (showPermissionRationaleDialog) {
@@ -492,6 +538,52 @@ fun SettingsScreen(
                         text = stringResource(Res.string.seconds_unit_suffix, prepSeconds),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            }
+            item {
+                Text(
+                    text = stringResource(Res.string.backup_section),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            scope.launch {
+                                val json = backupManager.exportToJson()
+                                exportJson(backupFilename, json)
+                            }
+                        }
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.export_workouts),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { importJson() }
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.import_workouts),
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }

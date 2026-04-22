@@ -10,4 +10,6 @@ interface TimerSettings {
     var restStartSoundPresetId: String
     var workoutFinishSoundPresetId: String
     var workPhaseWarningSoundPresetId: String
+    var onboardingCompleted: Boolean
+    var workoutsCompletedCount: Int
 }

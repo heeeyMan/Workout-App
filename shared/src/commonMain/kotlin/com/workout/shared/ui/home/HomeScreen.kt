@@ -44,9 +44,12 @@ import workoutapp.shared.generated.resources.last_workout
 import workoutapp.shared.generated.resources.my_workouts
 import workoutapp.shared.generated.resources.new_workout
 import workoutapp.shared.generated.resources.settings_cd
+import com.workout.shared.backup.formatForSharing
+import com.workout.shared.platform.rememberTextSharer
 import com.workout.shared.ui.components.WorkoutCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import workoutapp.shared.generated.resources.rest_label
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +62,8 @@ fun HomeScreen(
     val repository = koinInject<WorkoutRepository>()
     val vm = viewModel { HomeViewModel(repository) }
     val store = vm.store
+    val shareText = rememberTextSharer()
+    val restLabel = stringResource(Res.string.rest_label)
 
     val state by store.state.collectAsState()
 
@@ -143,7 +148,8 @@ fun HomeScreen(
                                 workout = lastStarted,
                                 onClick = { store.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
                                 onEditClick = { store.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
-                                onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) }
+                                onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) },
+                                onShareClick = { shareText(lastStarted.formatForSharing(restLabel)) }
                             )
                         }
                         item { }
@@ -160,7 +166,8 @@ fun HomeScreen(
                             workout = workout,
                             onClick = { store.dispatch(HomeIntent.StartWorkout(workout.id)) },
                             onEditClick = { store.dispatch(HomeIntent.EditWorkout(workout.id)) },
-                            onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) }
+                            onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) },
+                            onShareClick = { shareText(workout.formatForSharing(restLabel)) }
                         )
                     }
                 }

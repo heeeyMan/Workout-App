@@ -108,6 +108,7 @@ import com.workout.shared.platform.HapticFeedback
 import com.workout.shared.platform.NotifDisplayStrings
 import com.workout.shared.platform.ScreenWakeLock
 import com.workout.shared.platform.TimerSettings
+import com.workout.shared.platform.rememberAppReviewLauncher
 import com.workout.shared.ui.components.toTimeString
 import com.workout.shared.ui.util.BackHandler
 import com.workout.shared.ui.theme.TimerPrepGray
@@ -145,6 +146,7 @@ fun TimerScreen(
     )
 
     val quickAdjustEnabled = remember { mutableStateOf(timerSettings.timerQuickAdjustEnabled) }
+    val reviewLauncher = rememberAppReviewLauncher()
 
     // Load workout with settings
     LaunchedEffect(workoutId) {
@@ -225,6 +227,17 @@ fun TimerScreen(
 
     val state by store.state.collectAsState()
     val quickAdjust = quickAdjustEnabled.value
+
+    // Request in-app review after completing N workouts
+    LaunchedEffect(state.isFinished) {
+        if (state.isFinished) {
+            val count = timerSettings.workoutsCompletedCount + 1
+            timerSettings.workoutsCompletedCount = count
+            if (count in setOf(3, 10, 30)) {
+                reviewLauncher()
+            }
+        }
+    }
     var showExitDialog by remember { mutableStateOf(false) }
     var gymMode by remember { mutableStateOf(false) }
 

@@ -81,6 +81,16 @@ class IosTimerSettings : TimerSettings {
             defaults.setObject(normalizePresetId(value, SoundPresets.DEFAULT_WARNING_ID), forKey = KEY_WARNING_SOUND)
         }
 
+    override var onboardingCompleted: Boolean
+        get() = if (defaults.objectForKey(KEY_ONBOARDING_COMPLETED) == null) false
+                else defaults.boolForKey(KEY_ONBOARDING_COMPLETED)
+        set(value) { defaults.setBool(value, forKey = KEY_ONBOARDING_COMPLETED) }
+
+    override var workoutsCompletedCount: Int
+        get() = if (defaults.objectForKey(KEY_WORKOUTS_COMPLETED) == null) 0
+                else defaults.integerForKey(KEY_WORKOUTS_COMPLETED).toInt()
+        set(value) { defaults.setInteger(value.toLong(), forKey = KEY_WORKOUTS_COMPLETED) }
+
     private fun normalizePresetId(raw: String?, defaultId: String): String {
         val id = raw ?: defaultId
         return if (SoundPresets.isValidId(id)) id else defaultId
@@ -97,6 +107,8 @@ class IosTimerSettings : TimerSettings {
         private const val KEY_REST_SOUND = "rest_start_sound_preset"
         private const val KEY_FINISH_SOUND = "workout_finish_sound_preset"
         private const val KEY_WARNING_SOUND = "work_phase_warning_sound_preset"
+        private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val KEY_WORKOUTS_COMPLETED = "workouts_completed_count"
         const val DEFAULT_BLOCK_PREP_SECONDS = 5
         const val MIN_PREP_SECONDS = 0
         const val MAX_PREP_SECONDS = 120
