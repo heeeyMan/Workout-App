@@ -27,7 +27,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.AlertDialog
+import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -621,10 +620,14 @@ private fun NameEditDialog(
     var text by remember { mutableStateOf(currentName) }
     val focusRequester = remember { FocusRequester() }
 
-    AlertDialog(
+    WorkoutDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.dialog_exercise_name_title)) },
-        text = {
+        title = stringResource(Res.string.dialog_exercise_name_title),
+        confirmText = stringResource(Res.string.done),
+        onConfirm = { if (text.isNotBlank()) onConfirm(text.trim()) },
+        dismissText = stringResource(Res.string.cancel),
+        onDismiss = onDismiss,
+        content = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
@@ -635,14 +638,6 @@ private fun NameEditDialog(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
             )
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
-        },
-        confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
-                Text(stringResource(Res.string.done))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
         }
     )
 }
@@ -657,10 +652,14 @@ private fun DurationPickerDialog(
     var minutes by remember { mutableIntStateOf(seconds / 60) }
     var secs by remember { mutableIntStateOf(seconds % 60) }
 
-    AlertDialog(
+    WorkoutDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
+        title = title,
+        confirmText = stringResource(Res.string.done),
+        onConfirm = { onConfirm(minutes * 60 + secs) },
+        dismissText = stringResource(Res.string.cancel),
+        onDismiss = onDismiss,
+        content = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -670,31 +669,6 @@ private fun DurationPickerDialog(
                     seconds = secs,
                     onMinutesChange = { minutes = it },
                     onSecondsChange = { secs = it }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(minutes * 60 + secs) },
-                modifier = Modifier.heightIn(min = 60.dp),
-                contentPadding = PaddingValues(horizontal = 35.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    stringResource(Res.string.done),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.heightIn(min = 58.dp),
-                contentPadding = PaddingValues(horizontal = 30.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    stringResource(Res.string.cancel),
-                    style = MaterialTheme.typography.titleMedium
                 )
             }
         }

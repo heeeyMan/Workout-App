@@ -28,6 +28,10 @@
     <string name="widget_duration_seconds">%1$d s</string>
     <string name="widget_create_hint">Crea un entrenamiento</string>
 
+    <!-- App Shortcuts -->
+    <string name="shortcut_create_short">Crear</string>
+    <string name="shortcut_create_long">Crear entrenamiento</string>
+
     <!-- Quick Settings Tile -->
     <string name="tile_label">Temporizador fitness</string>
     <string name="tile_no_workout">Sin entrenamientos</string>

@@ -28,6 +28,10 @@
     <string name="widget_duration_seconds">%1$d с</string>
     <string name="widget_create_hint">Создай тренировку</string>
 
+    <!-- App Shortcuts -->
+    <string name="shortcut_create_short">Создать</string>
+    <string name="shortcut_create_long">Создать тренировку</string>
+
     <!-- Quick Settings Tile -->
     <string name="tile_label">Таймер тренировок</string>
     <string name="tile_no_workout">Нет тренировок</string>

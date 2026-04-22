@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
+import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -19,7 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,20 +73,14 @@ fun HomeScreen(
     }
 
     if (state.pendingDeleteId != null) {
-        AlertDialog(
+        WorkoutDialog(
             onDismissRequest = { store.dispatch(HomeIntent.CancelDelete) },
-            title = { Text(stringResource(Res.string.confirm_delete_workout_title)) },
-            text = { Text(stringResource(Res.string.confirm_delete_workout_message)) },
-            confirmButton = {
-                TextButton(onClick = { store.dispatch(HomeIntent.ConfirmDelete) }) {
-                    Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { store.dispatch(HomeIntent.CancelDelete) }) {
-                    Text(stringResource(Res.string.cancel))
-                }
-            }
+            title = stringResource(Res.string.confirm_delete_workout_title),
+            confirmText = stringResource(Res.string.delete),
+            onConfirm = { store.dispatch(HomeIntent.ConfirmDelete) },
+            dismissText = stringResource(Res.string.cancel),
+            onDismiss = { store.dispatch(HomeIntent.CancelDelete) },
+            content = { Text(stringResource(Res.string.confirm_delete_workout_message)) }
         )
     }
 

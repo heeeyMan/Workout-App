@@ -37,7 +37,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Celebration
-import androidx.compose.material3.AlertDialog
+import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
@@ -184,19 +184,23 @@ fun TimerScreen(
                     val st = store.state.value
                     audioFeedback.playPrepEndTone(st.workStartSoundPresetId)
                 }
+
                 is TimerEffect.VibratePrepEnd -> hapticFeedback.vibratePrepEnd()
                 is TimerEffect.PlayWorkSound -> {
                     val st = store.state.value
                     audioFeedback.playWorkTone(st.workStartSoundPresetId)
                 }
+
                 is TimerEffect.PlayRestSound -> {
                     val st = store.state.value
                     audioFeedback.playRestTone(st.restStartSoundPresetId)
                 }
+
                 is TimerEffect.PlayFinishSound -> {
                     val st = store.state.value
                     audioFeedback.playFinishTone(st.finishSoundPresetId)
                 }
+
                 is TimerEffect.Vibrate -> hapticFeedback.vibrateShort()
                 is TimerEffect.VibrateFinish -> hapticFeedback.vibrateFinish()
                 is TimerEffect.Alert10Seconds -> {
@@ -272,25 +276,19 @@ fun TimerScreen(
     }
 
     if (showExitDialog) {
-        AlertDialog(
+        WorkoutDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text(stringResource(Res.string.timer_exit_title)) },
-            text = { Text(stringResource(Res.string.timer_exit_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showExitDialog = false
-                        store.dispatch(TimerIntent.Finish)
-                    }
-                ) {
-                    Text(stringResource(Res.string.end_workout), color = MaterialTheme.colorScheme.error)
-                }
+            title = stringResource(Res.string.timer_exit_title),
+            confirmText = stringResource(Res.string.continue_workout),
+            onConfirm = {
+                showExitDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showExitDialog = false }) {
-                    Text(stringResource(Res.string.continue_workout))
-                }
-            }
+            dismissText = stringResource(Res.string.end_workout),
+            onDismiss = {
+                showExitDialog = false
+                store.dispatch(TimerIntent.Finish)
+            },
+            content = { Text(stringResource(Res.string.timer_exit_message)) }
         )
     }
 
@@ -494,13 +492,18 @@ fun TimerScreen(
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                                     )
                                 ) {
-                                    Icon(Icons.Default.SkipNext, contentDescription = stringResource(Res.string.cd_skip))
+                                    Icon(
+                                        Icons.Default.SkipNext,
+                                        contentDescription = stringResource(Res.string.cd_skip)
+                                    )
                                 }
 
                                 FilledIconButton(
                                     onClick = { store.dispatch(TimerIntent.TogglePause) },
                                     modifier = Modifier.size(76.dp),
-                                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = accentColor)
+                                    colors = IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = accentColor
+                                    )
                                 ) {
                                     Icon(
                                         if (state.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,

@@ -17,7 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
+import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,7 +29,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -207,10 +206,20 @@ fun SettingsScreen(
     }
 
     if (showPrepDialog) {
-        AlertDialog(
+        WorkoutDialog(
             onDismissRequest = { showPrepDialog = false },
-            title = { Text(stringResource(Res.string.prep_time_dialog_title)) },
-            text = {
+            title = stringResource(Res.string.prep_time_dialog_title),
+            confirmText = stringResource(Res.string.save),
+            onConfirm = {
+                val v = if (prepInput.isBlank()) 0 else prepInput.toIntOrNull() ?: prepSeconds
+                val clamped = v.coerceIn(0, 999)
+                settings.blockPrepDurationSeconds = clamped
+                prepSeconds = clamped
+                showPrepDialog = false
+            },
+            dismissText = stringResource(Res.string.cancel),
+            onDismiss = { showPrepDialog = false },
+            content = {
                 OutlinedTextField(
                     value = prepInput,
                     onValueChange = { value ->
@@ -220,33 +229,26 @@ fun SettingsScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val v = if (prepInput.isBlank()) 0 else prepInput.toIntOrNull() ?: prepSeconds
-                        val clamped = v.coerceIn(0, 999)
-                        settings.blockPrepDurationSeconds = clamped
-                        prepSeconds = clamped
-                        showPrepDialog = false
-                    }
-                ) {
-                    Text(stringResource(Res.string.save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPrepDialog = false }) {
-                    Text(stringResource(Res.string.cancel))
-                }
             }
         )
     }
 
     if (showWorkWarnDialog) {
-        AlertDialog(
+        WorkoutDialog(
             onDismissRequest = { showWorkWarnDialog = false },
-            title = { Text(stringResource(Res.string.work_phase_warn_dialog_title)) },
-            text = {
+            title = stringResource(Res.string.work_phase_warn_dialog_title),
+            confirmText = stringResource(Res.string.save),
+            onConfirm = {
+                val v = if (workWarnInput.isBlank()) 0
+                        else workWarnInput.toIntOrNull() ?: workPhaseEndWarningSeconds
+                val clamped = v.coerceIn(0, 999)
+                settings.workPhaseEndWarningSeconds = clamped
+                workPhaseEndWarningSeconds = clamped
+                showWorkWarnDialog = false
+            },
+            dismissText = stringResource(Res.string.cancel),
+            onDismiss = { showWorkWarnDialog = false },
+            content = {
                 OutlinedTextField(
                     value = workWarnInput,
                     onValueChange = { value ->
@@ -257,25 +259,6 @@ fun SettingsScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val v = if (workWarnInput.isBlank()) 0
-                                else workWarnInput.toIntOrNull() ?: workPhaseEndWarningSeconds
-                        val clamped = v.coerceIn(0, 999)
-                        settings.workPhaseEndWarningSeconds = clamped
-                        workPhaseEndWarningSeconds = clamped
-                        showWorkWarnDialog = false
-                    }
-                ) {
-                    Text(stringResource(Res.string.save))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showWorkWarnDialog = false }) {
-                    Text(stringResource(Res.string.cancel))
-                }
             }
         )
     }
