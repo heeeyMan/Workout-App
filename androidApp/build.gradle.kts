@@ -98,8 +98,8 @@ android {
     sourceSets {
         named("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
-            kotlin.srcDirs("src/androidMain/kotlin")
-            res.srcDirs("src/androidMain/res")
+            kotlin.setSrcDirs(listOf("src/androidMain/kotlin"))
+            res.setSrcDirs(listOf("src/androidMain/res"))
         }
     }
 
