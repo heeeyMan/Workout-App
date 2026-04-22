@@ -27,4 +27,8 @@
     <string name="widget_duration_minutes">%1$d 分钟</string>
     <string name="widget_duration_seconds">%1$d 秒</string>
     <string name="widget_create_hint">创建训练</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">训练计时器</string>
+    <string name="tile_no_workout">暂无训练</string>
 </resources>

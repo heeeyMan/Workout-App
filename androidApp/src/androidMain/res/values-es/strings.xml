@@ -27,4 +27,8 @@
     <string name="widget_duration_minutes">%1$d min</string>
     <string name="widget_duration_seconds">%1$d s</string>
     <string name="widget_create_hint">Crea un entrenamiento</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">Temporizador fitness</string>
+    <string name="tile_no_workout">Sin entrenamientos</string>
 </resources>

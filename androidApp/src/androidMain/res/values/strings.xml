@@ -27,4 +27,8 @@
     <string name="widget_duration_minutes">%1$d min</string>
     <string name="widget_duration_seconds">%1$d s</string>
     <string name="widget_create_hint">Create a workout</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label">Workout Timer</string>
+    <string name="tile_no_workout">No workouts yet</string>
 </resources>
