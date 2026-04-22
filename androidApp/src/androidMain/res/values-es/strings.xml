@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout</string>
+
+    <!-- Permission dialog -->
+    <string name="allow">Permitir</string>
+    <string name="later">Ahora no</string>
+    <string name="permission_notifications_title">Sonido y notificaciones</string>
+    <string name="permission_notifications_body">La app necesita tu permiso para avisarte con un sonido cuando cambie la etapa del entrenamiento</string>
+
+    <!-- Notification actions -->
+    <string name="cd_previous_phase">Fase anterior</string>
+    <string name="notif_action_pause">Pausa</string>
+    <string name="notif_action_resume">Continuar</string>
+    <string name="notif_action_next_phase">Siguiente</string>
+
+    <!-- Notification channel -->
+    <string name="timer_notification_channel_name">Entrenamiento</string>
+    <string name="timer_notification_channel_desc">Mientras el temporizador está activo, la app permanece en modo prioritario</string>
+    <string name="timer_notification_title_fallback">Entrenamiento</string>
+    <string name="timer_notification_running">Temporizador</string>
+</resources>

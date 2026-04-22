@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout</string>
+
+    <!-- Permission dialog -->
+    <string name="allow">Permitir</string>
+    <string name="later">Agora não</string>
+    <string name="permission_notifications_title">Som e notificações</string>
+    <string name="permission_notifications_body">O app precisa da sua permissão para avisar com um som quando a fase do treino mudar</string>
+
+    <!-- Notification actions -->
+    <string name="cd_previous_phase">Fase anterior</string>
+    <string name="notif_action_pause">Pausar</string>
+    <string name="notif_action_resume">Continuar</string>
+    <string name="notif_action_next_phase">Próximo</string>
+
+    <!-- Notification channel -->
+    <string name="timer_notification_channel_name">Treino</string>
+    <string name="timer_notification_channel_desc">Enquanto o cronômetro estiver ativo, o app permanece em modo prioritário</string>
+    <string name="timer_notification_title_fallback">Treino</string>
+    <string name="timer_notification_running">Cronômetro</string>
+</resources>

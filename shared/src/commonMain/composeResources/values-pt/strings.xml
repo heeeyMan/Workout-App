@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="back">Voltar</string>
+    <string name="save">Salvar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="done">Concluído</string>
+    <string name="delete">Excluir</string>
+
+    <!-- Home screen -->
+    <string name="my_workouts">Meus treinos</string>
+    <string name="settings_cd">Configurações</string>
+    <string name="new_workout">Novo treino</string>
+    <string name="create_first_workout">Toque em + para criar seu primeiro treino</string>
+    <string name="last_workout">Último treino</string>
+    <string name="all_workouts">Todos os treinos</string>
+    <string name="confirm_delete_workout_title">Excluir treino?</string>
+    <string name="confirm_delete_workout_message">Esta ação não pode ser desfeita.</string>
+
+    <!-- Workout list screen -->
+    <string name="create">Criar</string>
+    <string name="no_workouts">Nenhum treino ainda</string>
+
+    <!-- Workout card -->
+    <string name="cd_start_workout">Iniciar</string>
+    <string name="cd_edit_workout">Editar treino</string>
+    <plurals name="blocks_count">
+        <item quantity="one">%1$d bloco</item>
+        <item quantity="other">%1$d blocos</item>
+    </plurals>
+
+    <!-- Create workout screen -->
+    <string name="error_workout_name_required">Informe um nome para o treino</string>
+    <string name="create_workout_title_new">Novo treino</string>
+    <string name="create_workout_title_edit">Editar</string>
+    <string name="training_time">Duração: %1$s</string>
+    <string name="workout_name_label">Nome do treino</string>
+    <string name="add_exercise">+ Exercício</string>
+    <string name="add_rest">+ Descanso</string>
+    <string name="block_type_exercise">EXERCÍCIO</string>
+    <string name="block_type_rest">DESCANSO</string>
+    <string name="cd_reorder">Reordenar</string>
+    <string name="cd_duplicate">Duplicar</string>
+    <string name="cd_edit">Editar</string>
+    <string name="work_label">Trabalho</string>
+    <string name="rest_label">Descanso</string>
+    <string name="duration_label">Duração</string>
+    <string name="repeats_label">Repetições</string>
+    <string name="dialog_exercise_name_title">Nome do exercício</string>
+    <string name="dialog_work_duration_title">Duração do trabalho</string>
+    <string name="dialog_rest_duration_title">Duração do descanso</string>
+    <string name="default_workout_name_pattern">Treino %1$d</string>
+    <string name="default_exercise_name_pattern">Exercício %1$d</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Configurações</string>
+    <string name="timer_sound_enabled">Som do cronômetro</string>
+    <string name="vibration">Vibração</string>
+    <string name="sound_before_work">Som ao iniciar série</string>
+    <string name="sound_before_rest">Som ao terminar série</string>
+    <string name="sound_workout_finish">Som de conclusão</string>
+    <string name="sound_work_phase_warn">Som de aviso no fim da série</string>
+    <string name="work_phase_warn_title">Aviso antes do fim da série</string>
+    <string name="work_phase_warn_off">Desligado</string>
+    <string name="timer_quick_adjust_title">Botões +10 s / −10 s</string>
+    <string name="prep_time_title">Tempo de preparação</string>
+    <string name="sound_picker_work_title">Som ao iniciar série</string>
+    <string name="sound_picker_rest_title">Som ao terminar série</string>
+    <string name="sound_picker_finish_title">Som de conclusão</string>
+    <string name="sound_picker_work_phase_warn_title">Som de aviso no fim da série</string>
+    <string name="cd_confirm_selection">Confirmar seleção</string>
+    <string name="prep_time_dialog_title">Tempo de preparação</string>
+    <string name="seconds_input_label">Segundos</string>
+    <string name="work_phase_warn_dialog_title">Aviso antes do fim da série</string>
+    <string name="work_phase_warn_disabled_hint">0 — desativado</string>
+    <string name="seconds_unit_suffix">%1$d s</string>
+
+    <!-- Timer screen -->
+    <string name="timer_exit_title">Encerrar treino?</string>
+    <string name="timer_exit_message">O progresso não será salvo.</string>
+    <string name="end_workout">Encerrar</string>
+    <string name="continue_workout">Continuar</string>
+    <string name="phase_prep">PREPARAÇÃO</string>
+    <string name="phase_work">SÉRIE</string>
+    <string name="phase_rest">DESCANSO</string>
+    <string name="phase_rest_name">Descanso</string>
+    <string name="timer_round_format">Rodada %1$s</string>
+    <string name="timer_next_phase_format">Próximo: %1$s · %2$s</string>
+    <string name="cd_exit_gym_mode">Sair da tela cheia</string>
+    <string name="cd_lock_controls">Bloquear botões</string>
+    <string name="cd_gym_mode">Tela cheia</string>
+    <string name="timer_minus_10">−10 s</string>
+    <string name="timer_plus_10">+10 s</string>
+    <string name="cd_skip">Pular</string>
+    <string name="cd_resume">Continuar</string>
+    <string name="cd_pause">Pausar</string>
+    <string name="cd_end_workout">Encerrar treino</string>
+    <string name="timer_previous_phase">Passo anterior</string>
+    <string name="timer_hold_to_unlock">Segure para mostrar botões</string>
+    <string name="workout_finished_format">Treino %1$s concluído</string>
+    <string name="back_to_home">Início</string>
+
+    <!-- Notification / Now Playing display strings -->
+    <string name="notif_phase_prep">Preparação</string>
+    <string name="notif_phase_work">Série</string>
+    <string name="notif_phase_rest">Descanso</string>
+    <string name="notif_paused">Pausado</string>
+    <string name="notif_set_format">Rodada %1$s</string>
+
+    <!-- Settings — contacts -->
+    <string name="settings_contact_section">Contato</string>
+    <string name="settings_contact_email_label">Escrever ao desenvolvedor</string>
+    <string name="settings_developer_email">alexvasin373@gmail.com</string>
+
+    <!-- Sound presets -->
+    <string name="preset_custom_mp3_start">Gongo início</string>
+    <string name="preset_custom_mp3_end">Gongo fim</string>
+    <string name="preset_custom_sound_1">Som 1</string>
+    <string name="preset_custom_sound_2">Som 2</string>
+    <string name="preset_custom_sound_3">Som 3</string>
+    <string name="preset_beep_standard">Bipe curto</string>
+    <string name="preset_beep_soft">Bipe suave</string>
+    <string name="preset_ack">Clique</string>
+    <string name="preset_cdma_incall">Lembrete</string>
+    <string name="preset_cdma_guard">Sinal de chamada</string>
+    <string name="preset_dtmf_1">Tom 1</string>
+    <string name="preset_dtmf_3">Tom 3</string>
+    <string name="preset_cdma_high">Tom alto</string>
+    <string name="preset_finish_default">Fim de treino (padrão)</string>
+</resources>

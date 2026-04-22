@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="back">वापस</string>
+    <string name="save">सहेजें</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="done">हो गया</string>
+    <string name="delete">हटाएं</string>
+
+    <!-- Home screen -->
+    <string name="my_workouts">मेरी वर्कआउट</string>
+    <string name="settings_cd">सेटिंग्स</string>
+    <string name="new_workout">नई वर्कआउट</string>
+    <string name="create_first_workout">+ दबाएं और पहली वर्कआउट बनाएं</string>
+    <string name="last_workout">पिछली वर्कआउट</string>
+    <string name="all_workouts">सभी वर्कआउट</string>
+    <string name="confirm_delete_workout_title">वर्कआउट हटाएं?</string>
+    <string name="confirm_delete_workout_message">यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+
+    <!-- Workout list screen -->
+    <string name="create">बनाएं</string>
+    <string name="no_workouts">कोई वर्कआउट नहीं</string>
+
+    <!-- Workout card -->
+    <string name="cd_start_workout">शुरू करें</string>
+    <string name="cd_edit_workout">वर्कआउट संपादित करें</string>
+    <plurals name="blocks_count">
+        <item quantity="one">%1$d ब्लॉक</item>
+        <item quantity="other">%1$d ब्लॉक</item>
+    </plurals>
+
+    <!-- Create workout screen -->
+    <string name="error_workout_name_required">वर्कआउट का नाम दर्ज करें</string>
+    <string name="create_workout_title_new">नई वर्कआउट</string>
+    <string name="create_workout_title_edit">संपादित करें</string>
+    <string name="training_time">अवधि: %1$s</string>
+    <string name="workout_name_label">वर्कआउट का नाम</string>
+    <string name="add_exercise">+ व्यायाम</string>
+    <string name="add_rest">+ आराम</string>
+    <string name="block_type_exercise">व्यायाम</string>
+    <string name="block_type_rest">आराम</string>
+    <string name="cd_reorder">क्रम बदलें</string>
+    <string name="cd_duplicate">डुप्लिकेट करें</string>
+    <string name="cd_edit">संपादित करें</string>
+    <string name="work_label">काम</string>
+    <string name="rest_label">आराम</string>
+    <string name="duration_label">अवधि</string>
+    <string name="repeats_label">दोहराव</string>
+    <string name="dialog_exercise_name_title">व्यायाम का नाम</string>
+    <string name="dialog_work_duration_title">काम की अवधि</string>
+    <string name="dialog_rest_duration_title">आराम की अवधि</string>
+    <string name="default_workout_name_pattern">वर्कआउट %1$d</string>
+    <string name="default_exercise_name_pattern">व्यायाम %1$d</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">सेटिंग्स</string>
+    <string name="timer_sound_enabled">टाइमर ध्वनि</string>
+    <string name="vibration">वाइब्रेशन</string>
+    <string name="sound_before_work">सेट शुरू होने की ध्वनि</string>
+    <string name="sound_before_rest">सेट खत्म होने की ध्वनि</string>
+    <string name="sound_workout_finish">वर्कआउट समाप्ति ध्वनि</string>
+    <string name="sound_work_phase_warn">सेट अंत चेतावनी ध्वनि</string>
+    <string name="work_phase_warn_title">सेट समाप्त होने से पहले चेतावनी</string>
+    <string name="work_phase_warn_off">बंद</string>
+    <string name="timer_quick_adjust_title">+10 s / −10 s बटन</string>
+    <string name="prep_time_title">तैयारी का समय</string>
+    <string name="sound_picker_work_title">सेट शुरू होने की ध्वनि</string>
+    <string name="sound_picker_rest_title">सेट खत्म होने की ध्वनि</string>
+    <string name="sound_picker_finish_title">वर्कआउट समाप्ति ध्वनि</string>
+    <string name="sound_picker_work_phase_warn_title">सेट अंत चेतावनी ध्वनि</string>
+    <string name="cd_confirm_selection">चयन की पुष्टि करें</string>
+    <string name="prep_time_dialog_title">तैयारी का समय</string>
+    <string name="seconds_input_label">सेकंड</string>
+    <string name="work_phase_warn_dialog_title">सेट समाप्त होने से पहले चेतावनी</string>
+    <string name="work_phase_warn_disabled_hint">0 — बंद</string>
+    <string name="seconds_unit_suffix">%1$d s</string>
+
+    <!-- Timer screen -->
+    <string name="timer_exit_title">वर्कआउट समाप्त करें?</string>
+    <string name="timer_exit_message">वर्तमान प्रगति सहेजी नहीं जाएगी।</string>
+    <string name="end_workout">समाप्त करें</string>
+    <string name="continue_workout">जारी रखें</string>
+    <string name="phase_prep">तैयारी</string>
+    <string name="phase_work">सेट</string>
+    <string name="phase_rest">आराम</string>
+    <string name="phase_rest_name">आराम</string>
+    <string name="timer_round_format">राउंड %1$s</string>
+    <string name="timer_next_phase_format">अगला: %1$s · %2$s</string>
+    <string name="cd_exit_gym_mode">फुल स्क्रीन से बाहर</string>
+    <string name="cd_lock_controls">बटन लॉक करें</string>
+    <string name="cd_gym_mode">फुल स्क्रीन</string>
+    <string name="timer_minus_10">−10 s</string>
+    <string name="timer_plus_10">+10 s</string>
+    <string name="cd_skip">छोड़ें</string>
+    <string name="cd_resume">जारी रखें</string>
+    <string name="cd_pause">रोकें</string>
+    <string name="cd_end_workout">वर्कआउट समाप्त करें</string>
+    <string name="timer_previous_phase">पिछला चरण</string>
+    <string name="timer_hold_to_unlock">बटन दिखाने के लिए दबाए रखें</string>
+    <string name="workout_finished_format">वर्कआउट %1$s पूर्ण</string>
+    <string name="back_to_home">होम</string>
+
+    <!-- Notification / Now Playing display strings -->
+    <string name="notif_phase_prep">तैयारी</string>
+    <string name="notif_phase_work">सेट</string>
+    <string name="notif_phase_rest">आराम</string>
+    <string name="notif_paused">रुका हुआ</string>
+    <string name="notif_set_format">राउंड %1$s</string>
+
+    <!-- Settings — contacts -->
+    <string name="settings_contact_section">संपर्क</string>
+    <string name="settings_contact_email_label">डेवलपर को लिखें</string>
+    <string name="settings_developer_email">alexvasin373@gmail.com</string>
+
+    <!-- Sound presets -->
+    <string name="preset_custom_mp3_start">घंटी शुरू</string>
+    <string name="preset_custom_mp3_end">घंटी समाप्त</string>
+    <string name="preset_custom_sound_1">ध्वनि 1</string>
+    <string name="preset_custom_sound_2">ध्वनि 2</string>
+    <string name="preset_custom_sound_3">ध्वनि 3</string>
+    <string name="preset_beep_standard">छोटी बीप</string>
+    <string name="preset_beep_soft">हल्की बीप</string>
+    <string name="preset_ack">क्लिक</string>
+    <string name="preset_cdma_incall">रिमाइंडर</string>
+    <string name="preset_cdma_guard">कॉल सिग्नल</string>
+    <string name="preset_dtmf_1">टोन 1</string>
+    <string name="preset_dtmf_3">टोन 3</string>
+    <string name="preset_cdma_high">ऊंचा टोन</string>
+    <string name="preset_finish_default">वर्कआउट पूर्ण (डिफ़ॉल्ट)</string>
+</resources>

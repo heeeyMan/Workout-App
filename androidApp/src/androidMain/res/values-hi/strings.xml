@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout</string>
+
+    <!-- Permission dialog -->
+    <string name="allow">अनुमति दें</string>
+    <string name="later">अभी नहीं</string>
+    <string name="permission_notifications_title">ध्वनि और सूचनाएं</string>
+    <string name="permission_notifications_body">प्रशिक्षण चरण बदलने पर ध्वनि सूचना देने के लिए ऐप को आपकी अनुमति चाहिए</string>
+
+    <!-- Notification actions -->
+    <string name="cd_previous_phase">पिछला चरण</string>
+    <string name="notif_action_pause">रोकें</string>
+    <string name="notif_action_resume">जारी रखें</string>
+    <string name="notif_action_next_phase">अगला</string>
+
+    <!-- Notification channel -->
+    <string name="timer_notification_channel_name">वर्कआउट</string>
+    <string name="timer_notification_channel_desc">जब टाइमर चल रहा हो, ऐप उच्च-प्राथमिकता मोड में रहता है</string>
+    <string name="timer_notification_title_fallback">वर्कआउट</string>
+    <string name="timer_notification_running">टाइमर</string>
+</resources>

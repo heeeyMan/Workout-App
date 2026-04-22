@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout</string>
+
+    <!-- Permission dialog -->
+    <string name="allow">允许</string>
+    <string name="later">稍后</string>
+    <string name="permission_notifications_title">声音和通知</string>
+    <string name="permission_notifications_body">训练阶段切换时，应用需要您的权限以发出声音提醒</string>
+
+    <!-- Notification actions -->
+    <string name="cd_previous_phase">上一阶段</string>
+    <string name="notif_action_pause">暂停</string>
+    <string name="notif_action_resume">继续</string>
+    <string name="notif_action_next_phase">下一个</string>
+
+    <!-- Notification channel -->
+    <string name="timer_notification_channel_name">训练</string>
+    <string name="timer_notification_channel_desc">计时器运行时，应用保持高优先级模式</string>
+    <string name="timer_notification_title_fallback">训练</string>
+    <string name="timer_notification_running">计时器</string>
+</resources>
