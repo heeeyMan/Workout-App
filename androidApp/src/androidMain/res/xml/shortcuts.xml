@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="open_create"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/shortcut_create_short"
+        android:shortcutLongLabel="@string/shortcut_create_long">
+        <intent
+            android:action="com.workout.android.action.OPEN_CREATE"
+            android:targetPackage="com.workout.android"
+            android:targetClass="com.workout.android.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+</shortcuts>
