@@ -84,7 +84,7 @@ class WorkoutWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(ImageProvider(R.drawable.widget_background), ContentScale.FillBounds)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 2.dp)
                     .clickable(actionStartActivity(startIntent)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
