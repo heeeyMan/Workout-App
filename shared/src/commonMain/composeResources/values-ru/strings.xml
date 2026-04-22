@@ -102,6 +102,18 @@
     <string name="workout_finished_format">Тренировка %1$s завершена</string>
     <string name="back_to_home">На главную</string>
 
+    <!-- Notification / Now Playing display strings -->
+    <string name="notif_phase_prep">Подготовка</string>
+    <string name="notif_phase_work">Подход</string>
+    <string name="notif_phase_rest">Отдых</string>
+    <string name="notif_paused">Пауза</string>
+    <string name="notif_set_format">Повтор %1$s</string>
+
+    <!-- Settings — contacts -->
+    <string name="settings_contact_section">Контакты</string>
+    <string name="settings_contact_email_label">Написать разработчику</string>
+    <string name="settings_developer_email">alexvasin373@gmail.com</string>
+
     <!-- Sound presets -->
     <string name="preset_custom_mp3_start">Гонг старт</string>
     <string name="preset_custom_mp3_end">Гонг конец</string>

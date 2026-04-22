@@ -25,9 +25,12 @@ class HomeStore(
     }
 
     private fun startWorkout(workoutId: Long) {
+        if (state.value.isStartingWorkout) return
+        setState { copy(isStartingWorkout = true) }
         scope.launch {
             workoutRepository.markWorkoutStarted(workoutId)
             emitEffect(HomeEffect.NavigateToTimer(workoutId))
+            setState { copy(isStartingWorkout = false) }
         }
     }
 

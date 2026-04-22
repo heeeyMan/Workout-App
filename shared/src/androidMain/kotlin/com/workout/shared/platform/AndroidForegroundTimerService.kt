@@ -36,19 +36,21 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         startService(workoutName.ifBlank { "Workout" }, "", "", false, "prep")
     }
 
-    override fun update(state: TimerState, workoutName: String) {
+    override fun update(state: TimerState, workoutName: String, displayStrings: NotifDisplayStrings) {
         if (state.isLoading) return
         if (state.isFinished) { stop(); return }
 
         val phaseLine = when {
-            state.isPrepBeforeWork -> "Prep"
+            state.isPrepBeforeWork -> displayStrings.phasePrep
             state.currentPhase?.type == PhaseType.Work -> {
                 val n = state.currentPhase?.name.orEmpty()
-                if (n.isNotBlank()) "Work · $n" else "Work"
+                if (n.isNotBlank()) "${displayStrings.phaseWork} · $n" else displayStrings.phaseWork
             }
-            else -> "Rest"
+            else -> displayStrings.phaseRest
         }
-        val detailLine = state.currentPhase?.repeatLabel?.let { "Set $it" }.orEmpty()
+        val detailLine = state.currentPhase?.repeatLabel
+            ?.let { displayStrings.setFormat.format(it) }
+            .orEmpty()
         val phaseType = when {
             state.isPrepBeforeWork -> "prep"
             state.currentPhase?.type == PhaseType.Work -> "work"
@@ -56,7 +58,7 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         }
         val timeLine = buildString {
             append(formatMmSs(state.secondsRemaining))
-            if (state.isPaused) append(" · Paused")
+            if (state.isPaused) append(" · ${displayStrings.paused}")
         }
 
         if (!serviceStarted) {

@@ -40,8 +40,8 @@ class IosForegroundTimerService : ForegroundTimerService {
         setupRemoteCommands()
     }
 
-    override fun update(state: TimerState, workoutName: String) {
-        updateNowPlayingInfo(state, workoutName)
+    override fun update(state: TimerState, workoutName: String, displayStrings: NotifDisplayStrings) {
+        updateNowPlayingInfo(state, workoutName, displayStrings)
     }
 
     override fun stop() {
@@ -137,7 +137,7 @@ class IosForegroundTimerService : ForegroundTimerService {
     // ── Now Playing info ─────────────────────────────────────────────
 
     @Suppress("UNCHECKED_CAST")
-    private fun updateNowPlayingInfo(state: TimerState, workoutName: String) {
+    private fun updateNowPlayingInfo(state: TimerState, workoutName: String, displayStrings: NotifDisplayStrings) {
         val info = NSMutableDictionary()
 
         fun nsKey(key: String): NSString = NSString.create(string = key)
@@ -147,16 +147,16 @@ class IosForegroundTimerService : ForegroundTimerService {
 
         // Artist: current phase info
         val phaseText = when {
-            state.isPrepBeforeWork -> "Prep"
+            state.isPrepBeforeWork -> displayStrings.phasePrep
             state.currentPhase?.type == PhaseType.Work ->
-                state.currentPhase?.name ?: "Work"
-            else -> "Rest"
+                state.currentPhase?.name ?: displayStrings.phaseWork
+            else -> displayStrings.phaseRest
         }
         info.setObject(phaseText, forKey = nsKey(MPMediaItemPropertyArtist))
 
         // Album: repeat label if present
         state.currentPhase?.repeatLabel?.let { label ->
-            info.setObject("Set $label", forKey = nsKey(MPMediaItemPropertyAlbumTitle))
+            info.setObject(displayStrings.setFormat.replace("%1\$s", label), forKey = nsKey(MPMediaItemPropertyAlbumTitle))
         }
 
         // Duration and elapsed time for progress bar on lock screen

@@ -8,11 +8,13 @@ coroutines = "1.10.2"
 datetime = "0.7.1"
 serialization = "1.11.0"
 composeMultiplatform = "1.11.0-beta02"
+composeMaterial3 = "1.9.0"
+composeMaterialIcons = "1.7.3"
 navigationComposeMp = "2.9.2"
 lifecycleViewmodelMp = "2.10.0"
 androidxActivityCompose = "1.13.0"
 androidxCoreKtx = "1.18.0"
-androidxMedia = "1.7.0"
+androidxMedia = "1.7.1"
 compileSdk = "36"
 minSdk = "28"
 targetSdk = "36"
@@ -39,6 +41,14 @@ datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version
 # Serialization
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
+# Compose Multiplatform
+compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "composeMultiplatform" }
+compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "composeMultiplatform" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "composeMaterial3" }
+compose-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "composeMultiplatform" }
+compose-material-icons-extended = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version.ref = "composeMaterialIcons" }
+compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "composeMultiplatform" }
+
 # Navigation (CMP)
 navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeMp" }
 
@@ -52,8 +62,10 @@ androidx-media = { group = "androidx.media", name = "media", version.ref = "andr
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

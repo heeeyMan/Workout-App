@@ -48,6 +48,12 @@ class AndroidTimerSettings(context: Context) : TimerSettings {
             ).apply()
         }
 
+    var skipNotificationPermissionPrompt: Boolean
+        get() = prefs.getBoolean(KEY_SKIP_NOTIF_PROMPT, false)
+        set(value) {
+            prefs.edit().putBoolean(KEY_SKIP_NOTIF_PROMPT, value).apply()
+        }
+
     override var timerQuickAdjustEnabled: Boolean
         get() = prefs.getBoolean(KEY_TIMER_QUICK_ADJUST, true)
         set(value) {
@@ -106,6 +112,7 @@ class AndroidTimerSettings(context: Context) : TimerSettings {
         private const val KEY_WORK_PHASE_END_WARN = "work_phase_end_warning_seconds"
         private const val KEY_ALERT_10_SECONDS_LEGACY = "alert_at_10_seconds"
         private const val KEY_TIMER_QUICK_ADJUST = "timer_quick_adjust_enabled"
+        private const val KEY_SKIP_NOTIF_PROMPT = "skip_notification_permission_prompt"
         private const val KEY_WORK_SOUND_PRESET = "work_start_sound_preset"
         private const val KEY_REST_SOUND_PRESET = "rest_start_sound_preset"
         private const val KEY_FINISH_SOUND_PRESET = "workout_finish_sound_preset"

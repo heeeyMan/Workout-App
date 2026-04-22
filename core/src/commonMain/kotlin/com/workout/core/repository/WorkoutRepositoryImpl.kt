@@ -23,11 +23,12 @@ class WorkoutRepositoryImpl(
             .asFlow()
             .mapToList(Dispatchers.Default)
             .map { entities ->
+                val allBlocks = database.blockEntityQueries
+                    .selectAllBlocks()
+                    .executeAsList()
+                val blocksByWorkoutId = allBlocks.groupBy { it.workout_id }
                 entities.map { entity ->
-                    val blockEntities = database.blockEntityQueries
-                        .selectBlocksByWorkoutId(entity.id)
-                        .executeAsList()
-                    entity.toDomain(blockEntities)
+                    entity.toDomain(blocksByWorkoutId[entity.id] ?: emptyList())
                 }
             }
 
@@ -68,8 +69,7 @@ class WorkoutRepositoryImpl(
                         is Block.Exercise -> block.restDurationSeconds.toLong()
                         is Block.Rest -> block.durationSeconds.toLong()
                     },
-                    repeats = (block as? Block.Exercise)?.repeats?.toLong(),
-                    video_path = (block as? Block.Exercise)?.videoPath
+                    repeats = (block as? Block.Exercise)?.repeats?.toLong()
                 )
             }
         }
@@ -109,8 +109,7 @@ class WorkoutRepositoryImpl(
             name = name ?: "Упражнение ${index + 1}",
             workDurationSeconds = work_duration_seconds?.toInt() ?: 40,
             restDurationSeconds = rest_duration_seconds?.toInt() ?: 20,
-            repeats = repeats?.toInt() ?: 1,
-            videoPath = video_path
+            repeats = repeats?.toInt() ?: 1
         )
         else -> Block.Rest(
             id = id,

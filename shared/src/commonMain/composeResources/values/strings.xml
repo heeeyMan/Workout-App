@@ -100,6 +100,18 @@
     <string name="workout_finished_format">%1$s completed!</string>
     <string name="back_to_home">Back to Home</string>
 
+    <!-- Notification / Now Playing display strings -->
+    <string name="notif_phase_prep">Prep</string>
+    <string name="notif_phase_work">Work</string>
+    <string name="notif_phase_rest">Rest</string>
+    <string name="notif_paused">Paused</string>
+    <string name="notif_set_format">Set %1$s</string>
+
+    <!-- Settings — contacts -->
+    <string name="settings_contact_section">Contact</string>
+    <string name="settings_contact_email_label">Write to developer</string>
+    <string name="settings_developer_email">alexvasin373@gmail.com</string>
+
     <!-- Sound presets -->
     <string name="preset_custom_mp3_start">Gong Start</string>
     <string name="preset_custom_mp3_end">Gong End</string>

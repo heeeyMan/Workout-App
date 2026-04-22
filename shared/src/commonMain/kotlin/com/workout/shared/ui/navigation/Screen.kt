@@ -6,9 +6,6 @@ import kotlinx.serialization.Serializable
 data object HomeRoute
 
 @Serializable
-data object WorkoutListRoute
-
-@Serializable
 data object SettingsRoute
 
 @Serializable

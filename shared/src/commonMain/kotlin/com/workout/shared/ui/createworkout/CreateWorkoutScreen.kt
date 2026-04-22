@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,6 +53,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,7 +72,7 @@ import com.workout.core.model.Block
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
 import com.workout.shared.feature.createworkout.CreateWorkoutIntent
-import com.workout.shared.feature.createworkout.CreateWorkoutStore
+import com.workout.shared.feature.createworkout.CreateWorkoutViewModel
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.add_exercise
 import workoutapp.shared.generated.resources.add_rest
@@ -120,8 +120,8 @@ fun CreateWorkoutScreen(
     onNavigateBack: () -> Unit
 ) {
     val repository = koinInject<WorkoutRepository>()
-    val store = remember { CreateWorkoutStore(repository) }
-    DisposableEffect(Unit) { onDispose { store.destroy() } }
+    val vm = viewModel { CreateWorkoutViewModel(repository) }
+    val store = vm.store
 
     val state by store.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }

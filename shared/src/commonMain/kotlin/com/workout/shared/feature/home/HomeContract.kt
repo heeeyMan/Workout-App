@@ -5,7 +5,8 @@ import com.workout.core.model.Workout
 data class HomeState(
     val workouts: List<Workout> = emptyList(),
     val isLoading: Boolean = true,
-    val pendingDeleteId: Long? = null
+    val pendingDeleteId: Long? = null,
+    val isStartingWorkout: Boolean = false
 )
 
 sealed interface HomeIntent {

@@ -2,142 +2,21 @@
 <resources>
     <string name="app_name">Workout</string>
 
-    <string name="back">Back</string>
-    <string name="save">Save</string>
-    <string name="cancel">Cancel</string>
-    <string name="done">Done</string>
-    <string name="delete">Delete</string>
+    <!-- Permission dialog (AppEntryPermissionHandler) -->
     <string name="allow">Allow</string>
     <string name="later">Not now</string>
+    <string name="permission_notifications_title">Sound and notifications</string>
+    <string name="permission_notifications_body">The app needs your permission to notify you with a sound when the training stage changes</string>
 
-    <string name="my_workouts">My workouts</string>
-    <string name="settings">Settings</string>
-    <string name="new_workout">New workout</string>
-    <string name="confirm_delete_workout_title">Delete workout?</string>
-    <string name="confirm_delete_workout_message">This action cannot be undone.</string>
-    <string name="last_workout">Last workout</string>
-    <string name="all_workouts">All workouts</string>
-    <string name="empty_home_subtitle">No workouts yet.\nTap + to create the first one.</string>
-
-    <string name="create">Create</string>
-    <string name="no_workouts">No workouts</string>
-
-    <string name="cd_start_workout">Start workout</string>
-    <string name="cd_delete">Delete</string>
-
-    <string name="workout_card_line">%1$s · %2$s</string>
-
-    <string name="create_workout_title_new">New workout</string>
-    <string name="create_workout_title_edit">Edit</string>
-    <string name="cd_save">Save</string>
-    <string name="workout_name_label">Workout name</string>
-    <string name="add_exercise">+ Exercise</string>
-    <string name="add_rest">+ Rest</string>
-    <string name="block_type_exercise">EXERCISE</string>
-    <string name="block_type_rest">REST</string>
-    <string name="cd_reorder">Reorder</string>
-    <string name="cd_duplicate">Duplicate</string>
-    <string name="cd_edit">Edit</string>
-    <string name="cd_edit_workout">Edit workout</string>
-    <string name="work_label">Work</string>
-    <string name="rest_label">Rest</string>
-    <string name="repeats_label">Repeats</string>
-    <string name="duration_label">Duration</string>
-    <string name="dialog_exercise_name_title">Exercise name</string>
-    <string name="dialog_work_duration_title">Work duration</string>
-    <string name="dialog_rest_duration_title">Rest duration</string>
-    <string name="error_workout_name_required">Enter a workout name</string>
-    <string name="default_workout_name_pattern">Workout %1$d</string>
-    <string name="default_exercise_name_pattern">Exercise %1$d</string>
-
-    <string name="minutes_short">min</string>
-    <string name="seconds_short">sec</string>
-
-    <string name="settings_title">Settings</string>
-    <string name="prep_time_title">Prep time before workout</string>
-    <string name="prep_time_dialog_title">Prep time before workout</string>
-    <string name="seconds_input_label">Seconds</string>
-    <string name="seconds_unit_suffix">%1$d s</string>
-    <string name="sound_before_work">Start-up sound</string>
-    <string name="sound_before_rest">Sound of work completion</string>
-    <string name="sound_workout_finish">Workout complete sound</string>
-    <string name="sound_work_phase_warn">End-of-work warning sound</string>
-    <string name="timer_sound_enabled">Timer sound</string>
-    <string name="vibration">Vibration</string>
-    <string name="work_phase_warn_title">Warn before work ends</string>
-    <string name="work_phase_warn_dialog_title">Seconds before work ends</string>
-    <string name="work_phase_warn_dialog_hint">Sound each second in the last N seconds of work. Use 0 to turn off.</string>
-    <string name="work_phase_warn_off">Off</string>
-    <string name="cd_confirm_selection">Confirm selection</string>
-    <string name="sound_picker_work_title">Sound start work</string>
-    <string name="sound_picker_rest_title">Sound end work</string>
-    <string name="sound_picker_finish_title">Workout complete sound</string>
-    <string name="sound_picker_work_phase_warn_title">End-of-work warning sound</string>
-
-    <string name="preset_custom_mp3_start">Gong Start</string>
-    <string name="preset_custom_mp3_end">Gong End</string>
-    <string name="preset_custom_sound_1">Sound 1</string>
-    <string name="preset_custom_sound_2">Sound 2</string>
-    <string name="preset_custom_sound_3">Sound 3</string>
-    <string name="preset_beep_standard">Short beep</string>
-    <string name="preset_beep_soft">Soft beep</string>
-    <string name="preset_ack">Click</string>
-    <string name="preset_cdma_incall">Reminder</string>
-    <string name="preset_cdma_guard">Call signal</string>
-    <string name="preset_dtmf_1">Tone 1</string>
-    <string name="preset_dtmf_3">Tone 3</string>
-    <string name="preset_cdma_high">High tone</string>
-    <string name="preset_finish_default">Workout complete (default)</string>
-
-    <string name="timer_exit_title">End this workout?</string>
-    <string name="timer_exit_message">Your progress will not be saved.</string>
-    <string name="end_workout">End</string>
-    <string name="continue_workout">Continue</string>
-    <string name="phase_prep">PREP</string>
-    <string name="phase_work">WORK</string>
-    <string name="phase_rest">REST</string>
-    <string name="timer_repeat_format">Set %1$s</string>
-    <string name="timer_next_phase">Next: %1$s · %2$s</string>
-    <string name="timer_block_of">Block %1$d of %2$d</string>
-    <string name="cd_skip">Skip</string>
+    <!-- Notification actions (WorkoutTimerForegroundService) -->
     <string name="cd_previous_phase">Previous phase</string>
-    <string name="timer_minus_10">−10 s</string>
-    <string name="timer_plus_10">+10 s</string>
-    <string name="timer_quick_adjust_title">+10 s / −10 s on timer screen</string>
-    <string name="cd_gym_mode">Fullscreen gym mode</string>
-    <string name="cd_exit_gym_mode">Exit fullscreen</string>
-    <string name="cd_lock_controls">Lock controls</string>
-    <string name="timer_hold_to_unlock">Hold to show controls</string>
     <string name="notif_action_pause">Pause</string>
     <string name="notif_action_resume">Resume</string>
     <string name="notif_action_next_phase">Next</string>
-    <string name="cd_pause">Pause</string>
-    <string name="cd_resume">Resume</string>
-    <string name="cd_end_workout">End workout</string>
-    <string name="workout_finished_title">Workout %1$s finished</string>
-    <string name="back_to_home">Back to home</string>
 
-    <string name="notif_phase_prep">Prep</string>
-    <string name="notif_phase_work">Work</string>
-    <string name="notif_phase_work_with_name">Work · %1$s</string>
-    <string name="notif_phase_rest">Rest</string>
-    <string name="notif_repeat_format">Set %1$s</string>
-    <string name="notif_paused">Paused</string>
-
-    <string name="phase_rest_name">Rest</string>
-
-    <string name="permission_notifications_title">Sound and notifications</string>
-    <string name="permission_notifications_body">On Android 13 and up, notification permission may be needed for reliable timer sounds. Vibration can be adjusted separately in app settings.</string>
-
+    <!-- Notification channel and content (WorkoutTimerForegroundService) -->
     <string name="timer_notification_channel_name">Workout</string>
     <string name="timer_notification_channel_desc">While the timer is running, the app stays in a high-priority mode</string>
     <string name="timer_notification_title_fallback">Workout</string>
     <string name="timer_notification_running">Timer</string>
-    <string name="training_time">Training time: %1$s</string>
-
-    <plurals name="blocks_count">
-        <item quantity="one">%d block</item>
-        <item quantity="other">%d blocks</item>
-    </plurals>
-    <string name="timer_previous_phase">Step back</string>
 </resources>

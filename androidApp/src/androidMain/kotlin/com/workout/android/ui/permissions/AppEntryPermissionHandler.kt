@@ -19,14 +19,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import com.workout.android.R
-import com.workout.android.data.TimerPreferences
+import com.workout.shared.platform.AndroidTimerSettings
 import org.koin.android.ext.android.getKoin
 
 @Composable
 fun AppEntryPermissionHandler() {
     val context = LocalContext.current
     val activity = context as? ComponentActivity ?: return
-    val prefs = activity.getKoin().get<TimerPreferences>()
+    val prefs = activity.getKoin().get<AndroidTimerSettings>()
     var showDialog by remember { mutableStateOf(false) }
 
     val needRequest = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU

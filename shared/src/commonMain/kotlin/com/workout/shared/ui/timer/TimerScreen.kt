@@ -31,7 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.NavigateBefore
+import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -67,13 +67,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
 import com.workout.shared.feature.timer.TimerIntent
-import com.workout.shared.feature.timer.TimerStore
+import com.workout.shared.feature.timer.TimerViewModel
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.back_to_home
+import workoutapp.shared.generated.resources.notif_paused
+import workoutapp.shared.generated.resources.notif_phase_prep
+import workoutapp.shared.generated.resources.notif_phase_rest
+import workoutapp.shared.generated.resources.notif_phase_work
+import workoutapp.shared.generated.resources.notif_set_format
 import workoutapp.shared.generated.resources.cd_end_workout
 import workoutapp.shared.generated.resources.cd_exit_gym_mode
 import workoutapp.shared.generated.resources.cd_gym_mode
@@ -99,9 +105,11 @@ import workoutapp.shared.generated.resources.workout_finished_format
 import com.workout.shared.platform.AudioFeedback
 import com.workout.shared.platform.ForegroundTimerService
 import com.workout.shared.platform.HapticFeedback
+import com.workout.shared.platform.NotifDisplayStrings
 import com.workout.shared.platform.ScreenWakeLock
 import com.workout.shared.platform.TimerSettings
 import com.workout.shared.ui.components.toTimeString
+import com.workout.shared.ui.util.BackHandler
 import com.workout.shared.ui.theme.TimerPrepGray
 import com.workout.shared.ui.theme.TimerPrepGrayDim
 import com.workout.shared.ui.theme.TimerRestGreen
@@ -125,7 +133,16 @@ fun TimerScreen(
     val screenWakeLock = koinInject<ScreenWakeLock>()
     val foregroundService = koinInject<ForegroundTimerService>()
 
-    val store = remember { TimerStore(repository) }
+    val vm = viewModel { TimerViewModel(repository) }
+    val store = vm.store
+
+    val notifDisplayStrings = NotifDisplayStrings(
+        phasePrep = stringResource(Res.string.notif_phase_prep),
+        phaseWork = stringResource(Res.string.notif_phase_work),
+        phaseRest = stringResource(Res.string.notif_phase_rest),
+        paused = stringResource(Res.string.notif_paused),
+        setFormat = stringResource(Res.string.notif_set_format)
+    )
 
     val quickAdjustEnabled = remember { mutableStateOf(timerSettings.timerQuickAdjustEnabled) }
 
@@ -154,7 +171,6 @@ fun TimerScreen(
         onDispose {
             foregroundService.stop()
             screenWakeLock.release()
-            store.destroy()
         }
     }
 
@@ -199,7 +215,7 @@ fun TimerScreen(
     // Update foreground service notification
     LaunchedEffect(Unit) {
         store.state.collect { s ->
-            foregroundService.update(s, s.workoutName)
+            foregroundService.update(s, s.workoutName, notifDisplayStrings)
         }
     }
 
@@ -207,6 +223,10 @@ fun TimerScreen(
     val quickAdjust = quickAdjustEnabled.value
     var showExitDialog by remember { mutableStateOf(false) }
     var gymMode by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = !state.isLoading && !state.isFinished) {
+        showExitDialog = true
+    }
     var gymControlsLocked by remember { mutableStateOf(false) }
 
     val timerFontSize = if (gymMode) 120.sp else 88.sp
@@ -518,7 +538,7 @@ fun TimerScreen(
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                             ) {
                                 Icon(
-                                    Icons.Default.NavigateBefore,
+                                    Icons.AutoMirrored.Filled.NavigateBefore,
                                     contentDescription = null,
                                     modifier = Modifier.size(22.dp)
                                 )

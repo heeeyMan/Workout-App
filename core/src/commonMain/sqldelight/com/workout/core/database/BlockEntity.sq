@@ -18,12 +18,14 @@ INSERT INTO BlockEntity (
     name,
     work_duration_seconds,
     rest_duration_seconds,
-    repeats,
-    video_path
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    repeats
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 selectBlocksByWorkoutId:
 SELECT * FROM BlockEntity WHERE workout_id = ? ORDER BY order_index ASC;
+
+selectAllBlocks:
+SELECT * FROM BlockEntity ORDER BY workout_id ASC, order_index ASC;
 
 deleteBlocksByWorkoutId:
 DELETE FROM BlockEntity WHERE workout_id = ?;

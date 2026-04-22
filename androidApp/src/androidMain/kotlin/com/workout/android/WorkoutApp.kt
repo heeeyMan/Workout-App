@@ -1,11 +1,9 @@
 package com.workout.android
 
 import android.app.Application
-import com.workout.android.di.androidModule
 import com.workout.core.database.DatabaseDriverFactory
 import com.workout.core.di.coreModule
 import com.workout.shared.di.androidPlatformModule
-import com.workout.shared.di.sharedUiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -17,9 +15,7 @@ class WorkoutApp : Application() {
             androidContext(this@WorkoutApp)
             modules(
                 coreModule(driverFactory = DatabaseDriverFactory(this@WorkoutApp)),
-                sharedUiModule,
-                androidPlatformModule,
-                androidModule
+                androidPlatformModule
             )
         }
     }

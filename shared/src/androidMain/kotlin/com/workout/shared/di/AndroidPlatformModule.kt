@@ -11,10 +11,11 @@ import com.workout.shared.platform.HapticFeedback
 import com.workout.shared.platform.ScreenWakeLock
 import com.workout.shared.platform.TimerSettings
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val androidPlatformModule = module {
-    single<TimerSettings> { AndroidTimerSettings(androidContext()) }
+    single { AndroidTimerSettings(androidContext()) } bind TimerSettings::class
     single<AudioFeedback> { AndroidAudioFeedback(androidContext()) }
     single<HapticFeedback> { AndroidHapticFeedback(androidContext()) }
     single<ScreenWakeLock> { AndroidScreenWakeLock() }

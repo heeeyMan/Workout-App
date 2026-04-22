@@ -22,11 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
-import com.workout.shared.feature.home.HomeStore
+import com.workout.shared.feature.home.HomeViewModel
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.all_workouts
 import workoutapp.shared.generated.resources.cancel
@@ -59,8 +58,8 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit
 ) {
     val repository = koinInject<WorkoutRepository>()
-    val store = remember { HomeStore(repository) }
-    DisposableEffect(Unit) { onDispose { store.destroy() } }
+    val vm = viewModel { HomeViewModel(repository) }
+    val store = vm.store
 
     val state by store.state.collectAsState()
 
@@ -132,7 +131,7 @@ fun HomeScreen(
             else -> {
                 val lastStarted = state.workouts
                     .filter { it.lastStartedAt != null }
-                    .maxByOrNull { it.lastStartedAt!! }
+                    .maxByOrNull { it.lastStartedAt ?: 0L }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),

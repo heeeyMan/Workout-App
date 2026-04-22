@@ -9,7 +9,6 @@ import com.workout.shared.ui.createworkout.CreateWorkoutScreen
 import com.workout.shared.ui.home.HomeScreen
 import com.workout.shared.ui.settings.SettingsScreen
 import com.workout.shared.ui.timer.TimerScreen
-import com.workout.shared.ui.workoutlist.WorkoutListScreen
 
 @Composable
 fun AppNavigation(
@@ -30,15 +29,6 @@ fun AppNavigation(
 
         composable<SettingsRoute> {
             SettingsScreen(
-                onNavigateBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<WorkoutListRoute> {
-            WorkoutListScreen(
-                onNavigateToTimer = { id -> navController.navigate(TimerRoute(id)) },
-                onNavigateToCreateWorkout = { navController.navigate(CreateWorkoutRoute()) },
-                onNavigateToEditWorkout = { id -> navController.navigate(CreateWorkoutRoute(id)) },
                 onNavigateBack = { navController.popBackStack() }
             )
         }

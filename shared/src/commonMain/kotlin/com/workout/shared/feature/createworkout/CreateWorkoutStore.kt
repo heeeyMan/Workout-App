@@ -115,14 +115,18 @@ class CreateWorkoutStore(
         }
         scope.launch {
             setState { copy(isSaving = true) }
-            val workout = Workout(
-                id = current.workoutId,
-                name = current.name.trim(),
-                createdAt = Clock.System.now().toEpochMilliseconds(),
-                blocks = current.blocks
-            )
-            workoutRepository.saveWorkout(workout)
-            emitEffect(CreateWorkoutEffect.NavigateBack)
+            try {
+                val workout = Workout(
+                    id = current.workoutId,
+                    name = current.name.trim(),
+                    createdAt = Clock.System.now().toEpochMilliseconds(),
+                    blocks = current.blocks
+                )
+                workoutRepository.saveWorkout(workout)
+                emitEffect(CreateWorkoutEffect.NavigateBack)
+            } catch (_: Exception) {
+                setState { copy(isSaving = false) }
+            }
         }
     }
 

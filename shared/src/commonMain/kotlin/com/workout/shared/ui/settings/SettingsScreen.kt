@@ -2,6 +2,7 @@ package com.workout.shared.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -46,6 +48,9 @@ import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.back
 import workoutapp.shared.generated.resources.cancel
 import workoutapp.shared.generated.resources.cd_confirm_selection
+import workoutapp.shared.generated.resources.settings_contact_email_label
+import workoutapp.shared.generated.resources.settings_contact_section
+import workoutapp.shared.generated.resources.settings_developer_email
 import workoutapp.shared.generated.resources.prep_time_dialog_title
 import workoutapp.shared.generated.resources.prep_time_title
 import workoutapp.shared.generated.resources.save
@@ -82,6 +87,8 @@ fun SettingsScreen(
 ) {
     val settings = koinInject<TimerSettings>()
     val audioFeedback = koinInject<AudioFeedback>()
+    val uriHandler = LocalUriHandler.current
+    val developerEmail = stringResource(Res.string.settings_developer_email)
 
     // Local state backed by TimerSettings
     var prepSeconds by remember { mutableStateOf(settings.blockPrepDurationSeconds) }
@@ -449,6 +456,39 @@ fun SettingsScreen(
                         text = stringResource(Res.string.seconds_unit_suffix, prepSeconds),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            }
+            item {
+                Text(
+                    text = stringResource(Res.string.settings_contact_section),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { uriHandler.openUri("mailto:$developerEmail") }
+                        .padding(vertical = 16.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.settings_contact_email_label),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                    )
+                    Text(
+                        text = developerEmail,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
