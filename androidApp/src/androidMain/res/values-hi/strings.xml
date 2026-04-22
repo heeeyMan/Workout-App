@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Workout</string>
+    <string name="app_name">वर्कआउट टाइमर</string>
 
     <!-- Permission dialog -->
     <string name="allow">अनुमति दें</string>

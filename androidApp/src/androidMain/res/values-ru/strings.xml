@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Тренировки</string>
+    <string name="app_name">Таймер тренировок</string>
 
     <!-- Permission dialog (AppEntryPermissionHandler) -->
     <string name="allow">Разрешить</string>

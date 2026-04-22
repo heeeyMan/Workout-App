@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Workout</string>
+    <string name="app_name">Workout Timer</string>
 
     <!-- Permission dialog (AppEntryPermissionHandler) -->
     <string name="allow">Allow</string>
@@ -15,8 +15,8 @@
     <string name="notif_action_next_phase">Next</string>
 
     <!-- Notification channel and content (WorkoutTimerForegroundService) -->
-    <string name="timer_notification_channel_name">Workout</string>
+    <string name="timer_notification_channel_name">Workout Timer</string>
     <string name="timer_notification_channel_desc">While the timer is running, the app stays in a high-priority mode</string>
-    <string name="timer_notification_title_fallback">Workout</string>
+    <string name="timer_notification_title_fallback">Workout Timer</string>
     <string name="timer_notification_running">Timer</string>
 </resources>
