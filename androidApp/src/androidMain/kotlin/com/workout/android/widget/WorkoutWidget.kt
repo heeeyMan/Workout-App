@@ -2,12 +2,12 @@ package com.workout.android.widget
 
 import android.content.Context
 import android.content.Intent
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
@@ -15,7 +15,10 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -57,7 +60,7 @@ class WorkoutWidget : GlanceAppWidget() {
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(R.color.widget_background)
+                    .background(ImageProvider(R.drawable.widget_background), ContentScale.FillBounds)
                     .padding(16.dp)
                     .clickable(actionStartActivity(createIntent)),
                 verticalAlignment = Alignment.CenterVertically,
@@ -77,39 +80,45 @@ class WorkoutWidget : GlanceAppWidget() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
 
-            Column(
+            Row(
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(R.color.widget_background)
-                    .padding(16.dp)
+                    .background(ImageProvider(R.drawable.widget_background), ContentScale.FillBounds)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
                     .clickable(actionStartActivity(startIntent)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    workout.name,
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    style = TextStyle(
-                        color = ColorProvider(R.color.widget_text_primary),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1
-                )
-                Spacer(modifier = GlanceModifier.height(4.dp))
-                Text(
-                    formatDuration(context, workout.totalDurationSeconds),
-                    style = TextStyle(
-                        color = ColorProvider(R.color.widget_text_secondary),
-                        fontSize = 13.sp
+                Column(
+                    modifier = GlanceModifier
+                        .defaultWeight()
+                        .fillMaxHeight(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        workout.name,
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        style = TextStyle(
+                            color = ColorProvider(R.color.widget_text_primary),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        maxLines = 1
                     )
-                )
-                Spacer(modifier = GlanceModifier.height(10.dp))
+                    Spacer(modifier = GlanceModifier.height(4.dp))
+                    Text(
+                        formatDuration(context, workout.totalDurationSeconds),
+                        style = TextStyle(
+                            color = ColorProvider(R.color.widget_text_secondary),
+                            fontSize = 13.sp
+                        )
+                    )
+                }
                 Text(
                     "▶",
                     modifier = GlanceModifier.wrapContentSize(),
                     style = TextStyle(
                         color = ColorProvider(R.color.widget_text_primary),
-                        fontSize = 20.sp
+                        fontSize = 40.sp
                     )
                 )
             }
