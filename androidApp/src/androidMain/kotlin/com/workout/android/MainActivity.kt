@@ -8,9 +8,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.lifecycleScope
 import com.workout.android.ui.permissions.AppEntryPermissionHandler
@@ -34,8 +37,10 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
         enableEdgeToEdge()
         setContent {
-            AppEntryPermissionHandler()
-            WorkoutApp(startWorkoutId = startWorkoutId, openCreate = openCreate)
+            Box(Modifier.fillMaxSize()) {
+                WorkoutApp(startWorkoutId = startWorkoutId, openCreate = openCreate)
+                AppEntryPermissionHandler()
+            }
         }
     }
 

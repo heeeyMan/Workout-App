@@ -7,6 +7,7 @@
     <string name="later">Not now</string>
     <string name="permission_notifications_title">Sound and notifications</string>
     <string name="permission_notifications_body">The app needs your permission to notify you with a sound when the training stage changes</string>
+    <string name="permission_banner_hint">Enable to hear sound alerts during workouts</string>
 
     <!-- Notification actions (WorkoutTimerForegroundService) -->
     <string name="cd_previous_phase">Previous phase</string>

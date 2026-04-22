@@ -57,6 +57,9 @@
     <!-- Settings screen -->
     <string name="settings_title">Настройки</string>
     <string name="timer_sound_enabled">Звук таймера</string>
+    <string name="notification_permission_rationale_title">Разрешите уведомления</string>
+    <string name="notification_permission_rationale_body">Для звука таймера нужно разрешение на уведомления. Пожалуйста, включите его в настройках приложения.</string>
+    <string name="go_to_settings">Перейти в настройки</string>
     <string name="vibration">Вибрация</string>
     <string name="sound_before_work">Звук начала подхода</string>
     <string name="sound_before_rest">Звук конца подхода</string>

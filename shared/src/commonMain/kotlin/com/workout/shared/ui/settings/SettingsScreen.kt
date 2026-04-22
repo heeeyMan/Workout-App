@@ -47,6 +47,9 @@ import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.back
 import workoutapp.shared.generated.resources.cancel
 import workoutapp.shared.generated.resources.cd_confirm_selection
+import workoutapp.shared.generated.resources.go_to_settings
+import workoutapp.shared.generated.resources.notification_permission_rationale_body
+import workoutapp.shared.generated.resources.notification_permission_rationale_title
 import workoutapp.shared.generated.resources.settings_contact_email_label
 import workoutapp.shared.generated.resources.settings_contact_section
 import workoutapp.shared.generated.resources.settings_developer_email
@@ -74,6 +77,7 @@ import workoutapp.shared.generated.resources.work_phase_warn_title
 import com.workout.shared.platform.AudioFeedback
 import com.workout.shared.platform.SoundPresets
 import com.workout.shared.platform.TimerSettings
+import com.workout.shared.platform.rememberNotificationPermissionState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -88,10 +92,24 @@ fun SettingsScreen(
     val audioFeedback = koinInject<AudioFeedback>()
     val uriHandler = LocalUriHandler.current
     val developerEmail = stringResource(Res.string.settings_developer_email)
+    val notificationPermission = rememberNotificationPermissionState()
 
     // Local state backed by TimerSettings
     var prepSeconds by remember { mutableStateOf(settings.blockPrepDurationSeconds) }
-    var soundEnabled by remember { mutableStateOf(settings.soundEnabled) }
+    var soundEnabled by remember { mutableStateOf(settings.soundEnabled && notificationPermission.isGranted) }
+    var awaitingPermissionToEnable by remember { mutableStateOf(false) }
+
+    LaunchedEffect(notificationPermission.isGranted) {
+        if (!notificationPermission.isGranted) {
+            settings.soundEnabled = false
+            soundEnabled = false
+            awaitingPermissionToEnable = false
+        } else if (awaitingPermissionToEnable) {
+            settings.soundEnabled = true
+            soundEnabled = true
+            awaitingPermissionToEnable = false
+        }
+    }
     var vibrationEnabled by remember { mutableStateOf(settings.vibrationEnabled) }
     var workPhaseEndWarningSeconds by remember { mutableStateOf(settings.workPhaseEndWarningSeconds) }
     var workSoundPresetId by remember { mutableStateOf(settings.workStartSoundPresetId) }
@@ -103,6 +121,9 @@ fun SettingsScreen(
     // Sound picker state
     var soundPickerTarget by remember { mutableStateOf<SoundPickerTarget?>(null) }
     var pendingSoundPresetId by remember { mutableStateOf(SoundPresets.DEFAULT_WORK_ID) }
+
+    // Permission rationale dialog state
+    var showPermissionRationaleDialog by remember { mutableStateOf(false) }
 
     // Prep dialog state
     var showPrepDialog by remember { mutableStateOf(false) }
@@ -205,6 +226,21 @@ fun SettingsScreen(
         }
     }
 
+    if (showPermissionRationaleDialog) {
+        WorkoutDialog(
+            onDismissRequest = { showPermissionRationaleDialog = false },
+            title = stringResource(Res.string.notification_permission_rationale_title),
+            confirmText = stringResource(Res.string.go_to_settings),
+            onConfirm = {
+                showPermissionRationaleDialog = false
+                notificationPermission.openSettings()
+            },
+            dismissText = stringResource(Res.string.cancel),
+            onDismiss = { showPermissionRationaleDialog = false },
+            content = { Text(stringResource(Res.string.notification_permission_rationale_body)) }
+        )
+    }
+
     if (showPrepDialog) {
         WorkoutDialog(
             onDismissRequest = { showPrepDialog = false },
@@ -297,9 +333,18 @@ fun SettingsScreen(
                     )
                     Switch(
                         checked = soundEnabled,
-                        onCheckedChange = {
-                            settings.soundEnabled = it
-                            soundEnabled = it
+                        onCheckedChange = { checked ->
+                            if (checked && !notificationPermission.isGranted) {
+                                if (notificationPermission.shouldOpenSettings) {
+                                    showPermissionRationaleDialog = true
+                                } else {
+                                    awaitingPermissionToEnable = true
+                                    notificationPermission.request()
+                                }
+                            } else {
+                                settings.soundEnabled = checked
+                                soundEnabled = checked
+                            }
                         }
                     )
                 }

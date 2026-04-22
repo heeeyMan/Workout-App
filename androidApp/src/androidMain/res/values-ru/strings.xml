@@ -7,6 +7,7 @@
     <string name="later">Позже</string>
     <string name="permission_notifications_title">Звук и уведомления</string>
     <string name="permission_notifications_body">Приложению нужно ваше разрешение, чтобы уведомлять вас звуком при смене этапа тренировки</string>
+    <string name="permission_banner_hint">Включи, чтобы слышать сигналы смены фазы</string>
 
     <!-- Notification actions (WorkoutTimerForegroundService) -->
     <string name="cd_previous_phase">Предыдущая фаза</string>

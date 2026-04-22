@@ -55,6 +55,9 @@
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>
     <string name="timer_sound_enabled">Timer sound</string>
+    <string name="notification_permission_rationale_title">Allow notifications</string>
+    <string name="notification_permission_rationale_body">Timer sound requires notification permission. Please allow it in app settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
     <string name="vibration">Vibration</string>
     <string name="sound_before_work">Sound before work</string>
     <string name="sound_before_rest">Sound before rest</string>
