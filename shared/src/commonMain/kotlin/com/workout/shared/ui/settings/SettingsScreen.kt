@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardType
@@ -524,7 +525,7 @@ private fun SecondsInputField(
     supportingText: String? = null
 ) {
     val onDialog = MaterialTheme.colorScheme.onPrimary
-    val onDialogMuted = MaterialTheme.colorScheme.onSurfaceVariant
+    val onDialogDim = onDialog.copy(alpha = 0.5f)
     CompositionLocalProvider(
         LocalTextSelectionColors provides TextSelectionColors(
             handleColor = onDialog,
@@ -539,15 +540,20 @@ private fun SecondsInputField(
                 { Text(supportingText) }
             } else null,
             singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = onDialog,
                 unfocusedTextColor = onDialog,
                 focusedBorderColor = onDialog,
-                unfocusedBorderColor = onDialogMuted,
+                unfocusedBorderColor = onDialogDim,
                 focusedLabelColor = onDialog,
-                unfocusedLabelColor = onDialogMuted,
-                cursorColor = onDialog
+                unfocusedLabelColor = onDialogDim,
+                cursorColor = onDialog,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedSupportingTextColor = onDialogDim,
+                unfocusedSupportingTextColor = onDialogDim,
             )
         )
     }

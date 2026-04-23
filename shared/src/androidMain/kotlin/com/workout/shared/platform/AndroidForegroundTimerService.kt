@@ -14,6 +14,17 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         @Volatile
         var dispatchCallback: ((TimerIntent) -> Unit)? = null
 
+        /**
+         * Устанавливается сервисом при старте; используется для обновления уведомления без reflection.
+         * Параметры: context, workoutName, phaseLine, detailLine, timeLine, isPaused, phaseType → Notification.
+         */
+        @Volatile
+        var notificationBuilder: ((android.content.Context, String, String, String, String, Boolean, String) -> android.app.Notification)? = null
+
+        /** Вызывается при stop() для остановки сервиса без reflection/Class.forName. */
+        @Volatile
+        var stopService: (() -> Unit)? = null
+
         const val ACTION_RUN = "com.workout.android.timer.RUN"
         const val EXTRA_WORKOUT_NAME = "workout_name"
         const val EXTRA_PHASE_LINE = "phase_line"
@@ -21,10 +32,11 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         const val EXTRA_IS_PAUSED = "is_paused"
         const val EXTRA_PHASE_TYPE = "phase_type"
 
-        private const val SERVICE_CLASS = "com.workout.android.timer.WorkoutTimerForegroundService"
-
         /** ID уведомления — совпадает с WorkoutTimerForegroundService.NOTIFICATION_ID */
         const val NOTIFICATION_ID = 71001
+
+        /** Имя класса сервиса — используется только для первоначального Intent при старте. */
+        private const val SERVICE_CLASS = "com.workout.android.timer.WorkoutTimerForegroundService"
     }
 
     private var serviceStarted = false
@@ -73,12 +85,9 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
 
     override fun stop() {
         dispatchCallback = null
+        notificationBuilder = null
         serviceStarted = false
-        val app = context.applicationContext
-        try {
-            val cls = Class.forName(SERVICE_CLASS)
-            app.stopService(Intent(app, cls))
-        } catch (_: Exception) { }
+        stopService?.invoke()
     }
 
     private fun startService(
@@ -117,21 +126,10 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         isPaused: Boolean,
         phaseType: String
     ) {
-        try {
-            val cls = Class.forName(SERVICE_CLASS)
-            val method = cls.getMethod(
-                "buildNotificationStatic",
-                Context::class.java,
-                String::class.java, String::class.java, String::class.java,
-                String::class.java, Boolean::class.javaPrimitiveType, String::class.java
-            )
-            val notification = method.invoke(
-                null, context, workoutName, phaseLine, detailLine, timeLine, isPaused, phaseType
-            ) as android.app.Notification
-
-            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-            nm?.notify(NOTIFICATION_ID, notification)
-        } catch (_: Exception) { }
+        val builder = notificationBuilder ?: return
+        val notification = builder(context, workoutName, phaseLine, detailLine, timeLine, isPaused, phaseType)
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        nm?.notify(NOTIFICATION_ID, notification)
     }
 }
 

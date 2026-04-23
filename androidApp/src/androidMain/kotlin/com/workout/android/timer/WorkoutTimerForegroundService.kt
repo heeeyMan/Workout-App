@@ -35,6 +35,8 @@ class WorkoutTimerForegroundService : Service() {
         super.onCreate()
         createChannelIfNeeded()
         setupMediaSession()
+        AndroidForegroundTimerService.notificationBuilder = ::buildNotificationStatic
+        AndroidForegroundTimerService.stopService = { stop(applicationContext) }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -100,6 +102,8 @@ class WorkoutTimerForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        AndroidForegroundTimerService.notificationBuilder = null
+        AndroidForegroundTimerService.stopService = null
         mediaSession?.apply { isActive = false; release() }
         mediaSession = null
         try {
@@ -135,7 +139,7 @@ class WorkoutTimerForegroundService : Service() {
     companion object {
         private const val CHANNEL_ID = "workout_timer_foreground"
         const val NOTIFICATION_ID = 71001
-        private val ACTION_RUN get() = AndroidForegroundTimerService.ACTION_RUN
+        private const val ACTION_RUN = AndroidForegroundTimerService.ACTION_RUN
 
         private const val REQ_PAUSE = 71002
         private const val REQ_SKIP = 71003
