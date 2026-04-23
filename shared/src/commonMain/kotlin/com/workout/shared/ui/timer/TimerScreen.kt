@@ -72,6 +72,7 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.timer.PhaseType
 import com.workout.shared.feature.timer.TimerEffect
 import com.workout.shared.feature.timer.TimerIntent
+import com.workout.shared.feature.timer.TimerLoadSettings
 import com.workout.shared.feature.timer.TimerViewModel
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.back_to_home
@@ -153,14 +154,16 @@ fun TimerScreen(
         store.dispatch(
             TimerIntent.Load(
                 workoutId = workoutId,
-                blockPrepDurationSeconds = timerSettings.blockPrepDurationSeconds,
-                soundEnabled = timerSettings.soundEnabled,
-                vibrationEnabled = timerSettings.vibrationEnabled,
-                workStartSoundPresetId = timerSettings.workStartSoundPresetId,
-                restStartSoundPresetId = timerSettings.restStartSoundPresetId,
-                finishSoundPresetId = timerSettings.workoutFinishSoundPresetId,
-                workPhaseWarningSoundPresetId = timerSettings.workPhaseWarningSoundPresetId,
-                workPhaseEndWarningSeconds = timerSettings.workPhaseEndWarningSeconds,
+                settings = TimerLoadSettings(
+                    blockPrepDurationSeconds = timerSettings.blockPrepDurationSeconds,
+                    soundEnabled = timerSettings.soundEnabled,
+                    vibrationEnabled = timerSettings.vibrationEnabled,
+                    workStartSoundPresetId = timerSettings.workStartSoundPresetId,
+                    restStartSoundPresetId = timerSettings.restStartSoundPresetId,
+                    finishSoundPresetId = timerSettings.workoutFinishSoundPresetId,
+                    workPhaseWarningSoundPresetId = timerSettings.workPhaseWarningSoundPresetId,
+                    workPhaseEndWarningSeconds = timerSettings.workPhaseEndWarningSeconds,
+                ),
                 restPhaseDisplayName = getString(Res.string.phase_rest_name)
             )
         )
@@ -203,9 +206,10 @@ fun TimerScreen(
                     audioFeedback.playFinishTone(st.finishSoundPresetId)
                 }
 
-                is TimerEffect.Vibrate -> hapticFeedback.vibrateShort()
+                is TimerEffect.VibrateWork -> hapticFeedback.vibrateShort()
+                is TimerEffect.VibrateRest -> hapticFeedback.vibrateShort()
                 is TimerEffect.VibrateFinish -> hapticFeedback.vibrateFinish()
-                is TimerEffect.Alert10Seconds -> {
+                is TimerEffect.WorkPhaseEndAlert -> {
                     val st = store.state.value
                     if (st.soundEnabled) {
                         audioFeedback.playWarningTone(st.workPhaseWarningSoundPresetId)
@@ -250,16 +254,14 @@ fun TimerScreen(
     val titleStyle =
         if (gymMode) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium
 
-    val inPrep = state.isPrepBeforeWork
-    val isWorkPhase = state.currentPhase?.type == PhaseType.Work
-    val phaseAccentTarget = when {
-        inPrep -> TimerPrepGray
-        isWorkPhase -> TimerWorkOrange
+    val phaseAccentTarget = when (state.currentPhase?.type) {
+        PhaseType.Prep -> TimerPrepGray
+        PhaseType.Work -> TimerWorkOrange
         else -> TimerRestGreen
     }
-    val phaseDimTarget = when {
-        inPrep -> TimerPrepGrayDim
-        isWorkPhase -> TimerWorkOrangeDim
+    val phaseDimTarget = when (state.currentPhase?.type) {
+        PhaseType.Prep -> TimerPrepGrayDim
+        PhaseType.Work -> TimerWorkOrangeDim
         else -> TimerRestGreenDim
     }
     val backgroundColor by animateColorAsState(
@@ -391,9 +393,9 @@ fun TimerScreen(
                             .padding(horizontal = 24.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = when {
-                                state.isPrepBeforeWork -> stringResource(Res.string.phase_prep)
-                                state.currentPhase?.type == PhaseType.Work -> stringResource(Res.string.phase_work)
+                            text = when (state.currentPhase?.type) {
+                                PhaseType.Prep -> stringResource(Res.string.phase_prep)
+                                PhaseType.Work -> stringResource(Res.string.phase_work)
                                 else -> stringResource(Res.string.phase_rest)
                             },
                             style = MaterialTheme.typography.titleLarge,
@@ -443,7 +445,7 @@ fun TimerScreen(
                     Spacer(Modifier.height(24.dp))
 
                     if (!gymControlsLocked || !gymMode) {
-                        state.nextPhase?.let { next ->
+                        state.nextSignificantPhase?.let { next ->
                             Text(
                                 text = stringResource(
                                     Res.string.timer_next_phase_format,

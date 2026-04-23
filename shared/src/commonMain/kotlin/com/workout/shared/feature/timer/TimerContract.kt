@@ -10,8 +10,6 @@ data class TimerState(
      * Хранится в состоянии, чтобы прогресс и таймер были согласованы на всю сессию.
      */
     val blockPrepDurationSeconds: Int = 0,
-    /** Обратный отсчёт перед первой фазой «Работа» в блоке (см. [TimerPhase.needsBlockPrepStart]). */
-    val isPrepBeforeWork: Boolean = false,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
     val isLoading: Boolean = true,
@@ -29,49 +27,74 @@ data class TimerState(
     val currentPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex)
     val nextPhase: TimerPhase? get() = phases.getOrNull(currentPhaseIndex + 1)
     val totalPhases: Int get() = phases.size
-    val overallProgress: Float
-        get() = if (phases.isEmpty()) 0f else currentPhaseIndex.toFloat() / phases.size
+
+    /** True когда текущий сегмент — обратный отсчёт подготовки перед блоком. */
+    val isPrepBeforeWork: Boolean get() = currentPhase?.type == PhaseType.Prep
+
+    /**
+     * Следующая значимая фаза для отображения в UI: пропускает Prep-фазы,
+     * показывая сразу предстоящую Work-фазу.
+     */
+    val nextSignificantPhase: TimerPhase?
+        get() {
+            val next = phases.getOrNull(currentPhaseIndex + 1) ?: return null
+            return if (next.type == PhaseType.Prep) phases.getOrNull(currentPhaseIndex + 2) else next
+        }
+
     val phaseProgress: Float
         get() {
-            val phase = currentPhase ?: return 0f
-            if (isPrepBeforeWork && phase.type == PhaseType.Work) {
-                val prep = blockPrepDurationSeconds
-                return if (prep <= 0) 1f else 1f - (secondsRemaining.toFloat() / prep)
-            }
-            val duration = phase.durationSeconds
-            return if (duration == 0) 1f else 1f - (secondsRemaining.toFloat() / duration)
+            val duration = currentPhase?.durationSeconds ?: return 0f
+            return if (duration == 0) 1f
+            else (1f - secondsRemaining.toFloat() / duration).coerceIn(0f, 1f)
         }
+
+    val overallProgress: Float
+        get() = if (phases.isEmpty()) 0f else (currentPhaseIndex + phaseProgress) / phases.size
+
     val isInWorkEndWarning: Boolean
-        get() = workPhaseEndWarningSeconds > 0 &&
-                !isPrepBeforeWork &&
-                currentPhase?.type == PhaseType.Work &&
-                secondsRemaining in 1..workPhaseEndWarningSeconds
+        get() = isInWarningWindow(secondsRemaining)
+
+    /**
+     * Проверяет, попадает ли [secondsRemaining] в окно предупреждения конца Work-фазы.
+     * Используется как в [isInWorkEndWarning] (для UI), так и в [TimerStore.tick]
+     * (для значения после тика), чтобы избежать дублирования условия.
+     */
+    fun isInWarningWindow(secondsRemaining: Int): Boolean =
+        workPhaseEndWarningSeconds > 0 &&
+            currentPhase?.type == PhaseType.Work &&
+            secondsRemaining in 1..workPhaseEndWarningSeconds
 }
 
 data class TimerPhase(
     val name: String,
     val type: PhaseType,
     val durationSeconds: Int,
-    val repeatLabel: String? = null,  // e.g. "2 / 5"
-    /** True только для первого подхода в блоке упражнения — перед ним показывается пауза из настроек. */
-    val needsBlockPrepStart: Boolean = false
+    val repeatLabel: String? = null,
 )
 
-enum class PhaseType { Work, Rest }
+enum class PhaseType { Prep, Work, Rest }
+
+/**
+ * Настройки таймера, передаваемые при загрузке тренировки.
+ * Группирует параметры [TimerIntent.Load], не связанные с конкретной тренировкой.
+ */
+data class TimerLoadSettings(
+    val blockPrepDurationSeconds: Int,
+    val soundEnabled: Boolean,
+    val vibrationEnabled: Boolean,
+    val workStartSoundPresetId: String,
+    val restStartSoundPresetId: String,
+    val finishSoundPresetId: String,
+    val workPhaseWarningSoundPresetId: String,
+    val workPhaseEndWarningSeconds: Int,
+)
 
 sealed interface TimerIntent {
     data class Load(
         val workoutId: Long,
-        val blockPrepDurationSeconds: Int,
-        val soundEnabled: Boolean,
-        val vibrationEnabled: Boolean,
-        val workStartSoundPresetId: String,
-        val restStartSoundPresetId: String,
-        val finishSoundPresetId: String,
-        val workPhaseWarningSoundPresetId: String,
-        val workPhaseEndWarningSeconds: Int,
+        val settings: TimerLoadSettings,
         /** Локализованная подпись фазы отдыха (для таймера и блоков). */
-        val restPhaseDisplayName: String
+        val restPhaseDisplayName: String,
     ) : TimerIntent
     data object TogglePause : TimerIntent
     data object SkipPhase : TimerIntent
@@ -93,14 +116,17 @@ sealed interface TimerEffect {
     data object PlayWorkSound : TimerEffect
     data object PlayRestSound : TimerEffect
     data object PlayFinishSound : TimerEffect
-    data object Vibrate : TimerEffect
+    /** Вибрация при старте фазы «Работа». */
+    data object VibrateWork : TimerEffect
+    /** Вибрация при старте фазы «Отдых». */
+    data object VibrateRest : TimerEffect
     data object VibrateFinish : TimerEffect
     /**
      * Предупреждение в конце фазы «Работа»: короткий звук (если включён звук).
      * [secondsRemainingAfterTick] — сколько секунд осталось в фазе после этого тика (1..N в окне предупреждения).
      * [withVibration] — однократная вибрация в первую секунду окна предупреждения.
      */
-    data class Alert10Seconds(
+    data class WorkPhaseEndAlert(
         val secondsRemainingAfterTick: Int,
         val withVibration: Boolean,
     ) : TimerEffect

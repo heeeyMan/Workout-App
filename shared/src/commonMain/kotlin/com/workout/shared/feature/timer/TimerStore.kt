@@ -1,6 +1,5 @@
 package com.workout.shared.feature.timer
 
-import com.workout.core.model.Block
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.mvi.BaseStore
 import kotlinx.coroutines.Job
@@ -16,18 +15,7 @@ class TimerStore(
 
     override fun dispatch(intent: TimerIntent) {
         when (intent) {
-            is TimerIntent.Load -> load(
-                intent.workoutId,
-                intent.blockPrepDurationSeconds,
-                intent.soundEnabled,
-                intent.vibrationEnabled,
-                intent.workStartSoundPresetId,
-                intent.restStartSoundPresetId,
-                intent.finishSoundPresetId,
-                intent.workPhaseWarningSoundPresetId,
-                intent.workPhaseEndWarningSeconds,
-                intent.restPhaseDisplayName
-            )
+            is TimerIntent.Load -> load(intent.workoutId, intent.settings, intent.restPhaseDisplayName)
             is TimerIntent.TogglePause -> togglePause()
             is TimerIntent.SkipPhase -> skipPhase()
             is TimerIntent.PreviousPhase -> previousPhase()
@@ -37,49 +25,30 @@ class TimerStore(
         }
     }
 
-    private fun load(
-        workoutId: Long,
-        blockPrepDurationSeconds: Int,
-        soundEnabled: Boolean,
-        vibrationEnabled: Boolean,
-        workStartSoundPresetId: String,
-        restStartSoundPresetId: String,
-        finishSoundPresetId: String,
-        workPhaseWarningSoundPresetId: String,
-        workPhaseEndWarningSeconds: Int,
-        restPhaseDisplayName: String
-    ) {
+    private fun load(workoutId: Long, settings: TimerLoadSettings, restPhaseDisplayName: String) {
         scope.launch {
             val workout = workoutRepository.getWorkoutById(workoutId) ?: return@launch
-            val phases = workout.blocks.flatMap { it.toPhases(restPhaseDisplayName) }
-            val prepLen = blockPrepDurationSeconds.coerceAtLeast(0)
+            val prepLen = settings.blockPrepDurationSeconds.coerceAtLeast(0)
+            val phases = workout.blocks.flatMap { it.toPhases(restPhaseDisplayName, prepLen) }
             val first = phases.firstOrNull()
-            val startWithPrep = prepLen > 0 &&
-                first?.type == PhaseType.Work &&
-                first.needsBlockPrepStart
             setState {
                 copy(
                     workoutName = workout.name,
                     phases = phases,
                     currentPhaseIndex = 0,
                     blockPrepDurationSeconds = prepLen,
-                    isPrepBeforeWork = startWithPrep,
-                    secondsRemaining = when {
-                        startWithPrep -> prepLen
-                        first != null -> first.durationSeconds
-                        else -> 0
-                    },
-                    soundEnabled = soundEnabled,
-                    vibrationEnabled = vibrationEnabled,
-                    workStartSoundPresetId = workStartSoundPresetId,
-                    restStartSoundPresetId = restStartSoundPresetId,
-                    finishSoundPresetId = finishSoundPresetId,
-                    workPhaseWarningSoundPresetId = workPhaseWarningSoundPresetId,
-                    workPhaseEndWarningSeconds = workPhaseEndWarningSeconds.coerceAtLeast(0),
+                    secondsRemaining = first?.durationSeconds ?: 0,
+                    soundEnabled = settings.soundEnabled,
+                    vibrationEnabled = settings.vibrationEnabled,
+                    workStartSoundPresetId = settings.workStartSoundPresetId,
+                    restStartSoundPresetId = settings.restStartSoundPresetId,
+                    finishSoundPresetId = settings.finishSoundPresetId,
+                    workPhaseWarningSoundPresetId = settings.workPhaseWarningSoundPresetId,
+                    workPhaseEndWarningSeconds = settings.workPhaseEndWarningSeconds.coerceAtLeast(0),
                     isLoading = false
                 )
             }
-            if (startWithPrep && soundEnabled) {
+            if (first?.type == PhaseType.Prep && settings.soundEnabled) {
                 emitEffect(TimerEffect.PlayPrepTickSound)
             }
             startTimer()
@@ -98,21 +67,12 @@ class TimerStore(
 
     // Показываем полностью заполненный прогресс (secondsRemaining=0), затем через небольшую
     // задержку переходим к следующей фазе и перезапускаем тикер.
-    // Обрабатывает как конец подготовки (isPrepBeforeWork=true), так и конец обычной фазы.
     private fun scheduleTransition() {
         phaseTransitionJob?.cancel()
         phaseTransitionJob = scope.launch {
             delay(100L)
             phaseTransitionJob = null
-            val s = state.value
-            if (s.isPrepBeforeWork) {
-                val phase = s.currentPhase ?: return@launch
-                setState { copy(isPrepBeforeWork = false, secondsRemaining = phase.durationSeconds) }
-                if (state.value.soundEnabled) emitEffect(TimerEffect.PlayPrepEndSound)
-                if (state.value.vibrationEnabled) emitEffect(TimerEffect.VibratePrepEnd)
-            } else {
-                advancePhase()
-            }
+            advancePhase()
             if (!state.value.isFinished && !state.value.isPaused) {
                 startTimer()
             }
@@ -126,24 +86,17 @@ class TimerStore(
 
         val newSeconds = s.secondsRemaining - 1
 
-        if (s.isPrepBeforeWork && s.soundEnabled && newSeconds > 0) {
+        if (s.currentPhase?.type == PhaseType.Prep && s.soundEnabled && newSeconds > 0) {
             emitEffect(TimerEffect.PlayPrepTickSound)
         }
 
-        val warnWindow = s.workPhaseEndWarningSeconds
-        if (warnWindow > 0 && !s.isPrepBeforeWork &&
-            s.currentPhase?.type == PhaseType.Work &&
-            newSeconds in 1..warnWindow
-        ) {
-            val playSound = s.soundEnabled
-            val vibOnce = s.vibrationEnabled && newSeconds == warnWindow
-            if (playSound || vibOnce) {
-                emitEffect(
-                    TimerEffect.Alert10Seconds(
-                        secondsRemainingAfterTick = newSeconds,
-                        withVibration = vibOnce,
-                    ),
-                )
+        if (s.isInWarningWindow(newSeconds)) {
+            val vibOnce = s.vibrationEnabled && newSeconds == s.workPhaseEndWarningSeconds
+            if (s.soundEnabled || vibOnce) {
+                emitEffect(TimerEffect.WorkPhaseEndAlert(
+                    secondsRemainingAfterTick = newSeconds,
+                    withVibration = vibOnce,
+                ))
             }
         }
 
@@ -163,70 +116,44 @@ class TimerStore(
 
         if (nextIndex >= s.phases.size) {
             timerJob?.cancel()
-            setState { copy(isFinished = true, secondsRemaining = 0, isPrepBeforeWork = false) }
-            if (s.soundEnabled) {
-                emitEffect(TimerEffect.PlayFinishSound)
-            }
-            if (s.vibrationEnabled) {
-                emitEffect(TimerEffect.VibrateFinish)
-            }
+            setState { copy(isFinished = true, secondsRemaining = 0) }
+            if (s.soundEnabled) emitEffect(TimerEffect.PlayFinishSound)
+            if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateFinish)
             return
         }
 
         val nextPhase = s.phases[nextIndex]
-        val prepLen = s.blockPrepDurationSeconds
+        setState { copy(currentPhaseIndex = nextIndex, secondsRemaining = nextPhase.durationSeconds) }
+
+        // s.currentPhase — фаза, которую покидаем (захвачена до setState)
         when (nextPhase.type) {
-            PhaseType.Work if prepLen > 0 && nextPhase.needsBlockPrepStart -> {
-                setState {
-                    copy(
-                        currentPhaseIndex = nextIndex,
-                        isPrepBeforeWork = true,
-                        secondsRemaining = prepLen
-                    )
-                }
-                if (state.value.soundEnabled) {
-                    emitEffect(TimerEffect.PlayPrepTickSound)
-                }
+            PhaseType.Prep -> {
+                if (s.soundEnabled) emitEffect(TimerEffect.PlayPrepTickSound)
             }
             PhaseType.Work -> {
-                setState {
-                    copy(
-                        currentPhaseIndex = nextIndex,
-                        isPrepBeforeWork = false,
-                        secondsRemaining = nextPhase.durationSeconds
-                    )
-                }
-                if (state.value.soundEnabled) {
-                    emitEffect(TimerEffect.PlayWorkSound)
-                }
-                if (state.value.vibrationEnabled) {
-                    emitEffect(TimerEffect.Vibrate)
+                if (s.currentPhase?.type == PhaseType.Prep) {
+                    // Переход подготовка → работа: особый звук и вибрация
+                    if (s.soundEnabled) emitEffect(TimerEffect.PlayPrepEndSound)
+                    if (s.vibrationEnabled) emitEffect(TimerEffect.VibratePrepEnd)
+                } else {
+                    if (s.soundEnabled) emitEffect(TimerEffect.PlayWorkSound)
+                    if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateWork)
                 }
             }
-            else -> {
-                setState {
-                    copy(
-                        currentPhaseIndex = nextIndex,
-                        isPrepBeforeWork = false,
-                        secondsRemaining = nextPhase.durationSeconds
-                    )
-                }
-                if (state.value.soundEnabled) {
-                    emitEffect(TimerEffect.PlayRestSound)
-                }
-                if (state.value.vibrationEnabled) {
-                    emitEffect(TimerEffect.Vibrate)
-                }
+            PhaseType.Rest -> {
+                if (s.soundEnabled) emitEffect(TimerEffect.PlayRestSound)
+                if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateRest)
             }
         }
     }
 
     private fun skipPhase() {
-        val hadTransition = phaseTransitionJob?.isActive == true
         phaseTransitionJob?.cancel()
         phaseTransitionJob = null
+        // Отменяем и перезапускаем timerJob, чтобы новая фаза начиналась ровно с 1 с
+        timerJob?.cancel()
         advancePhase()
-        if (hadTransition && !state.value.isFinished && !state.value.isPaused) {
+        if (!state.value.isFinished && !state.value.isPaused) {
             startTimer()
         }
     }
@@ -235,15 +162,7 @@ class TimerStore(
         val s = state.value
         if (index < 0 || index >= s.phases.size) return
         val p = s.phases[index]
-        val prep = s.blockPrepDurationSeconds
-        val startWithPrep = p.type == PhaseType.Work && prep > 0 && p.needsBlockPrepStart
-        setState {
-            copy(
-                currentPhaseIndex = index,
-                isPrepBeforeWork = startWithPrep,
-                secondsRemaining = if (startWithPrep) prep else p.durationSeconds
-            )
-        }
+        setState { copy(currentPhaseIndex = index, secondsRemaining = p.durationSeconds) }
     }
 
     private fun previousPhase() {
@@ -257,29 +176,13 @@ class TimerStore(
         val s = state.value
         if (s.isFinished || s.isLoading) return
 
-        if (s.currentPhaseIndex == 0 && s.isPrepBeforeWork) return
-
-        if (s.isPrepBeforeWork) {
-            enterPhaseAtIndex(s.currentPhaseIndex - 1)
-            return
-        }
-
-        val phase = s.currentPhase ?: return
-        if (phase.type == PhaseType.Work && phase.needsBlockPrepStart && s.blockPrepDurationSeconds > 0) {
-            setState {
-                copy(
-                    isPrepBeforeWork = true,
-                    secondsRemaining = blockPrepDurationSeconds
-                )
-            }
-            return
-        }
-
+        // На первой фазе — перезапустить её с начала
         if (s.currentPhaseIndex == 0) {
-            setState { copy(secondsRemaining = phase.durationSeconds) }
+            enterPhaseAtIndex(0)
             return
         }
 
+        // Иначе — перейти к предыдущей фазе (может быть Prep перед текущим подходом)
         enterPhaseAtIndex(s.currentPhaseIndex - 1)
     }
 
@@ -287,11 +190,7 @@ class TimerStore(
         if (delta == 0) return
         val s = state.value
         if (s.isFinished || s.isLoading) return
-        val maxCap = if (s.isPrepBeforeWork) {
-            s.blockPrepDurationSeconds
-        } else {
-            s.currentPhase?.durationSeconds ?: return
-        }
+        val maxCap = s.currentPhase?.durationSeconds ?: return
         if (maxCap <= 0) return
         val newVal = (s.secondsRemaining + delta).coerceIn(1, maxCap)
         setState { copy(secondsRemaining = newVal) }
@@ -323,35 +222,5 @@ class TimerStore(
         timerJob?.cancel()
         phaseTransitionJob?.cancel()
         super.destroy()
-    }
-
-    // Expand a Block into flat list of timer phases
-    private fun Block.toPhases(restPhaseDisplayName: String): List<TimerPhase> = when (this) {
-        is Block.Exercise -> (1..repeats).flatMap { rep ->
-            buildList {
-                add(
-                    TimerPhase(
-                        name = name,
-                        type = PhaseType.Work,
-                        durationSeconds = workDurationSeconds,
-                        repeatLabel = "$rep / $repeats",
-                        needsBlockPrepStart = rep == 1
-                    )
-                )
-                if (restDurationSeconds > 0 && rep < repeats) {
-                    add(
-                        TimerPhase(
-                            name = restPhaseDisplayName,
-                            type = PhaseType.Rest,
-                            durationSeconds = restDurationSeconds,
-                            repeatLabel = "$rep / $repeats"
-                        )
-                    )
-                }
-            }
-        }
-        is Block.Rest -> listOf(
-            TimerPhase(name = restPhaseDisplayName, type = PhaseType.Rest, durationSeconds = durationSeconds)
-        )
     }
 }
