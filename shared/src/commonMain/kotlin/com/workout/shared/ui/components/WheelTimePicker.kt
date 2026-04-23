@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -134,8 +135,14 @@ private fun WheelColumn(
                 val distance = abs(index - centeredDataIndex)
                 val alpha = when (distance) {
                     0 -> 1f
-                    1 -> 0.45f
-                    else -> 0.15f
+                    1 -> 0.55f
+                    else -> 0.25f
+                }
+                // Активный элемент лежит на primaryContainer, неактивные — на фоне диалога (primary)
+                val textColor = if (distance == 0) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onPrimary
                 }
                 Box(
                     modifier = Modifier
@@ -152,7 +159,7 @@ private fun WheelColumn(
                             MaterialTheme.typography.headlineLarge
                         },
                         fontWeight = if (distance == 0) FontWeight.Bold else FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = textColor
                     )
                 }
             }

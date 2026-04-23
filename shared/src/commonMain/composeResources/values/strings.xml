@@ -91,7 +91,7 @@
     <string name="phase_rest">REST</string>
     <string name="phase_rest_name">Rest</string>
     <string name="timer_round_format">Round %1$s</string>
-    <string name="timer_next_phase_format">Next: %1$s %2$s</string>
+    <string name="timer_next_phase_format">Next: %1$s · %2$s</string>
     <string name="cd_exit_gym_mode">Exit gym mode</string>
     <string name="cd_lock_controls">Lock controls</string>
     <string name="cd_gym_mode">Gym mode</string>
