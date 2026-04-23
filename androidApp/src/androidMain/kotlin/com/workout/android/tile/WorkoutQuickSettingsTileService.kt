@@ -1,5 +1,6 @@
 package com.workout.android.tile
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -64,6 +65,7 @@ class WorkoutQuickSettingsTileService : TileService() {
             startActivityAndCollapse(pi)
         } else {
             @Suppress("DEPRECATION")
+            @SuppressLint("StartActivityAndCollapseDeprecated")
             startActivityAndCollapse(intent)
         }
     }
