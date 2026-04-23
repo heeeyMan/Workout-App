@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -58,12 +58,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -208,7 +214,6 @@ fun CreateWorkoutScreen(
                     BlockCard(
                         block = block,
                         index = index,
-                        totalBlocks = state.blocks.size,
                         isDragging = draggingIndex == index,
                         dragOffsetY = if (draggingIndex == index) dragOffsetY else 0f,
                         onMeasuredCenterY = { center -> blockCenters[index] = center },
@@ -241,9 +246,7 @@ fun CreateWorkoutScreen(
                         },
                         onUpdate = { updated -> store.dispatch(CreateWorkoutIntent.UpdateBlock(index, updated)) },
                         onDelete = { store.dispatch(CreateWorkoutIntent.RemoveBlock(index)) },
-                        onDuplicate = { store.dispatch(CreateWorkoutIntent.DuplicateBlock(index)) },
-                        onMoveUp = { if (index > 0) store.dispatch(CreateWorkoutIntent.MoveBlock(index, index - 1)) },
-                        onMoveDown = { if (index < state.blocks.size - 1) store.dispatch(CreateWorkoutIntent.MoveBlock(index, index + 1)) }
+                        onDuplicate = { store.dispatch(CreateWorkoutIntent.DuplicateBlock(index)) }
                     )
                 }
             }
@@ -289,7 +292,6 @@ fun CreateWorkoutScreen(
 private fun BlockCard(
     block: Block,
     index: Int,
-    totalBlocks: Int,
     isDragging: Boolean,
     dragOffsetY: Float,
     onMeasuredCenterY: (Float) -> Unit,
@@ -298,9 +300,7 @@ private fun BlockCard(
     onEndDrag: () -> Unit,
     onUpdate: (Block) -> Unit,
     onDelete: () -> Unit,
-    onDuplicate: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit
+    onDuplicate: () -> Unit
 ) {
     val isExercise = block is Block.Exercise
     val accentColor = if (isExercise) TimerWorkOrange else TimerRestGreen
@@ -557,7 +557,7 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
 private fun DurationChip(
     label: String,
     seconds: Int,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -617,26 +617,40 @@ private fun NameEditDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var text by remember { mutableStateOf(currentName) }
+    var text by remember { mutableStateOf(TextFieldValue(currentName, selection = TextRange(currentName.length))) }
     val focusRequester = remember { FocusRequester() }
 
     WorkoutDialog(
         onDismissRequest = onDismiss,
         title = stringResource(Res.string.dialog_exercise_name_title),
         confirmText = stringResource(Res.string.done),
-        onConfirm = { if (text.isNotBlank()) onConfirm(text.trim()) },
+        onConfirm = { if (text.text.isNotBlank()) onConfirm(text.text.trim()) },
         dismissText = stringResource(Res.string.cancel),
         onDismiss = onDismiss,
         content = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
-            )
+            CompositionLocalProvider(
+                LocalTextSelectionColors provides TextSelectionColors(
+                    handleColor = Color.Black,
+                    backgroundColor = Color.Black.copy(alpha = 0.3f)
+                )
+            ) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedBorderColor = Color.Black,
+                        unfocusedBorderColor = Color.Gray,
+                        cursorColor = Color.Black
+                    )
+                )
+            }
             LaunchedEffect(Unit) { focusRequester.requestFocus() }
         }
     )

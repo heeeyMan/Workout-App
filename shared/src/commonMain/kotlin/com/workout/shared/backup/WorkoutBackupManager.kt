@@ -74,9 +74,9 @@ fun Workout.formatForSharing(restLabel: String): String {
     val totalMin = totalDurationSeconds / 60
     val totalSec = totalDurationSeconds % 60
     val duration = when {
-        totalMin > 0 && totalSec > 0 -> "${totalMin} min ${totalSec} sec"
-        totalMin > 0 -> "${totalMin} min"
-        else -> "${totalSec} sec"
+        totalMin > 0 && totalSec > 0 -> "$totalMin min $totalSec sec"
+        totalMin > 0 -> "$totalMin min"
+        else -> "$totalSec sec"
     }
     return buildString {
         appendLine(name)

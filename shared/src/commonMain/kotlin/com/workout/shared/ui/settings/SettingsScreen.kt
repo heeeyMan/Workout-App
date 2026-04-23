@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -37,8 +38,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
@@ -302,15 +307,31 @@ fun SettingsScreen(
             dismissText = stringResource(Res.string.cancel),
             onDismiss = { showPrepDialog = false },
             content = {
-                OutlinedTextField(
-                    value = prepInput,
-                    onValueChange = { value ->
-                        prepInput = value.filter { it.isDigit() }.take(3)
-                    },
-                    label = { Text(stringResource(Res.string.seconds_input_label)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                CompositionLocalProvider(
+                    LocalTextSelectionColors provides TextSelectionColors(
+                        handleColor = Color.Black,
+                        backgroundColor = Color.Black.copy(alpha = 0.3f)
+                    )
+                ) {
+                    OutlinedTextField(
+                        value = prepInput,
+                        onValueChange = { value ->
+                            prepInput = value.filter { it.isDigit() }.take(3)
+                        },
+                        label = { Text(stringResource(Res.string.seconds_input_label)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
             }
         )
     }
@@ -331,16 +352,32 @@ fun SettingsScreen(
             dismissText = stringResource(Res.string.cancel),
             onDismiss = { showWorkWarnDialog = false },
             content = {
-                OutlinedTextField(
-                    value = workWarnInput,
-                    onValueChange = { value ->
-                        workWarnInput = value.filter { it.isDigit() }.take(3)
-                    },
-                    label = { Text(stringResource(Res.string.seconds_input_label)) },
-                    supportingText = { Text(stringResource(Res.string.work_phase_warn_disabled_hint)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                CompositionLocalProvider(
+                    LocalTextSelectionColors provides TextSelectionColors(
+                        handleColor = Color.Black,
+                        backgroundColor = Color.Black.copy(alpha = 0.3f)
+                    )
+                ) {
+                    OutlinedTextField(
+                        value = workWarnInput,
+                        onValueChange = { value ->
+                            workWarnInput = value.filter { it.isDigit() }.take(3)
+                        },
+                        label = { Text(stringResource(Res.string.seconds_input_label)) },
+                        supportingText = { Text(stringResource(Res.string.work_phase_warn_disabled_hint)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Gray,
+                            focusedLabelColor = Color.Black,
+                            unfocusedLabelColor = Color.Gray,
+                            cursorColor = Color.Black
+                        )
+                    )
+                }
             }
         )
     }
