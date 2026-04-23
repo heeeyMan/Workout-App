@@ -96,6 +96,8 @@ class TimerStore(
                 emitEffect(TimerEffect.WorkPhaseEndAlert(
                     secondsRemainingAfterTick = newSeconds,
                     withVibration = vibOnce,
+                    withSound = s.soundEnabled,
+                    presetId = s.workPhaseWarningSoundPresetId,
                 ))
             }
         }
@@ -117,7 +119,7 @@ class TimerStore(
         if (nextIndex >= s.phases.size) {
             timerJob?.cancel()
             setState { copy(isFinished = true, secondsRemaining = 0) }
-            if (s.soundEnabled) emitEffect(TimerEffect.PlayFinishSound)
+            if (s.soundEnabled) emitEffect(TimerEffect.PlayFinishSound(s.finishSoundPresetId))
             if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateFinish)
             return
         }
@@ -133,16 +135,16 @@ class TimerStore(
             PhaseType.Work -> {
                 if (s.currentPhase?.type == PhaseType.Prep) {
                     // Переход подготовка → работа: особый звук и вибрация
-                    if (s.soundEnabled) emitEffect(TimerEffect.PlayPrepEndSound)
+                    if (s.soundEnabled) emitEffect(TimerEffect.PlayPrepEndSound(s.workStartSoundPresetId))
                     if (s.vibrationEnabled) emitEffect(TimerEffect.VibratePrepEnd)
                 } else {
-                    if (s.soundEnabled) emitEffect(TimerEffect.PlayWorkSound)
-                    if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateWork)
+                    if (s.soundEnabled) emitEffect(TimerEffect.PlayWorkSound(s.workStartSoundPresetId))
+                    if (s.vibrationEnabled) emitEffect(TimerEffect.Vibrate)
                 }
             }
             PhaseType.Rest -> {
-                if (s.soundEnabled) emitEffect(TimerEffect.PlayRestSound)
-                if (s.vibrationEnabled) emitEffect(TimerEffect.VibrateRest)
+                if (s.soundEnabled) emitEffect(TimerEffect.PlayRestSound(s.restStartSoundPresetId))
+                if (s.vibrationEnabled) emitEffect(TimerEffect.Vibrate)
             }
         }
     }

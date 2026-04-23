@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -29,7 +28,6 @@ import workoutapp.shared.generated.resources.cd_edit_workout
 import workoutapp.shared.generated.resources.cd_start_workout
 import workoutapp.shared.generated.resources.delete
 import workoutapp.shared.generated.resources.rest_label
-import workoutapp.shared.generated.resources.share_workout_cd
 import com.workout.shared.ui.theme.DangerRed
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -40,7 +38,6 @@ fun WorkoutCard(
     onClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onShareClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val blocksCount = workout.blocks.size
@@ -87,15 +84,6 @@ fun WorkoutCard(
                     contentDescription = stringResource(Res.string.cd_edit_workout),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            if (onShareClick != null) {
-                IconButton(onClick = onShareClick) {
-                    Icon(
-                        Icons.Outlined.Share,
-                        contentDescription = stringResource(Res.string.share_workout_cd),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
             IconButton(onClick = onDeleteClick) {
                 Icon(

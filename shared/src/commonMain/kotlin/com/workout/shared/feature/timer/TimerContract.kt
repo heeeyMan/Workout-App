@@ -110,25 +110,27 @@ sealed interface TimerEffect {
     /** Короткий сигнал каждую секунду на этапе подготовки перед блоком. */
     data object PlayPrepTickSound : TimerEffect
     /** Конец подготовки — переход к работе: более протяжный звук. */
-    data object PlayPrepEndSound : TimerEffect
+    data class PlayPrepEndSound(val presetId: String) : TimerEffect
     /** Конец подготовки — выраженная вибрация. */
     data object VibratePrepEnd : TimerEffect
-    data object PlayWorkSound : TimerEffect
-    data object PlayRestSound : TimerEffect
-    data object PlayFinishSound : TimerEffect
-    /** Вибрация при старте фазы «Работа». */
-    data object VibrateWork : TimerEffect
-    /** Вибрация при старте фазы «Отдых». */
-    data object VibrateRest : TimerEffect
+    data class PlayWorkSound(val presetId: String) : TimerEffect
+    data class PlayRestSound(val presetId: String) : TimerEffect
+    data class PlayFinishSound(val presetId: String) : TimerEffect
+    /** Вибрация при старте фазы «Работа» или «Отдых». */
+    data object Vibrate : TimerEffect
     data object VibrateFinish : TimerEffect
     /**
-     * Предупреждение в конце фазы «Работа»: короткий звук (если включён звук).
-     * [secondsRemainingAfterTick] — сколько секунд осталось в фазе после этого тика (1..N в окне предупреждения).
+     * Предупреждение в конце фазы «Работа».
+     * [secondsRemainingAfterTick] — сколько секунд осталось после тика (1..N в окне предупреждения).
      * [withVibration] — однократная вибрация в первую секунду окна предупреждения.
+     * [withSound] — воспроизвести звук предупреждения.
+     * [presetId] — идентификатор звукового пресета.
      */
     data class WorkPhaseEndAlert(
         val secondsRemainingAfterTick: Int,
         val withVibration: Boolean,
+        val withSound: Boolean,
+        val presetId: String,
     ) : TimerEffect
     data object NavigateBack : TimerEffect
 }

@@ -60,7 +60,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
@@ -116,6 +115,7 @@ import com.workout.shared.ui.theme.TimerPrepGray
 import com.workout.shared.ui.theme.TimerPrepGrayDim
 import com.workout.shared.ui.theme.TimerRestGreen
 import com.workout.shared.ui.theme.TimerRestGreenDim
+import com.workout.shared.ui.theme.DangerRed
 import com.workout.shared.ui.theme.TimerWorkOrange
 import com.workout.shared.ui.theme.TimerWorkOrangeDim
 import org.jetbrains.compose.resources.getString
@@ -146,7 +146,7 @@ fun TimerScreen(
         setFormat = stringResource(Res.string.notif_set_format)
     )
 
-    val quickAdjustEnabled = remember { mutableStateOf(timerSettings.timerQuickAdjustEnabled) }
+    val quickAdjust = remember { timerSettings.timerQuickAdjustEnabled }
     val reviewLauncher = rememberAppReviewLauncher()
 
     // Load workout with settings
@@ -185,38 +185,16 @@ fun TimerScreen(
             when (effect) {
                 is TimerEffect.NavigateBack -> onNavigateBack()
                 is TimerEffect.PlayPrepTickSound -> audioFeedback.playPrepTickTone()
-                is TimerEffect.PlayPrepEndSound -> {
-                    val st = store.state.value
-                    audioFeedback.playPrepEndTone(st.workStartSoundPresetId)
-                }
-
+                is TimerEffect.PlayPrepEndSound -> audioFeedback.playPrepEndTone(effect.presetId)
                 is TimerEffect.VibratePrepEnd -> hapticFeedback.vibratePrepEnd()
-                is TimerEffect.PlayWorkSound -> {
-                    val st = store.state.value
-                    audioFeedback.playWorkTone(st.workStartSoundPresetId)
-                }
-
-                is TimerEffect.PlayRestSound -> {
-                    val st = store.state.value
-                    audioFeedback.playRestTone(st.restStartSoundPresetId)
-                }
-
-                is TimerEffect.PlayFinishSound -> {
-                    val st = store.state.value
-                    audioFeedback.playFinishTone(st.finishSoundPresetId)
-                }
-
-                is TimerEffect.VibrateWork -> hapticFeedback.vibrateShort()
-                is TimerEffect.VibrateRest -> hapticFeedback.vibrateShort()
+                is TimerEffect.PlayWorkSound -> audioFeedback.playWorkTone(effect.presetId)
+                is TimerEffect.PlayRestSound -> audioFeedback.playRestTone(effect.presetId)
+                is TimerEffect.PlayFinishSound -> audioFeedback.playFinishTone(effect.presetId)
+                is TimerEffect.Vibrate -> hapticFeedback.vibrateShort()
                 is TimerEffect.VibrateFinish -> hapticFeedback.vibrateFinish()
                 is TimerEffect.WorkPhaseEndAlert -> {
-                    val st = store.state.value
-                    if (st.soundEnabled) {
-                        audioFeedback.playWarningTone(st.workPhaseWarningSoundPresetId)
-                    }
-                    if (effect.withVibration && st.vibrationEnabled) {
-                        hapticFeedback.vibrateAlert()
-                    }
+                    if (effect.withSound) audioFeedback.playWarningTone(effect.presetId)
+                    if (effect.withVibration) hapticFeedback.vibrateAlert()
                 }
             }
         }
@@ -230,7 +208,6 @@ fun TimerScreen(
     }
 
     val state by store.state.collectAsState()
-    val quickAdjust = quickAdjustEnabled.value
 
     // Request in-app review after completing N workouts
     LaunchedEffect(state.isFinished) {
@@ -244,11 +221,11 @@ fun TimerScreen(
     }
     var showExitDialog by remember { mutableStateOf(false) }
     var gymMode by remember { mutableStateOf(false) }
+    var gymControlsLocked by remember { mutableStateOf(false) }
 
     BackHandler(enabled = !state.isLoading && !state.isFinished) {
         showExitDialog = true
     }
-    var gymControlsLocked by remember { mutableStateOf(false) }
 
     val timerFontSize = if (gymMode) 120.sp else 88.sp
     val titleStyle =
@@ -285,7 +262,7 @@ fun TimerScreen(
         label = "warning_pulse_value"
     )
     val effectiveAccentColor = if (state.isInWorkEndWarning) {
-        lerp(accentColor, Color(0xFFE53935), warningPulse)
+        lerp(accentColor, DangerRed, warningPulse)
     } else {
         accentColor
     }

@@ -30,11 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.workout.core.model.Workout
 import com.workout.core.repository.WorkoutRepository
-import com.workout.shared.backup.formatForSharing
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
 import com.workout.shared.feature.home.HomeViewModel
-import com.workout.shared.platform.rememberTextSharer
 import com.workout.shared.ui.components.WorkoutCard
 import com.workout.shared.ui.util.WorkoutDialog
 import org.jetbrains.compose.resources.stringResource
@@ -46,13 +44,9 @@ import workoutapp.shared.generated.resources.confirm_delete_workout_message
 import workoutapp.shared.generated.resources.confirm_delete_workout_title
 import workoutapp.shared.generated.resources.create_first_workout
 import workoutapp.shared.generated.resources.delete
-import workoutapp.shared.generated.resources.duration_min
-import workoutapp.shared.generated.resources.duration_sec
-import workoutapp.shared.generated.resources.exercise_label
 import workoutapp.shared.generated.resources.last_workout
 import workoutapp.shared.generated.resources.my_workouts
 import workoutapp.shared.generated.resources.new_workout
-import workoutapp.shared.generated.resources.rest_label
 import workoutapp.shared.generated.resources.settings_cd
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,12 +60,6 @@ fun HomeScreen(
     val repository = koinInject<WorkoutRepository>()
     val vm = viewModel { HomeViewModel(repository) }
     val store = vm.store
-    val shareText = rememberTextSharer()
-    val exerciseLabel = stringResource(Res.string.exercise_label)
-    val restLabel = stringResource(Res.string.rest_label)
-    val minLabel = stringResource(Res.string.duration_min)
-    val secLabel = stringResource(Res.string.duration_sec)
-
     val state by store.state.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -110,7 +98,6 @@ fun HomeScreen(
                 workouts = state.workouts,
                 onDispatch = store::dispatch,
                 padding = padding,
-                onShare = { workout -> shareText(workout.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
             )
         }
     }
@@ -165,8 +152,7 @@ private fun EmptyContent(padding: PaddingValues) {
 private fun WorkoutListContent(
     workouts: List<Workout>,
     onDispatch: (HomeIntent) -> Unit,
-    padding: PaddingValues,
-    onShare: (Workout) -> Unit
+    padding: PaddingValues
 ) {
     val lastStarted = workouts
         .filter { it.lastStartedAt != null }
@@ -191,7 +177,6 @@ private fun WorkoutListContent(
                     onClick = { onDispatch(HomeIntent.StartWorkout(lastStarted.id)) },
                     onEditClick = { onDispatch(HomeIntent.EditWorkout(lastStarted.id)) },
                     onDeleteClick = { onDispatch(HomeIntent.RequestDelete(lastStarted.id)) },
-                    onShareClick = { onShare(lastStarted) }
                 )
             }
             item { }
@@ -209,7 +194,6 @@ private fun WorkoutListContent(
                 onClick = { onDispatch(HomeIntent.StartWorkout(workout.id)) },
                 onEditClick = { onDispatch(HomeIntent.EditWorkout(workout.id)) },
                 onDeleteClick = { onDispatch(HomeIntent.RequestDelete(workout.id)) },
-                onShareClick = { onShare(workout) }
             )
         }
     }
