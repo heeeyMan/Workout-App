@@ -1,6 +1,8 @@
 package com.workout.shared.ui.timer
 
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -39,6 +41,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -56,8 +59,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -237,20 +243,30 @@ fun TimerScreen(
     }
     val backgroundColor by animateColorAsState(
         targetValue = phaseDimTarget,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(durationMillis = BACKGROUND_ANIM_DURATION),
         label = "bg_color"
     )
     val accentColor by animateColorAsState(
         targetValue = phaseAccentTarget,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(durationMillis = BACKGROUND_ANIM_DURATION),
         label = "accent_color"
     )
 
-    val effectiveAccentColor by animateColorAsState(
-        targetValue = if (state.isInWorkEndWarning) DangerRed else phaseAccentTarget,
-        animationSpec = tween(durationMillis = 400),
-        label = "effective_accent_color"
-    )
+    val warningColor = remember { Animatable(TimerWorkOrange) }
+    LaunchedEffect(state.isInWorkEndWarning) {
+        if (state.isInWorkEndWarning) {
+            // Пульс всегда стартует с оранжевого, гарантируя плавный вход
+            warningColor.snapTo(TimerWorkOrange)
+            while (true) {
+                warningColor.animateTo(DangerRed, animationSpec = tween(WARNING_PULSE_DURATION_MS, easing = LinearEasing))
+                warningColor.animateTo(TimerWorkOrange, animationSpec = tween(WARNING_PULSE_DURATION_MS, easing = LinearEasing))
+            }
+        } else {
+            // Сброс для следующего предупреждения; accentColor берёт управление цветом на себя
+            warningColor.snapTo(TimerWorkOrange)
+        }
+    }
+    val effectiveAccentColor = if (state.isInWorkEndWarning) warningColor.value else accentColor
 
     if (showExitDialog) {
         WorkoutDialog(
@@ -408,13 +424,26 @@ fun TimerScreen(
 
                     if (!gymControlsLocked || !gymMode) {
                         state.nextSignificantPhase?.let { next ->
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            val formatStr = stringResource(Res.string.timer_next_phase_format)
+                            val splitIdx = formatStr.indexOf($$"%1$s")
+                            val prefix = if (splitIdx >= 0) formatStr.take(splitIdx) else ""
+                            val suffix = if (splitIdx >= 0) {
+                                formatStr.substring(splitIdx + $$"%1$s".length)
+                                    .replace($$"%2$s", next.durationSeconds.toTimeString())
+                            } else ""
                             Text(
-                                text = stringResource(
-                                    Res.string.timer_next_phase_format,
-                                    next.name,
-                                    next.durationSeconds.toTimeString()
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = buildAnnotatedString {
+                                    append(prefix)
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(next.name)
+                                    }
+                                    append(suffix)
+                                },
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
@@ -585,3 +614,6 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
         }
     }
 }
+
+private const val WARNING_PULSE_DURATION_MS = 500
+private const val BACKGROUND_ANIM_DURATION = 600
