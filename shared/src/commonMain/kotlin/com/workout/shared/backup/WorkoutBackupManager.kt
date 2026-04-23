@@ -6,7 +6,6 @@ import com.workout.core.model.BLOCK_TYPE_REST
 import com.workout.core.model.Workout
 import com.workout.core.repository.WorkoutRepository
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class WorkoutBackupManager(private val repository: WorkoutRepository) {
@@ -70,13 +69,18 @@ class WorkoutBackupManager(private val repository: WorkoutRepository) {
     }
 }
 
-fun Workout.formatForSharing(restLabel: String): String {
+fun Workout.formatForSharing(
+    exerciseLabel: String,
+    restLabel: String,
+    minLabel: String,
+    secLabel: String
+): String {
     val totalMin = totalDurationSeconds / 60
     val totalSec = totalDurationSeconds % 60
     val duration = when {
-        totalMin > 0 && totalSec > 0 -> "$totalMin min $totalSec sec"
-        totalMin > 0 -> "$totalMin min"
-        else -> "$totalSec sec"
+        totalMin > 0 && totalSec > 0 -> "$totalMin $minLabel $totalSec $secLabel"
+        totalMin > 0 -> "$totalMin $minLabel"
+        else -> "$totalSec $secLabel"
     }
     return buildString {
         appendLine(name)
@@ -87,11 +91,11 @@ fun Workout.formatForSharing(restLabel: String): String {
                 append("${i + 1}. ")
                 when (block) {
                     is Block.Exercise -> {
-                        val exerciseName = block.name.ifEmpty { "Exercise" }
-                        append("$exerciseName — ${block.repeats}× ${block.workDurationSeconds}s")
-                        if (block.restDurationSeconds > 0) append(" / ${block.restDurationSeconds}s")
+                        val exerciseName = block.name.ifEmpty { exerciseLabel }
+                        append("$exerciseName — ${block.repeats}× ${block.workDurationSeconds}$secLabel")
+                        if (block.restDurationSeconds > 0) append(" / ${block.restDurationSeconds}$secLabel")
                     }
-                    is Block.Rest -> append("$restLabel — ${block.durationSeconds}s")
+                    is Block.Rest -> append("$restLabel — ${block.durationSeconds}$secLabel")
                 }
                 appendLine()
             }

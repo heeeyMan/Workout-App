@@ -20,10 +20,13 @@ import com.workout.shared.feature.timer.TimerIntent
 import com.workout.shared.platform.AndroidForegroundTimerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class WorkoutTimerForegroundService : Service() {
 
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var mediaSession: MediaSession? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -102,17 +105,17 @@ class WorkoutTimerForegroundService : Service() {
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         } catch (_: Exception) { }
-        updateWidget()
+        updateWidget()  // отменяет serviceScope сам по завершении
         super.onDestroy()
     }
 
     private fun updateWidget() {
         val context = applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             val manager = GlanceAppWidgetManager(context)
             manager.getGlanceIds(WorkoutWidget::class.java)
                 .forEach { id -> WorkoutWidget().update(context, id) }
-        }
+        }.invokeOnCompletion { serviceScope.cancel() }
     }
 
     private fun createChannelIfNeeded() {

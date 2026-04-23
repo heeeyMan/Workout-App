@@ -7,7 +7,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.layout.size
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
@@ -22,7 +24,6 @@ import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.wrapContentSize
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -85,10 +86,11 @@ class WorkoutWidget : GlanceAppWidget() {
                     .background(ImageProvider(R.drawable.widget_background), ContentScale.FillBounds)
                     .padding(horizontal = 16.dp, vertical = 2.dp)
                     .clickable(actionStartActivity(startIntent)),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
                     modifier = GlanceModifier
+                        .defaultWeight()
                         .fillMaxHeight(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -110,13 +112,10 @@ class WorkoutWidget : GlanceAppWidget() {
                         )
                     )
                 }
-                Text(
-                    "▶",
-                    modifier = GlanceModifier.wrapContentSize(),
-                    style = TextStyle(
-                        color = ColorProvider(R.color.widget_text_primary),
-                        fontSize = 40.sp
-                    )
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_play),
+                    contentDescription = null,
+                    modifier = GlanceModifier.size(44.dp)
                 )
             }
         }

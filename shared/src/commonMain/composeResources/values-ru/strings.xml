@@ -134,6 +134,8 @@
     <string name="import_success">Импортировано тренировок: %1$d</string>
     <string name="import_error">Ошибка импорта. Проверьте формат файла.</string>
     <string name="share_workout_cd">Поделиться</string>
+    <string name="duration_min">мин</string>
+    <string name="duration_sec">с</string>
     <string name="workout_backup_filename">workout_backup.json</string>
     <string name="settings_contact_section">Контакты</string>
     <string name="settings_contact_email_label">Написать разработчику</string>

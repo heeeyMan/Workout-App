@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
 
-        shortcutManager.setDynamicShortcuts(shortcuts)
+        shortcutManager.dynamicShortcuts = shortcuts
     }
 
     private fun handleIntent(intent: Intent) {

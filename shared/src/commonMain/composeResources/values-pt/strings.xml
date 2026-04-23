@@ -127,4 +127,6 @@
     <string name="preset_dtmf_3">Tom 3</string>
     <string name="preset_cdma_high">Tom alto</string>
     <string name="preset_finish_default">Fim de treino (padrão)</string>
+    <string name="duration_min">min</string>
+    <string name="duration_sec">s</string>
 </resources>

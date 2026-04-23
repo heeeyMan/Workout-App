@@ -49,6 +49,9 @@ import com.workout.shared.platform.rememberTextSharer
 import com.workout.shared.ui.components.WorkoutCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import workoutapp.shared.generated.resources.duration_min
+import workoutapp.shared.generated.resources.duration_sec
+import workoutapp.shared.generated.resources.exercise_label
 import workoutapp.shared.generated.resources.rest_label
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +66,10 @@ fun HomeScreen(
     val vm = viewModel { HomeViewModel(repository) }
     val store = vm.store
     val shareText = rememberTextSharer()
+    val exerciseLabel = stringResource(Res.string.exercise_label)
     val restLabel = stringResource(Res.string.rest_label)
+    val minLabel = stringResource(Res.string.duration_min)
+    val secLabel = stringResource(Res.string.duration_sec)
 
     val state by store.state.collectAsState()
 
@@ -149,7 +155,7 @@ fun HomeScreen(
                                 onClick = { store.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
                                 onEditClick = { store.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
                                 onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) },
-                                onShareClick = { shareText(lastStarted.formatForSharing(restLabel)) }
+                                onShareClick = { shareText(lastStarted.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
                             )
                         }
                         item { }
@@ -167,7 +173,7 @@ fun HomeScreen(
                             onClick = { store.dispatch(HomeIntent.StartWorkout(workout.id)) },
                             onEditClick = { store.dispatch(HomeIntent.EditWorkout(workout.id)) },
                             onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) },
-                            onShareClick = { shareText(workout.formatForSharing(restLabel)) }
+                            onShareClick = { shareText(workout.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
                         )
                     }
                 }

@@ -132,6 +132,8 @@
     <string name="import_success">Imported %1$d workouts</string>
     <string name="import_error">Import error. Check the file format.</string>
     <string name="share_workout_cd">Share</string>
+    <string name="duration_min">min</string>
+    <string name="duration_sec">sec</string>
     <string name="workout_backup_filename">workout_backup.json</string>
     <string name="settings_contact_section">Contact</string>
     <string name="settings_contact_email_label">Write to developer</string>

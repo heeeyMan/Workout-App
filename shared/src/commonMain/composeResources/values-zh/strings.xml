@@ -126,4 +126,6 @@
     <string name="preset_dtmf_3">音调 3</string>
     <string name="preset_cdma_high">高音调</string>
     <string name="preset_finish_default">训练完成（默认）</string>
+    <string name="duration_min">分钟</string>
+    <string name="duration_sec">秒</string>
 </resources>

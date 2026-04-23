@@ -127,4 +127,6 @@
     <string name="preset_dtmf_3">टोन 3</string>
     <string name="preset_cdma_high">ऊंचा टोन</string>
     <string name="preset_finish_default">वर्कआउट पूर्ण (डिफ़ॉल्ट)</string>
+    <string name="duration_min">मिनट</string>
+    <string name="duration_sec">से</string>
 </resources>

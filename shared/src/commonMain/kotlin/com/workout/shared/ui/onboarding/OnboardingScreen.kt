@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import workoutapp.shared.generated.resources.Res
+import workoutapp.shared.generated.resources.duration_min
 import workoutapp.shared.generated.resources.exercise_label
 import workoutapp.shared.generated.resources.onboarding_add_selected
 import workoutapp.shared.generated.resources.onboarding_skip
@@ -218,7 +219,7 @@ private fun TemplateCard(
             )
             if (totalMin > 0) {
                 Text(
-                    text = "$totalMin min",
+                    text = "$totalMin ${stringResource(Res.string.duration_min)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
