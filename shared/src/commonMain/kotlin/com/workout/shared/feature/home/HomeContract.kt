@@ -6,7 +6,13 @@ data class HomeState(
     val workouts: List<Workout> = emptyList(),
     val isLoading: Boolean = true,
     val pendingDeleteId: Long? = null,
-)
+) {
+    val lastStartedWorkout: Workout?
+        get() = workouts.filter { it.lastStartedAt != null }.maxByOrNull { it.lastStartedAt!! }
+
+    val otherWorkouts: List<Workout>
+        get() = if (lastStartedWorkout == null) workouts else workouts.filter { it.id != lastStartedWorkout!!.id }
+}
 
 sealed interface HomeIntent {
     data class StartWorkout(val workoutId: Long) : HomeIntent

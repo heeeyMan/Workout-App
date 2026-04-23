@@ -11,6 +11,7 @@ import platform.AVFAudio.AVAudioPlayer
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryOptionMixWithOthers
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
+import platform.AVFAudio.AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation
 import platform.AVFAudio.setActive
 import platform.Foundation.NSData
 import platform.Foundation.NSMutableDictionary
@@ -32,6 +33,7 @@ class IosForegroundTimerService : ForegroundTimerService {
 
     private var onDispatch: ((TimerIntent) -> Unit)? = null
     private var silencePlayer: AVAudioPlayer? = null
+    private val silenceData: NSData by lazy { generateSilentWav(durationSeconds = 10) }
 
     override fun start(workoutName: String, onDispatch: (TimerIntent) -> Unit) {
         this.onDispatch = onDispatch
@@ -41,6 +43,7 @@ class IosForegroundTimerService : ForegroundTimerService {
     }
 
     override fun update(state: TimerState, workoutName: String, displayStrings: NotifDisplayStrings) {
+        if (state.isFinished) { stop(); return }
         updateNowPlayingInfo(state, workoutName, displayStrings)
     }
 
@@ -71,7 +74,11 @@ class IosForegroundTimerService : ForegroundTimerService {
 
     private fun deactivateAudioSession() {
         try {
-            AVAudioSession.sharedInstance().setActive(false, error = null)
+            AVAudioSession.sharedInstance().setActive(
+                false,
+                withOptions = AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation,
+                error = null
+            )
         } catch (_: Exception) {
             // best-effort
         }
@@ -80,7 +87,6 @@ class IosForegroundTimerService : ForegroundTimerService {
     // ── Silent audio loop (keeps the app alive in background) ────────
 
     private fun startSilenceLoop() {
-        val silenceData = generateSilentWav(durationSeconds = 10)
         val player = AVAudioPlayer(data = silenceData, error = null) ?: return
         player.numberOfLoops = -1   // loop forever
         player.volume = 0.01f       // nearly silent
@@ -92,6 +98,7 @@ class IosForegroundTimerService : ForegroundTimerService {
     // ── Remote Command Center (lock screen / Control Center) ─────────
 
     private fun setupRemoteCommands() {
+        clearRemoteCommands()
         val center = MPRemoteCommandCenter.sharedCommandCenter()
 
         center.playCommand.enabled = true

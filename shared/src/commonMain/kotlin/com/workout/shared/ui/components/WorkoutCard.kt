@@ -27,6 +27,8 @@ import workoutapp.shared.generated.resources.blocks_count
 import workoutapp.shared.generated.resources.cd_edit_workout
 import workoutapp.shared.generated.resources.cd_start_workout
 import workoutapp.shared.generated.resources.delete
+import workoutapp.shared.generated.resources.duration_min
+import workoutapp.shared.generated.resources.duration_sec
 import workoutapp.shared.generated.resources.rest_label
 import com.workout.shared.ui.theme.DangerRed
 import org.jetbrains.compose.resources.pluralStringResource
@@ -44,7 +46,9 @@ fun WorkoutCard(
     val blocksPart = pluralStringResource(Res.plurals.blocks_count, blocksCount, blocksCount)
     val subtitle = "${workout.totalDurationSeconds.toTimeString()} \u00B7 $blocksPart"
     val restLabel = stringResource(Res.string.rest_label)
-    val structurePreview = workout.toStructurePreview(restLabel)
+    val minSuffix = stringResource(Res.string.duration_min)
+    val secSuffix = stringResource(Res.string.duration_sec)
+    val structurePreview = workout.toStructurePreview(restLabel, minSuffix, secSuffix)
 
     Card(
         modifier = modifier
@@ -96,28 +100,28 @@ fun WorkoutCard(
     }
 }
 
-private fun Int.toCompactDuration(): String {
-    if (this < 60) return "${this}s"
+private fun Int.toCompactDuration(minSuffix: String, secSuffix: String): String {
+    if (this < 60) return "$this$secSuffix"
     val m = this / 60
     val s = this % 60
-    return if (s == 0) "${m}m" else "${m}:${s.toString().padStart(2, '0')}"
+    return if (s == 0) "$m$minSuffix" else "$m:${s.toString().padStart(2, '0')}"
 }
 
-private fun Workout.toStructurePreview(restLabel: String): String {
+private fun Workout.toStructurePreview(restLabel: String, minSuffix: String, secSuffix: String): String {
     if (blocks.isEmpty()) return ""
     val maxVisible = 3
     val items = blocks.take(maxVisible).map { block ->
         when (block) {
             is Block.Exercise -> {
-                val work = block.workDurationSeconds.toCompactDuration()
+                val work = block.workDurationSeconds.toCompactDuration(minSuffix, secSuffix)
                 if (block.restDurationSeconds > 0) {
-                    val rest = block.restDurationSeconds.toCompactDuration()
+                    val rest = block.restDurationSeconds.toCompactDuration(minSuffix, secSuffix)
                     "${block.repeats}\u00D7 $work/$rest"
                 } else {
                     "${block.repeats}\u00D7 $work"
                 }
             }
-            is Block.Rest -> "$restLabel ${block.durationSeconds.toCompactDuration()}"
+            is Block.Rest -> "$restLabel ${block.durationSeconds.toCompactDuration(minSuffix, secSuffix)}"
         }
     }
     val preview = items.joinToString(" \u00B7 ")

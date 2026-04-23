@@ -31,9 +31,12 @@ class HomeStore(
         if (isStartingWorkout) return
         isStartingWorkout = true
         scope.launch {
-            workoutRepository.markWorkoutStarted(workoutId)
-            emitEffect(HomeEffect.NavigateToTimer(workoutId))
-            isStartingWorkout = false
+            try {
+                workoutRepository.markWorkoutStarted(workoutId)
+                emitEffect(HomeEffect.NavigateToTimer(workoutId))
+            } finally {
+                isStartingWorkout = false
+            }
         }
     }
 

@@ -14,7 +14,7 @@ class AndroidForegroundTimerService(private val context: Context) : ForegroundTi
         @Volatile
         var dispatchCallback: ((TimerIntent) -> Unit)? = null
 
-        private const val ACTION_RUN = "com.workout.android.timer.RUN"
+        const val ACTION_RUN = "com.workout.android.timer.RUN"
         const val EXTRA_WORKOUT_NAME = "workout_name"
         const val EXTRA_PHASE_LINE = "phase_line"
         const val EXTRA_DETAIL_LINE = "detail_line"

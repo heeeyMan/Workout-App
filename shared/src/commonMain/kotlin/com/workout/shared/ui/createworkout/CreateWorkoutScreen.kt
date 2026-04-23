@@ -1,5 +1,8 @@
 package com.workout.shared.ui.createworkout
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -79,9 +82,6 @@ import com.workout.shared.feature.createworkout.CreateWorkoutIntent
 import com.workout.shared.feature.createworkout.CreateWorkoutViewModel
 import com.workout.shared.ui.components.WheelTimePicker
 import com.workout.shared.ui.components.toTimeString
-import com.workout.shared.ui.theme.BrownContainer
-import com.workout.shared.ui.theme.OnBrownContainer
-import com.workout.shared.ui.theme.SurfaceVariant
 import com.workout.shared.ui.theme.TimerRestGreen
 import com.workout.shared.ui.theme.TimerWorkOrange
 import com.workout.shared.ui.util.WorkoutDialog
@@ -132,7 +132,23 @@ fun CreateWorkoutScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val blockCenters = remember { mutableStateMapOf<Int, Float>() }
     var draggingIndex by remember { mutableIntStateOf(-1) }
+    // Визуальная целевая позиция во время drag: отличается от draggingIndex.
+    // MoveBlock диспатчится один раз — при окончании drag.
+    var draggingTargetIndex by remember { mutableIntStateOf(-1) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
+
+    // Визуальный порядок блоков: во время drag элемент отображается в целевой позиции,
+    // но state.blocks не меняется до окончания drag.
+    val displayBlocks = remember(state.blocks, draggingIndex, draggingTargetIndex) {
+        if (draggingIndex < 0 || draggingTargetIndex < 0 || draggingIndex == draggingTargetIndex) {
+            state.blocks
+        } else {
+            state.blocks.toMutableList().apply {
+                val item = removeAt(draggingIndex)
+                add(draggingTargetIndex.coerceIn(0, size), item)
+            }
+        }
+    }
 
     // Сбрасываем кэш центров при изменении количества блоков, чтобы drag-and-drop
     // не ориентировался на устаревшие позиции после добавления или удаления блока.
@@ -185,39 +201,59 @@ fun CreateWorkoutScreen(
                 )
             }
 
-            itemsIndexed(state.blocks, key = { _, block -> block.id.toString() + block.orderIndex }) { index, block ->
-                Box(modifier = Modifier.animateItem()) {
+            itemsIndexed(
+                items = displayBlocks,
+                // Стабильный ключ: для сохранённых блоков — id (не меняется при reorder),
+                // для новых (id=0) — orderIndex, который стабилен в течение drag
+                // (state.blocks не меняется до окончания drag).
+                key = { _, block -> if (block.id != 0L) block.id else "n${block.orderIndex}" }
+            ) { index, block ->
+                val isDragging = draggingTargetIndex == index
+                Box(
+                    modifier = Modifier.animateItem(
+                        // Dragging-элемент движется вручную через translationY;
+                        // отключаем placementSpec чтобы избежать конфликта анимаций.
+                        placementSpec = if (isDragging) null else spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    )
+                ) {
                     BlockCard(
                         block = block,
                         index = index,
-                        isDragging = draggingIndex == index,
-                        dragOffsetY = if (draggingIndex == index) dragOffsetY else 0f,
+                        isDragging = isDragging,
+                        dragOffsetY = if (isDragging) dragOffsetY else 0f,
                         onMeasuredCenterY = { center -> blockCenters[index] = center },
                         onStartDrag = {
                             draggingIndex = index
+                            draggingTargetIndex = index
                             dragOffsetY = 0f
                         },
                         onDrag = { deltaY ->
                             if (draggingIndex < 0) return@BlockCard
                             dragOffsetY += deltaY
 
-                            val from = draggingIndex
-                            val currentCenter = blockCenters[from] ?: return@BlockCard
+                            val currentCenter = blockCenters[draggingTargetIndex] ?: return@BlockCard
                             val targetCenter = currentCenter + dragOffsetY
 
                             val nearest = blockCenters
                                 .minByOrNull { (_, center) -> abs(center - targetCenter) }
-                                ?.key
-                                ?: return@BlockCard
+                                ?.key ?: return@BlockCard
 
-                            if (nearest != from && nearest in state.blocks.indices) {
-                                store.dispatch(CreateWorkoutIntent.MoveBlock(from, nearest))
-                                draggingIndex = nearest
+                            if (nearest != draggingTargetIndex && nearest in state.blocks.indices) {
+                                draggingTargetIndex = nearest
                                 dragOffsetY = 0f
                             }
                         },
                         onEndDrag = {
+                            if (draggingIndex >= 0 && draggingTargetIndex >= 0 &&
+                                draggingIndex != draggingTargetIndex
+                            ) {
+                                store.dispatch(CreateWorkoutIntent.MoveBlock(draggingIndex, draggingTargetIndex))
+                            }
                             draggingIndex = -1
+                            draggingTargetIndex = -1
                             dragOffsetY = 0f
                         },
                         onUpdate = { updated -> store.dispatch(CreateWorkoutIntent.UpdateBlock(index, updated)) },
@@ -262,8 +298,7 @@ private fun CreateWorkoutTopBar(
                 if (totalDurationSeconds > 0) {
                     Text(
                         text = stringResource(Res.string.training_time, totalDurationSeconds.toTimeString()),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -345,6 +380,11 @@ private fun BlockCard(
 ) {
     val isExercise = block is Block.Exercise
     val accentColor = if (isExercise) TimerWorkOrange else TimerRestGreen
+    val dragScale by animateFloatAsState(
+        targetValue = if (isDragging) 1.04f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "drag_scale"
+    )
 
     Card(
         modifier = Modifier
@@ -353,6 +393,8 @@ private fun BlockCard(
             .graphicsLayer {
                 translationY = dragOffsetY
                 shadowElevation = if (isDragging) 24f else 0f
+                scaleX = dragScale
+                scaleY = dragScale
             }
             .pointerInput(index) {
                 detectDragGesturesAfterLongPress(
@@ -369,7 +411,7 @@ private fun BlockCard(
                 val centerY = coordinates.positionInRoot().y + coordinates.size.height / 2f
                 onMeasuredCenterY(centerY)
             },
-        colors = CardDefaults.cardColors(containerColor = SurfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -656,7 +698,7 @@ private fun RepeatButton(
             .size(40.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(
-                if (enabled) BrownContainer
+                if (enabled) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceVariant
             )
             .clickable(enabled = enabled, onClick = onClick),
@@ -665,7 +707,7 @@ private fun RepeatButton(
         Text(
             text = label,
             style = MaterialTheme.typography.titleLarge,
-            color = if (enabled) OnBrownContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold
         )
     }
@@ -688,10 +730,12 @@ private fun NameEditDialog(
         dismissText = stringResource(Res.string.cancel),
         onDismiss = onDismiss,
         content = {
+            val onDialog = MaterialTheme.colorScheme.onPrimary
+            val onDialogMuted = MaterialTheme.colorScheme.onSurfaceVariant
             CompositionLocalProvider(
                 LocalTextSelectionColors provides TextSelectionColors(
-                    handleColor = Color.Black,
-                    backgroundColor = Color.Black.copy(alpha = 0.3f)
+                    handleColor = onDialog,
+                    backgroundColor = onDialog.copy(alpha = 0.3f)
                 )
             ) {
                 OutlinedTextField(
@@ -703,11 +747,11 @@ private fun NameEditDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        focusedBorderColor = Color.Black,
-                        unfocusedBorderColor = Color.Gray,
-                        cursorColor = Color.Black
+                        focusedTextColor = onDialog,
+                        unfocusedTextColor = onDialog,
+                        focusedBorderColor = onDialog,
+                        unfocusedBorderColor = onDialogMuted,
+                        cursorColor = onDialog
                     )
                 )
             }

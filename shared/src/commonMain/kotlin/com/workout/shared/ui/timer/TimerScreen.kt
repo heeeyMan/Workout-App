@@ -1,11 +1,6 @@
 package com.workout.shared.ui.timer
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -61,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -223,7 +217,7 @@ fun TimerScreen(
     var gymMode by remember { mutableStateOf(false) }
     var gymControlsLocked by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = !state.isLoading && !state.isFinished) {
+    BackHandler(enabled = !state.isFinished) {
         showExitDialog = true
     }
 
@@ -252,20 +246,11 @@ fun TimerScreen(
         label = "accent_color"
     )
 
-    val warningPulse by rememberInfiniteTransition(label = "warning_pulse").animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "warning_pulse_value"
+    val effectiveAccentColor by animateColorAsState(
+        targetValue = if (state.isInWorkEndWarning) DangerRed else phaseAccentTarget,
+        animationSpec = tween(durationMillis = 400),
+        label = "effective_accent_color"
     )
-    val effectiveAccentColor = if (state.isInWorkEndWarning) {
-        lerp(accentColor, DangerRed, warningPulse)
-    } else {
-        accentColor
-    }
 
     if (showExitDialog) {
         WorkoutDialog(
@@ -583,7 +568,7 @@ private fun FinishedContent(workoutName: String, onBack: () -> Unit) {
             imageVector = Icons.Outlined.Celebration,
             contentDescription = null,
             modifier = Modifier.size(96.dp),
-            tint = TimerWorkOrange
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.height(28.dp))
         Text(

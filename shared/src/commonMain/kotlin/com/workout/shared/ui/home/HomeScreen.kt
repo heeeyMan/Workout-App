@@ -3,7 +3,9 @@ package com.workout.shared.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,10 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.workout.core.model.Workout
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
+import com.workout.shared.feature.home.HomeState
 import com.workout.shared.feature.home.HomeViewModel
 import com.workout.shared.ui.components.WorkoutCard
 import com.workout.shared.ui.util.WorkoutDialog
@@ -95,7 +97,7 @@ fun HomeScreen(
             state.isLoading -> LoadingContent(padding)
             state.workouts.isEmpty() -> EmptyContent(padding)
             else -> WorkoutListContent(
-                workouts = state.workouts,
+                state = state,
                 onDispatch = store::dispatch,
                 padding = padding,
             )
@@ -150,13 +152,12 @@ private fun EmptyContent(padding: PaddingValues) {
 
 @Composable
 private fun WorkoutListContent(
-    workouts: List<Workout>,
+    state: HomeState,
     onDispatch: (HomeIntent) -> Unit,
     padding: PaddingValues
 ) {
-    val lastStarted = workouts
-        .filter { it.lastStartedAt != null }
-        .maxByOrNull { it.lastStartedAt ?: 0L }
+    val lastStarted = state.lastStartedWorkout
+    val otherWorkouts = state.otherWorkouts
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(padding),
@@ -164,7 +165,7 @@ private fun WorkoutListContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (lastStarted != null) {
-            item {
+            item(key = "header_last") {
                 Text(
                     text = stringResource(Res.string.last_workout),
                     style = MaterialTheme.typography.titleSmall,
@@ -173,23 +174,25 @@ private fun WorkoutListContent(
             }
             item(key = "last_${lastStarted.id}") {
                 WorkoutCard(
+                    modifier = Modifier.animateItem(),
                     workout = lastStarted,
                     onClick = { onDispatch(HomeIntent.StartWorkout(lastStarted.id)) },
                     onEditClick = { onDispatch(HomeIntent.EditWorkout(lastStarted.id)) },
                     onDeleteClick = { onDispatch(HomeIntent.RequestDelete(lastStarted.id)) },
                 )
             }
-            item { }
         }
-        item {
+        item(key = "header_all") {
+            if (lastStarted != null) Spacer(Modifier.height(4.dp))
             Text(
                 text = stringResource(Res.string.all_workouts),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        items(workouts.filter { it.id != lastStarted?.id }, key = { it.id }) { workout ->
+        items(otherWorkouts, key = { it.id }) { workout ->
             WorkoutCard(
+                modifier = Modifier.animateItem(),
                 workout = workout,
                 onClick = { onDispatch(HomeIntent.StartWorkout(workout.id)) },
                 onEditClick = { onDispatch(HomeIntent.EditWorkout(workout.id)) },

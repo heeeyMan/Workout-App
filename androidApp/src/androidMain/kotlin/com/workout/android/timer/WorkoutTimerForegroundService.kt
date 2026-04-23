@@ -135,7 +135,7 @@ class WorkoutTimerForegroundService : Service() {
     companion object {
         private const val CHANNEL_ID = "workout_timer_foreground"
         const val NOTIFICATION_ID = 71001
-        private const val ACTION_RUN = "com.workout.android.timer.RUN"
+        private val ACTION_RUN get() = AndroidForegroundTimerService.ACTION_RUN
 
         private const val REQ_PAUSE = 71002
         private const val REQ_SKIP = 71003
@@ -183,7 +183,7 @@ class WorkoutTimerForegroundService : Service() {
             val pausePI = actionPI(context, TimerNotificationActionReceiver.ACTION_TOGGLE_PAUSE, REQ_PAUSE)
             val skipPI = actionPI(context, TimerNotificationActionReceiver.ACTION_SKIP_PHASE, REQ_SKIP)
 
-            val pauseIcon = if (isPaused) android.R.drawable.ic_media_play else android.R.drawable.ic_media_pause
+            val pauseIcon = if (isPaused) R.drawable.ic_notif_play else R.drawable.ic_notif_pause
             val pauseLabel = context.getString(if (isPaused) R.string.notif_action_resume else R.string.notif_action_pause)
 
             val accentColor = when (phaseType) {
@@ -199,9 +199,9 @@ class WorkoutTimerForegroundService : Service() {
                 .setContentIntent(contentPI)
                 .setColor(accentColor)
                 .setColorized(true)
-                .addAction(NotificationCompat.Action(android.R.drawable.ic_media_previous, context.getString(R.string.cd_previous_phase), previousPI))
+                .addAction(NotificationCompat.Action(R.drawable.ic_notif_skip_previous, context.getString(R.string.cd_previous_phase), previousPI))
                 .addAction(NotificationCompat.Action(pauseIcon, pauseLabel, pausePI))
-                .addAction(NotificationCompat.Action(android.R.drawable.ic_media_next, context.getString(R.string.notif_action_next_phase), skipPI))
+                .addAction(NotificationCompat.Action(R.drawable.ic_notif_skip_next, context.getString(R.string.notif_action_next_phase), skipPI))
                 .setOngoing(true)
                 .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
