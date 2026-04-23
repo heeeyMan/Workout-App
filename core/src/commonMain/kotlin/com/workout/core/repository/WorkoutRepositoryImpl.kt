@@ -106,7 +106,7 @@ class WorkoutRepositoryImpl(
         BLOCK_TYPE_EXERCISE -> Block.Exercise(
             id = id,
             orderIndex = order_index.toInt(),
-            name = name ?: "Упражнение ${index + 1}",
+            name = name ?: "Exercise ${index + 1}",
             workDurationSeconds = work_duration_seconds?.toInt() ?: 40,
             restDurationSeconds = rest_duration_seconds?.toInt() ?: 20,
             repeats = repeats?.toInt() ?: 1

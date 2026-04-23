@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -26,7 +28,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material.icons.outlined.Edit
-import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,6 +44,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,7 +54,6 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,21 +64,32 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.workout.core.model.Block
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.feature.createworkout.CreateWorkoutEffect
 import com.workout.shared.feature.createworkout.CreateWorkoutIntent
 import com.workout.shared.feature.createworkout.CreateWorkoutViewModel
+import com.workout.shared.ui.components.WheelTimePicker
+import com.workout.shared.ui.components.toTimeString
+import com.workout.shared.ui.theme.BrownContainer
+import com.workout.shared.ui.theme.OnBrownContainer
+import com.workout.shared.ui.theme.SurfaceVariant
+import com.workout.shared.ui.theme.TimerRestGreen
+import com.workout.shared.ui.theme.TimerWorkOrange
+import com.workout.shared.ui.util.WorkoutDialog
+import kotlin.math.abs
+import kotlin.random.Random
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.add_exercise
 import workoutapp.shared.generated.resources.add_rest
@@ -105,18 +117,6 @@ import workoutapp.shared.generated.resources.save
 import workoutapp.shared.generated.resources.training_time
 import workoutapp.shared.generated.resources.work_label
 import workoutapp.shared.generated.resources.workout_name_label
-import com.workout.shared.ui.components.WheelTimePicker
-import com.workout.shared.ui.components.toTimeString
-import com.workout.shared.ui.theme.BrownContainer
-import com.workout.shared.ui.theme.OnBrownContainer
-import com.workout.shared.ui.theme.SurfaceVariant
-import com.workout.shared.ui.theme.TimerRestGreen
-import com.workout.shared.ui.theme.TimerWorkOrange
-import kotlin.math.abs
-import kotlin.random.Random
-import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,37 +159,11 @@ fun CreateWorkoutScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            if (workoutId == 0L) stringResource(Res.string.create_workout_title_new)
-                            else stringResource(Res.string.create_workout_title_edit)
-                        )
-                        if (state.totalDurationSeconds > 0) {
-                            val totalTime = state.totalDurationSeconds.toTimeString()
-                            Text(
-                                text = stringResource(Res.string.training_time, totalTime),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { store.dispatch(CreateWorkoutIntent.Discard) }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { store.dispatch(CreateWorkoutIntent.Save) }) {
-                        Icon(Icons.Default.Check, contentDescription = stringResource(Res.string.save))
-                    }
-                }
+            CreateWorkoutTopBar(
+                isEdit = workoutId != 0L,
+                totalDurationSeconds = state.totalDurationSeconds,
+                onDiscard = { store.dispatch(CreateWorkoutIntent.Discard) },
+                onSave = { store.dispatch(CreateWorkoutIntent.Save) }
             )
         }
     ) { padding ->
@@ -199,13 +173,9 @@ fun CreateWorkoutScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                OutlinedTextField(
-                    value = state.name,
-                    onValueChange = { store.dispatch(CreateWorkoutIntent.UpdateName(it)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(Res.string.workout_name_label)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
+                WorkoutNameField(
+                    name = state.name,
+                    onNameChange = { store.dispatch(CreateWorkoutIntent.UpdateName(it)) }
                 )
             }
 
@@ -252,34 +222,99 @@ fun CreateWorkoutScreen(
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            store.dispatch(
-                                CreateWorkoutIntent.AddExerciseBlock(
-                                    afterIndex = null,
-                                    defaultExerciseName = nextExerciseName
-                                )
-                            )
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(stringResource(Res.string.add_exercise))
-                    }
-                    Button(
-                        onClick = { store.dispatch(CreateWorkoutIntent.AddRestBlock()) },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(stringResource(Res.string.add_rest))
-                    }
-                }
+                AddBlockButtons(
+                    onAddExercise = {
+                        store.dispatch(CreateWorkoutIntent.AddExerciseBlock(afterIndex = null, defaultExerciseName = nextExerciseName))
+                    },
+                    onAddRest = { store.dispatch(CreateWorkoutIntent.AddRestBlock()) }
+                )
                 Spacer(Modifier.height(80.dp))
             }
+        }
+    }
+}
+
+// -----------------------------------------------
+// Top bar
+// -----------------------------------------------
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CreateWorkoutTopBar(
+    isEdit: Boolean,
+    totalDurationSeconds: Int,
+    onDiscard: () -> Unit,
+    onSave: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    if (isEdit) stringResource(Res.string.create_workout_title_edit)
+                    else stringResource(Res.string.create_workout_title_new)
+                )
+                if (totalDurationSeconds > 0) {
+                    Text(
+                        text = stringResource(Res.string.training_time, totalDurationSeconds.toTimeString()),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onDiscard) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+            }
+        },
+        actions = {
+            IconButton(onClick = onSave) {
+                Icon(Icons.Default.Check, contentDescription = stringResource(Res.string.save))
+            }
+        }
+    )
+}
+
+// -----------------------------------------------
+// Workout name field
+// -----------------------------------------------
+
+@Composable
+private fun WorkoutNameField(name: String, onNameChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = name,
+        onValueChange = onNameChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(stringResource(Res.string.workout_name_label)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
+    )
+}
+
+// -----------------------------------------------
+// Add block buttons
+// -----------------------------------------------
+
+@Composable
+private fun AddBlockButtons(onAddExercise: () -> Unit, onAddRest: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Button(
+            onClick = onAddExercise,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(stringResource(Res.string.add_exercise))
+        }
+        Button(
+            onClick = onAddRest,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(stringResource(Res.string.add_rest))
         }
     }
 }
@@ -332,66 +367,13 @@ private fun BlockCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            // -- Header + action icons --
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Color indicator
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(accentColor)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = if (isExercise) stringResource(Res.string.block_type_exercise)
-                           else stringResource(Res.string.block_type_rest),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = accentColor,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isDragging) MaterialTheme.colorScheme.surface
-                                else MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.DragHandle,
-                            contentDescription = stringResource(Res.string.cd_reorder),
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                    IconButton(onClick = onDuplicate, modifier = Modifier.size(40.dp)) {
-                        Icon(
-                            Icons.Outlined.ContentCopy,
-                            contentDescription = stringResource(Res.string.cd_duplicate),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
-                        Icon(
-                            Icons.Outlined.DeleteOutline,
-                            contentDescription = stringResource(Res.string.delete),
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
-            }
+            BlockCardHeader(
+                isExercise = isExercise,
+                accentColor = accentColor,
+                isDragging = isDragging,
+                onDuplicate = onDuplicate,
+                onDelete = onDelete
+            )
 
             Spacer(Modifier.height(12.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
@@ -400,6 +382,77 @@ private fun BlockCard(
             when (block) {
                 is Block.Exercise -> ExerciseBlockContent(block = block, onUpdate = onUpdate)
                 is Block.Rest -> RestBlockContent(block = block, onUpdate = onUpdate)
+            }
+        }
+    }
+}
+
+// -----------------------------------------------
+// Block card header
+// -----------------------------------------------
+
+@Composable
+private fun BlockCardHeader(
+    isExercise: Boolean,
+    accentColor: Color,
+    isDragging: Boolean,
+    onDuplicate: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(accentColor)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = if (isExercise) stringResource(Res.string.block_type_exercise)
+                   else stringResource(Res.string.block_type_rest),
+            style = MaterialTheme.typography.labelSmall,
+            color = accentColor,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
+        )
+        Row(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (isDragging) MaterialTheme.colorScheme.surface
+                        else MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Outlined.DragHandle,
+                    contentDescription = stringResource(Res.string.cd_reorder),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            IconButton(onClick = onDuplicate, modifier = Modifier.size(40.dp)) {
+                Icon(
+                    Icons.Outlined.ContentCopy,
+                    contentDescription = stringResource(Res.string.cd_duplicate),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            IconButton(onClick = onDelete, modifier = Modifier.size(48.dp)) {
+                Icon(
+                    Icons.Outlined.DeleteOutline,
+                    contentDescription = stringResource(Res.string.delete),
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     }
@@ -415,7 +468,6 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     var showWorkDialog by remember { mutableStateOf(false) }
     var showRestDialog by remember { mutableStateOf(false) }
 
-    // -- Name (tap -> dialog) --
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -442,7 +494,6 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
 
     Spacer(Modifier.height(16.dp))
 
-    // -- Work and Rest (tap -> time picker) --
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -467,37 +518,12 @@ private fun ExerciseBlockContent(block: Block.Exercise, onUpdate: (Block) -> Uni
     HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
     Spacer(Modifier.height(12.dp))
 
-    // -- Repeats --
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = stringResource(Res.string.repeats_label),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RepeatButton(label = "\u2212", enabled = block.repeats > 1) {
-                onUpdate(block.copy(repeats = block.repeats - 1))
-            }
-            Text(
-                text = block.repeats.toString(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .width(48.dp)
-                    .padding(horizontal = 8.dp),
-                textAlign = TextAlign.Center
-            )
-            RepeatButton(label = "+") {
-                onUpdate(block.copy(repeats = block.repeats + 1))
-            }
-        }
-    }
+    RepeatsRow(
+        repeats = block.repeats,
+        onDecrement = { onUpdate(block.copy(repeats = block.repeats - 1)) },
+        onIncrement = { onUpdate(block.copy(repeats = block.repeats + 1)) }
+    )
 
-    // -- Dialogs --
     if (showNameDialog) {
         NameEditDialog(
             currentName = block.name,
@@ -552,6 +578,34 @@ private fun RestBlockContent(block: Block.Rest, onUpdate: (Block) -> Unit) {
 // -----------------------------------------------
 // Reusable components
 // -----------------------------------------------
+
+@Composable
+private fun RepeatsRow(repeats: Int, onDecrement: () -> Unit, onIncrement: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = stringResource(Res.string.repeats_label),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RepeatButton(label = "\u2212", enabled = repeats > 1, onClick = onDecrement)
+            Text(
+                text = repeats.toString(),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .width(48.dp)
+                    .padding(horizontal = 8.dp),
+                textAlign = TextAlign.Center
+            )
+            RepeatButton(label = "+", onClick = onIncrement)
+        }
+    }
+}
 
 @Composable
 private fun DurationChip(
@@ -674,10 +728,7 @@ private fun DurationPickerDialog(
         dismissText = stringResource(Res.string.cancel),
         onDismiss = onDismiss,
         content = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 WheelTimePicker(
                     minutes = minutes,
                     seconds = secs,

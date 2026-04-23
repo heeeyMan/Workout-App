@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import com.workout.shared.ui.util.WorkoutDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -24,15 +23,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.workout.core.model.Workout
 import com.workout.core.repository.WorkoutRepository
+import com.workout.shared.backup.formatForSharing
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
+import com.workout.shared.feature.home.HomeStore
 import com.workout.shared.feature.home.HomeViewModel
+import com.workout.shared.platform.rememberTextSharer
+import com.workout.shared.ui.components.WorkoutCard
+import com.workout.shared.ui.util.WorkoutDialog
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import workoutapp.shared.generated.resources.Res
 import workoutapp.shared.generated.resources.all_workouts
 import workoutapp.shared.generated.resources.cancel
@@ -40,19 +47,14 @@ import workoutapp.shared.generated.resources.confirm_delete_workout_message
 import workoutapp.shared.generated.resources.confirm_delete_workout_title
 import workoutapp.shared.generated.resources.create_first_workout
 import workoutapp.shared.generated.resources.delete
-import workoutapp.shared.generated.resources.last_workout
-import workoutapp.shared.generated.resources.my_workouts
-import workoutapp.shared.generated.resources.new_workout
-import workoutapp.shared.generated.resources.settings_cd
-import com.workout.shared.backup.formatForSharing
-import com.workout.shared.platform.rememberTextSharer
-import com.workout.shared.ui.components.WorkoutCard
-import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import workoutapp.shared.generated.resources.duration_min
 import workoutapp.shared.generated.resources.duration_sec
 import workoutapp.shared.generated.resources.exercise_label
+import workoutapp.shared.generated.resources.last_workout
+import workoutapp.shared.generated.resources.my_workouts
+import workoutapp.shared.generated.resources.new_workout
 import workoutapp.shared.generated.resources.rest_label
+import workoutapp.shared.generated.resources.settings_cd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,27 +86,15 @@ fun HomeScreen(
     }
 
     if (state.pendingDeleteId != null) {
-        WorkoutDialog(
-            onDismissRequest = { store.dispatch(HomeIntent.CancelDelete) },
-            title = stringResource(Res.string.confirm_delete_workout_title),
-            confirmText = stringResource(Res.string.delete),
+        DeleteConfirmDialog(
             onConfirm = { store.dispatch(HomeIntent.ConfirmDelete) },
-            dismissText = stringResource(Res.string.cancel),
-            onDismiss = { store.dispatch(HomeIntent.CancelDelete) },
-            content = { Text(stringResource(Res.string.confirm_delete_workout_message)) }
+            onDismiss = { store.dispatch(HomeIntent.CancelDelete) }
         )
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(Res.string.my_workouts)) },
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings_cd))
-                    }
-                }
-            )
+            HomeTopBar(onNavigateToSettings = onNavigateToSettings)
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -115,69 +105,113 @@ fun HomeScreen(
         }
     ) { padding ->
         when {
-            state.isLoading -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
+            state.isLoading -> LoadingContent(padding)
+            state.workouts.isEmpty() -> EmptyContent(padding)
+            else -> WorkoutListContent(
+                workouts = state.workouts,
+                store = store,
+                padding = padding,
+                onShare = { workout -> shareText(workout.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
+            )
+        }
+    }
+}
 
-            state.workouts.isEmpty() -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(Res.string.create_first_workout),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+@Composable
+private fun DeleteConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    WorkoutDialog(
+        onDismissRequest = onDismiss,
+        title = stringResource(Res.string.confirm_delete_workout_title),
+        confirmText = stringResource(Res.string.delete),
+        onConfirm = onConfirm,
+        dismissText = stringResource(Res.string.cancel),
+        onDismiss = onDismiss,
+        content = { Text(stringResource(Res.string.confirm_delete_workout_message)) }
+    )
+}
 
-            else -> {
-                val lastStarted = state.workouts
-                    .filter { it.lastStartedAt != null }
-                    .maxByOrNull { it.lastStartedAt ?: 0L }
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (lastStarted != null) {
-                        item {
-                            Text(
-                                text = stringResource(Res.string.last_workout),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        item(key = "last_${lastStarted.id}") {
-                            WorkoutCard(
-                                workout = lastStarted,
-                                onClick = { store.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
-                                onEditClick = { store.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
-                                onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) },
-                                onShareClick = { shareText(lastStarted.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
-                            )
-                        }
-                        item { }
-                    }
-                    item {
-                        Text(
-                            text = stringResource(Res.string.all_workouts),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    items(state.workouts, key = { it.id }) { workout ->
-                        WorkoutCard(
-                            workout = workout,
-                            onClick = { store.dispatch(HomeIntent.StartWorkout(workout.id)) },
-                            onEditClick = { store.dispatch(HomeIntent.EditWorkout(workout.id)) },
-                            onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) },
-                            onShareClick = { shareText(workout.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
-                        )
-                    }
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeTopBar(onNavigateToSettings: () -> Unit) {
+    TopAppBar(
+        title = { Text(stringResource(Res.string.my_workouts)) },
+        actions = {
+            IconButton(onClick = onNavigateToSettings) {
+                Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings_cd))
             }
+        }
+    )
+}
+
+@Composable
+private fun LoadingContent(padding: PaddingValues) {
+    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun EmptyContent(padding: PaddingValues) {
+    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        Text(
+            text = stringResource(Res.string.create_first_workout),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun WorkoutListContent(
+    workouts: List<Workout>,
+    store: HomeStore,
+    padding: PaddingValues,
+    onShare: (Workout) -> Unit
+) {
+    val lastStarted = workouts
+        .filter { it.lastStartedAt != null }
+        .maxByOrNull { it.lastStartedAt ?: 0L }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(padding),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (lastStarted != null) {
+            item {
+                Text(
+                    text = stringResource(Res.string.last_workout),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            item(key = "last_${lastStarted.id}") {
+                WorkoutCard(
+                    workout = lastStarted,
+                    onClick = { store.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
+                    onEditClick = { store.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
+                    onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) },
+                    onShareClick = { onShare(lastStarted) }
+                )
+            }
+            item { }
+        }
+        item {
+            Text(
+                text = stringResource(Res.string.all_workouts),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        items(workouts, key = { it.id }) { workout ->
+            WorkoutCard(
+                workout = workout,
+                onClick = { store.dispatch(HomeIntent.StartWorkout(workout.id)) },
+                onEditClick = { store.dispatch(HomeIntent.EditWorkout(workout.id)) },
+                onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) },
+                onShareClick = { onShare(workout) }
+            )
         }
     }
 }
