@@ -30,4 +30,5 @@ sealed interface CreateWorkoutIntent {
 sealed interface CreateWorkoutEffect {
     data object NavigateBack : CreateWorkoutEffect
     data object ShowErrorEmptyWorkoutName : CreateWorkoutEffect
+    data object ShowSaveError : CreateWorkoutEffect
 }

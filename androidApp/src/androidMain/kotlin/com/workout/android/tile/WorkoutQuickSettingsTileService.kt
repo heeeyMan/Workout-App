@@ -35,9 +35,14 @@ class WorkoutQuickSettingsTileService : TileService() {
                 GlobalContext.get().get<WorkoutRepository>()
             }.getOrNull() ?: return@launch
 
-            val lastWorkout = repository.getWorkouts().first()
-                .filter { it.lastStartedAt != null }
-                .maxByOrNull { it.lastStartedAt ?: 0L }
+            val lastWorkout = runCatching {
+                repository.getWorkouts().first()
+                    .filter { it.lastStartedAt != null }
+                    .maxByOrNull { it.lastStartedAt ?: 0L }
+            }.getOrNull() ?: run {
+                lastWorkoutId = null
+                return@launch
+            }
 
             lastWorkoutId = lastWorkout?.id
 

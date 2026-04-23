@@ -103,6 +103,7 @@ import workoutapp.shared.generated.resources.dialog_rest_duration_title
 import workoutapp.shared.generated.resources.dialog_work_duration_title
 import workoutapp.shared.generated.resources.done
 import workoutapp.shared.generated.resources.duration_label
+import workoutapp.shared.generated.resources.error_save_failed
 import workoutapp.shared.generated.resources.error_workout_name_required
 import workoutapp.shared.generated.resources.repeats_label
 import workoutapp.shared.generated.resources.rest_label
@@ -139,6 +140,9 @@ fun CreateWorkoutScreen(
                 is CreateWorkoutEffect.NavigateBack -> onNavigateBack()
                 is CreateWorkoutEffect.ShowErrorEmptyWorkoutName -> snackbarHostState.showSnackbar(
                     getString(Res.string.error_workout_name_required)
+                )
+                is CreateWorkoutEffect.ShowSaveError -> snackbarHostState.showSnackbar(
+                    getString(Res.string.error_save_failed)
                 )
             }
         }

@@ -127,6 +127,7 @@ class CreateWorkoutStore(
                 emitEffect(CreateWorkoutEffect.NavigateBack)
             } catch (_: Exception) {
                 setState { copy(isSaving = false) }
+                emitEffect(CreateWorkoutEffect.ShowSaveError)
             }
         }
     }

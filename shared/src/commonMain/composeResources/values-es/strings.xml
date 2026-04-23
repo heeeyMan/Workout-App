@@ -31,6 +31,7 @@
 
     <!-- Create workout screen -->
     <string name="error_workout_name_required">Introduce un nombre para el entrenamiento</string>
+    <string name="error_save_failed">No se pudo guardar. Inténtalo de nuevo.</string>
     <string name="create_workout_title_new">Nuevo entrenamiento</string>
     <string name="create_workout_title_edit">Editar</string>
     <string name="training_time">Duración: %1$s</string>

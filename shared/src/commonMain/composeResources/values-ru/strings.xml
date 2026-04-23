@@ -33,6 +33,7 @@
 
     <!-- Create workout screen -->
     <string name="error_workout_name_required">Введите название тренировки</string>
+    <string name="error_save_failed">Не удалось сохранить тренировку. Попробуйте ещё раз.</string>
     <string name="create_workout_title_new">Новая тренировка</string>
     <string name="create_workout_title_edit">Редактировать</string>
     <string name="training_time">Время тренировки: %1$s</string>

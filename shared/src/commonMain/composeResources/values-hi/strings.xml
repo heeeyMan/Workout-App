@@ -31,6 +31,7 @@
 
     <!-- Create workout screen -->
     <string name="error_workout_name_required">वर्कआउट का नाम दर्ज करें</string>
+    <string name="error_save_failed">सहेजने में विफल। पुनः प्रयास करें।</string>
     <string name="create_workout_title_new">नई वर्कआउट</string>
     <string name="create_workout_title_edit">संपादित करें</string>
     <string name="training_time">अवधि: %1$s</string>

@@ -30,6 +30,7 @@
 
     <!-- Create workout screen -->
     <string name="error_workout_name_required">请输入训练名称</string>
+    <string name="error_save_failed">保存失败，请重试。</string>
     <string name="create_workout_title_new">新建训练</string>
     <string name="create_workout_title_edit">编辑</string>
     <string name="training_time">时长：%1$s</string>
