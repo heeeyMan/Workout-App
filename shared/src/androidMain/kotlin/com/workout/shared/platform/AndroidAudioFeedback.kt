@@ -59,8 +59,20 @@ class AndroidAudioFeedback(private val context: Context) : AudioFeedback {
     }
 
     private fun resolveRawId(name: String): Int? {
-        val id = context.resources.getIdentifier(name, "raw", context.packageName)
-        return if (id != 0) id else null
+        val pkg = context.packageName
+        val id = context.resources.getIdentifier(name, "raw", pkg)
+        if (id != 0) return id
+        // Debug/staging builds have applicationIdSuffix appended to the applicationId, but resources
+        // are compiled under the module namespace which has no suffix. Strip the last component and retry.
+        val lastDot = pkg.lastIndexOf('.')
+        if (lastDot > 0) {
+            val basePkg = pkg.substring(0, lastDot)
+            if (basePkg.contains('.')) {
+                val id2 = context.resources.getIdentifier(name, "raw", basePkg)
+                if (id2 != 0) return id2
+            }
+        }
+        return null
     }
 
     private fun playTone(toneType: Int, durationMs: Int) {
