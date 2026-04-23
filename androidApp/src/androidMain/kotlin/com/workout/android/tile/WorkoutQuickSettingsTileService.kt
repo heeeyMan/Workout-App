@@ -11,6 +11,8 @@ import com.workout.android.R
 import com.workout.core.repository.WorkoutRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,11 +20,17 @@ import org.koin.core.context.GlobalContext
 
 class WorkoutQuickSettingsTileService : TileService() {
 
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var lastWorkoutId: Long? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
+    }
 
     override fun onStartListening() {
         super.onStartListening()
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             val repository = runCatching {
                 GlobalContext.get().get<WorkoutRepository>()
             }.getOrNull() ?: return@launch
