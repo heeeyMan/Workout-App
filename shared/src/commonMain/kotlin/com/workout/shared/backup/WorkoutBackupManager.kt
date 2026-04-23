@@ -10,8 +10,6 @@ import kotlinx.serialization.json.Json
 
 class WorkoutBackupManager(private val repository: WorkoutRepository) {
 
-    private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
-
     suspend fun exportToJson(): String {
         val workouts = repository.getWorkouts().first()
         val dto = WorkoutBackupDto(workouts = workouts.map { it.toDto() })
@@ -20,12 +18,17 @@ class WorkoutBackupManager(private val repository: WorkoutRepository) {
 
     suspend fun importFromJson(jsonString: String): Int {
         val backup = json.decodeFromString<WorkoutBackupDto>(jsonString)
-        backup.workouts.forEach { dto -> repository.saveWorkout(dto.toWorkout()) }
-        return backup.workouts.size
+        if (backup.version > SUPPORTED_VERSION) {
+            error("Unsupported backup version: ${backup.version}. Max supported: $SUPPORTED_VERSION")
+        }
+        val workouts = backup.workouts.mapIndexed { _, dto -> dto.toWorkout() }
+        repository.saveWorkouts(workouts)
+        return workouts.size
     }
 
     private fun Workout.toDto() = WorkoutDto(
         name = name,
+        createdAt = createdAt,
         blocks = blocks.map { it.toDto() }
     )
 
@@ -48,7 +51,7 @@ class WorkoutBackupManager(private val repository: WorkoutRepository) {
     private fun WorkoutDto.toWorkout() = Workout(
         id = 0L,
         name = name,
-        createdAt = 0L,
+        createdAt = createdAt,
         blocks = blocks.mapIndexed { idx, dto -> dto.toBlock(idx) }
     )
 
@@ -61,44 +64,16 @@ class WorkoutBackupManager(private val repository: WorkoutRepository) {
             restDurationSeconds = restDurationSeconds,
             repeats = repeats
         )
-        else -> Block.Rest(
+        BLOCK_TYPE_REST -> Block.Rest(
             id = 0L,
             orderIndex = orderIndex.takeIf { it >= 0 } ?: fallbackIndex,
             durationSeconds = durationSeconds
         )
+        else -> error("Unknown block type: $type")
     }
-}
 
-fun Workout.formatForSharing(
-    exerciseLabel: String,
-    restLabel: String,
-    minLabel: String,
-    secLabel: String
-): String {
-    val totalMin = totalDurationSeconds / 60
-    val totalSec = totalDurationSeconds % 60
-    val duration = when {
-        totalMin > 0 && totalSec > 0 -> "$totalMin $minLabel $totalSec $secLabel"
-        totalMin > 0 -> "$totalMin $minLabel"
-        else -> "$totalSec $secLabel"
+    companion object {
+        private const val SUPPORTED_VERSION = 1
+        private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
     }
-    return buildString {
-        appendLine(name)
-        appendLine(duration)
-        if (blocks.isNotEmpty()) {
-            appendLine()
-            blocks.forEachIndexed { i, block ->
-                append("${i + 1}. ")
-                when (block) {
-                    is Block.Exercise -> {
-                        val exerciseName = block.name.ifEmpty { exerciseLabel }
-                        append("$exerciseName — ${block.repeats}× ${block.workDurationSeconds}$secLabel")
-                        if (block.restDurationSeconds > 0) append(" / ${block.restDurationSeconds}$secLabel")
-                    }
-                    is Block.Rest -> append("$restLabel — ${block.durationSeconds}$secLabel")
-                }
-                appendLine()
-            }
-        }
-    }.trimEnd()
 }

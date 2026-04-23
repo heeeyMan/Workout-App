@@ -48,7 +48,7 @@ class WorkoutRepositoryImpl(
             if (workout.id == 0L) {
                 database.workoutEntityQueries.insertWorkout(
                     name = workout.name,
-                    created_at = Clock.System.now().toEpochMilliseconds()
+                    created_at = workout.createdAt.takeIf { it > 0L } ?: Clock.System.now().toEpochMilliseconds()
                 )
                 insertedId = database.workoutEntityQueries.lastInsertRowId().executeAsOne()
             } else {
@@ -74,6 +74,32 @@ class WorkoutRepositoryImpl(
             }
         }
         return insertedId
+    }
+
+    override suspend fun saveWorkouts(workouts: List<Workout>) {
+        database.transaction {
+            workouts.forEach { workout ->
+                database.workoutEntityQueries.insertWorkout(
+                    name = workout.name,
+                    created_at = workout.createdAt.takeIf { it > 0L } ?: Clock.System.now().toEpochMilliseconds()
+                )
+                val insertedId = database.workoutEntityQueries.lastInsertRowId().executeAsOne()
+                workout.blocks.forEachIndexed { index, block ->
+                    database.blockEntityQueries.insertBlock(
+                        workout_id = insertedId,
+                        type = if (block is Block.Exercise) BLOCK_TYPE_EXERCISE else BLOCK_TYPE_REST,
+                        order_index = index.toLong(),
+                        name = (block as? Block.Exercise)?.name,
+                        work_duration_seconds = (block as? Block.Exercise)?.workDurationSeconds?.toLong(),
+                        rest_duration_seconds = when (block) {
+                            is Block.Exercise -> block.restDurationSeconds.toLong()
+                            is Block.Rest -> block.durationSeconds.toLong()
+                        },
+                        repeats = (block as? Block.Exercise)?.repeats?.toLong()
+                    )
+                }
+            }
+        }
     }
 
     override suspend fun markWorkoutStarted(id: Long) {

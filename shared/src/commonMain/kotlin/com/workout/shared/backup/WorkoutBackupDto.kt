@@ -11,13 +11,14 @@ data class WorkoutBackupDto(
 @Serializable
 data class WorkoutDto(
     val name: String,
+    val createdAt: Long = 0L,
     val blocks: List<BlockDto>
 )
 
 @Serializable
 data class BlockDto(
     val type: String,
-    val orderIndex: Int,
+    val orderIndex: Int = 0,
     val workDurationSeconds: Int = 0,
     val restDurationSeconds: Int = 0,
     val repeats: Int = 1,
