@@ -40,6 +40,8 @@
     <string name="block_type_rest">休息</string>
     <string name="cd_reorder">重新排序</string>
     <string name="cd_duplicate">复制</string>
+    <string name="cd_move_up">上移</string>
+    <string name="cd_move_down">下移</string>
     <string name="cd_edit">编辑</string>
     <string name="work_label">训练</string>
     <string name="rest_label">休息</string>

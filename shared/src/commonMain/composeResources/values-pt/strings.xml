@@ -41,6 +41,8 @@
     <string name="block_type_rest">DESCANSO</string>
     <string name="cd_reorder">Reordenar</string>
     <string name="cd_duplicate">Duplicar</string>
+    <string name="cd_move_up">Mover para cima</string>
+    <string name="cd_move_down">Mover para baixo</string>
     <string name="cd_edit">Editar</string>
     <string name="work_label">Trabalho</string>
     <string name="rest_label">Descanso</string>

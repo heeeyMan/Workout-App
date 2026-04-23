@@ -43,6 +43,8 @@
     <string name="block_type_rest">ОТДЫХ</string>
     <string name="cd_reorder">Перенести</string>
     <string name="cd_duplicate">Дублировать</string>
+    <string name="cd_move_up">Переместить вверх</string>
+    <string name="cd_move_down">Переместить вниз</string>
     <string name="cd_edit">Редактировать</string>
     <string name="work_label">Работа</string>
     <string name="rest_label">Отдых</string>

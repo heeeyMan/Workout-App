@@ -41,6 +41,8 @@
     <string name="block_type_rest">आराम</string>
     <string name="cd_reorder">क्रम बदलें</string>
     <string name="cd_duplicate">डुप्लिकेट करें</string>
+    <string name="cd_move_up">ऊपर ले जाएं</string>
+    <string name="cd_move_down">नीचे ले जाएं</string>
     <string name="cd_edit">संपादित करें</string>
     <string name="work_label">काम</string>
     <string name="rest_label">आराम</string>
