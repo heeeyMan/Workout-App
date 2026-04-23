@@ -6,11 +6,9 @@ data class HomeState(
     val workouts: List<Workout> = emptyList(),
     val isLoading: Boolean = true,
     val pendingDeleteId: Long? = null,
-    val isStartingWorkout: Boolean = false
 )
 
 sealed interface HomeIntent {
-    data object LoadWorkouts : HomeIntent
     data class StartWorkout(val workoutId: Long) : HomeIntent
     data class EditWorkout(val workoutId: Long) : HomeIntent
     data object CreateWorkout : HomeIntent

@@ -2,19 +2,22 @@ package com.workout.shared.feature.home
 
 import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.mvi.BaseStore
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class HomeStore(
     private val workoutRepository: WorkoutRepository
 ) : BaseStore<HomeState, HomeIntent, HomeEffect>(HomeState()) {
 
+    private var isStartingWorkout = false
+    private var workoutsJob: Job? = null
+
     init {
-        dispatch(HomeIntent.LoadWorkouts)
+        loadWorkouts()
     }
 
     override fun dispatch(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.LoadWorkouts -> loadWorkouts()
             is HomeIntent.StartWorkout -> startWorkout(intent.workoutId)
             is HomeIntent.EditWorkout -> emitEffect(HomeEffect.NavigateToEditWorkout(intent.workoutId))
             is HomeIntent.CreateWorkout -> emitEffect(HomeEffect.NavigateToCreateWorkout)
@@ -25,17 +28,18 @@ class HomeStore(
     }
 
     private fun startWorkout(workoutId: Long) {
-        if (state.value.isStartingWorkout) return
-        setState { copy(isStartingWorkout = true) }
+        if (isStartingWorkout) return
+        isStartingWorkout = true
         scope.launch {
             workoutRepository.markWorkoutStarted(workoutId)
             emitEffect(HomeEffect.NavigateToTimer(workoutId))
-            setState { copy(isStartingWorkout = false) }
+            isStartingWorkout = false
         }
     }
 
     private fun loadWorkouts() {
-        scope.launch {
+        if (workoutsJob?.isActive == true) return
+        workoutsJob = scope.launch {
             workoutRepository.getWorkouts().collect { workouts ->
                 setState { copy(workouts = workouts, isLoading = false) }
             }
@@ -44,9 +48,9 @@ class HomeStore(
 
     private fun confirmDelete() {
         val id = state.value.pendingDeleteId ?: return
+        setState { copy(pendingDeleteId = null) }
         scope.launch {
             workoutRepository.deleteWorkout(id)
-            setState { copy(pendingDeleteId = null) }
         }
     }
 }

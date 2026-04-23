@@ -33,7 +33,6 @@ import com.workout.core.repository.WorkoutRepository
 import com.workout.shared.backup.formatForSharing
 import com.workout.shared.feature.home.HomeEffect
 import com.workout.shared.feature.home.HomeIntent
-import com.workout.shared.feature.home.HomeStore
 import com.workout.shared.feature.home.HomeViewModel
 import com.workout.shared.platform.rememberTextSharer
 import com.workout.shared.ui.components.WorkoutCard
@@ -109,7 +108,7 @@ fun HomeScreen(
             state.workouts.isEmpty() -> EmptyContent(padding)
             else -> WorkoutListContent(
                 workouts = state.workouts,
-                store = store,
+                onDispatch = store::dispatch,
                 padding = padding,
                 onShare = { workout -> shareText(workout.formatForSharing(exerciseLabel, restLabel, minLabel, secLabel)) }
             )
@@ -165,7 +164,7 @@ private fun EmptyContent(padding: PaddingValues) {
 @Composable
 private fun WorkoutListContent(
     workouts: List<Workout>,
-    store: HomeStore,
+    onDispatch: (HomeIntent) -> Unit,
     padding: PaddingValues,
     onShare: (Workout) -> Unit
 ) {
@@ -189,9 +188,9 @@ private fun WorkoutListContent(
             item(key = "last_${lastStarted.id}") {
                 WorkoutCard(
                     workout = lastStarted,
-                    onClick = { store.dispatch(HomeIntent.StartWorkout(lastStarted.id)) },
-                    onEditClick = { store.dispatch(HomeIntent.EditWorkout(lastStarted.id)) },
-                    onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(lastStarted.id)) },
+                    onClick = { onDispatch(HomeIntent.StartWorkout(lastStarted.id)) },
+                    onEditClick = { onDispatch(HomeIntent.EditWorkout(lastStarted.id)) },
+                    onDeleteClick = { onDispatch(HomeIntent.RequestDelete(lastStarted.id)) },
                     onShareClick = { onShare(lastStarted) }
                 )
             }
@@ -204,12 +203,12 @@ private fun WorkoutListContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        items(workouts, key = { it.id }) { workout ->
+        items(workouts.filter { it.id != lastStarted?.id }, key = { it.id }) { workout ->
             WorkoutCard(
                 workout = workout,
-                onClick = { store.dispatch(HomeIntent.StartWorkout(workout.id)) },
-                onEditClick = { store.dispatch(HomeIntent.EditWorkout(workout.id)) },
-                onDeleteClick = { store.dispatch(HomeIntent.RequestDelete(workout.id)) },
+                onClick = { onDispatch(HomeIntent.StartWorkout(workout.id)) },
+                onEditClick = { onDispatch(HomeIntent.EditWorkout(workout.id)) },
+                onDeleteClick = { onDispatch(HomeIntent.RequestDelete(workout.id)) },
                 onShareClick = { onShare(workout) }
             )
         }
