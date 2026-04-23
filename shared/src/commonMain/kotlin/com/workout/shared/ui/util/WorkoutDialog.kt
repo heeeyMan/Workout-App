@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -34,9 +33,9 @@ fun WorkoutDialog(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 12.dp),
-        containerColor = Color.White,
-        titleContentColor = Color.Black,
-        textContentColor = Color.Black,
+        containerColor = MaterialTheme.colorScheme.primary,
+        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        textContentColor = MaterialTheme.colorScheme.onPrimary,
         shape = RoundedCornerShape(16.dp),
         title = { Text(title) },
         text = content,
@@ -53,8 +52,8 @@ fun WorkoutDialog(
                         .fillMaxWidth()
                         .heightIn(min = 52.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -70,7 +69,7 @@ fun WorkoutDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 48.dp),
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
                     ) {
                         Text(
                             dismissText,

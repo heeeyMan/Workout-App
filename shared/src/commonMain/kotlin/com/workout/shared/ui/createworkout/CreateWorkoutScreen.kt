@@ -134,6 +134,12 @@ fun CreateWorkoutScreen(
     var draggingIndex by remember { mutableIntStateOf(-1) }
     var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
+    // Сбрасываем кэш центров при изменении количества блоков, чтобы drag-and-drop
+    // не ориентировался на устаревшие позиции после добавления или удаления блока.
+    LaunchedEffect(state.blocks.size) {
+        blockCenters.clear()
+    }
+
     LaunchedEffect(workoutId) {
         if (workoutId != 0L) {
             store.dispatch(CreateWorkoutIntent.LoadWorkout(workoutId))

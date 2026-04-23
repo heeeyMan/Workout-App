@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -32,12 +31,6 @@ private const val VisibleItems = 5                // нечётное -> чёт�
 private val PickerHeight = ItemHeight * VisibleItems
 private const val PaddingItems = VisibleItems / 2 // = 2
 private val ColumnWidth = 112.dp
-
-fun Int.toTimeString(): String {
-    val m = this / 60
-    val s = this % 60
-    return "${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
-}
 
 /**
  * Барабанный пикер времени (мм : сс).
@@ -132,12 +125,12 @@ private fun WheelColumn(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Верхний отступ: делает первый элемент прокручиваемым в центр
-            items(List(PaddingItems) { Unit }) {
+            items(PaddingItems) {
                 Box(Modifier.height(ItemHeight))
             }
 
             // Данные
-            items(List(count) { it }) { index ->
+            items(count) { index ->
                 val distance = abs(index - centeredDataIndex)
                 val alpha = when (distance) {
                     0 -> 1f
@@ -165,7 +158,7 @@ private fun WheelColumn(
             }
 
             // Нижний отступ
-            items(List(PaddingItems) { Unit }) {
+            items(PaddingItems) {
                 Box(Modifier.height(ItemHeight))
             }
         }

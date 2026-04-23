@@ -5,8 +5,12 @@ import androidx.navigation.compose.rememberNavController
 import com.workout.shared.ui.theme.WorkoutAppTheme
 
 @Composable
-fun WorkoutApp(startWorkoutId: Long? = null, openCreate: Boolean = false) {
+fun WorkoutApp(
+    startWorkoutId: Long? = null,
+    startWorkoutToken: Int = 0,
+    openCreateToken: Int = 0
+) {
     WorkoutAppTheme {
-        AppNavigation(rememberNavController(), startWorkoutId, openCreate)
+        AppNavigation(rememberNavController(), startWorkoutId, startWorkoutToken, openCreateToken)
     }
 }

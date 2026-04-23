@@ -18,17 +18,18 @@ import org.koin.compose.koinInject
 fun AppNavigation(
     navController: NavHostController,
     startWorkoutId: Long? = null,
-    openCreate: Boolean = false
+    startWorkoutToken: Int = 0,
+    openCreateToken: Int = 0
 ) {
     val settings = koinInject<TimerSettings>()
 
-    LaunchedEffect(startWorkoutId) {
-        if (startWorkoutId != null) {
+    LaunchedEffect(startWorkoutToken) {
+        if (startWorkoutToken > 0 && startWorkoutId != null) {
             navController.navigate(TimerRoute(startWorkoutId))
         }
     }
-    LaunchedEffect(openCreate) {
-        if (openCreate) {
+    LaunchedEffect(openCreateToken) {
+        if (openCreateToken > 0) {
             navController.navigate(CreateWorkoutRoute())
         }
     }

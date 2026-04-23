@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,7 +31,8 @@ class MainActivity : ComponentActivity() {
 
     private val repository: WorkoutRepository by inject()
     private var startWorkoutId: Long? by mutableStateOf(null)
-    private var openCreate: Boolean by mutableStateOf(false)
+    private var startWorkoutToken: Int by mutableIntStateOf(0)
+    private var openCreateToken: Int by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +40,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Box(Modifier.fillMaxSize()) {
-                WorkoutApp(startWorkoutId = startWorkoutId, openCreate = openCreate)
+                WorkoutApp(
+                    startWorkoutId = startWorkoutId,
+                    startWorkoutToken = startWorkoutToken,
+                    openCreateToken = openCreateToken
+                )
                 AppEntryPermissionHandler()
             }
         }
@@ -111,10 +117,12 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent) {
         val id = intent.getLongExtra(EXTRA_WORKOUT_ID, -1L).takeIf { it != -1L }
         startWorkoutId = id
-        openCreate = intent.getBooleanExtra(EXTRA_OPEN_CREATE, false)
-            || intent.action == ACTION_OPEN_CREATE
         if (id != null) {
+            startWorkoutToken++
             lifecycleScope.launch { repository.markWorkoutStarted(id) }
+        }
+        if (intent.getBooleanExtra(EXTRA_OPEN_CREATE, false) || intent.action == ACTION_OPEN_CREATE) {
+            openCreateToken++
         }
     }
 

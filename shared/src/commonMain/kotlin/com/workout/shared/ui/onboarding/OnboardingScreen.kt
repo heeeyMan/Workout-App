@@ -35,7 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.workout.core.model.Workout
@@ -98,7 +98,10 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(
                         text = if (selected.isEmpty())
@@ -175,11 +178,8 @@ private fun TemplateCard(
     val description = stringResource(template.descriptionRes)
     val totalMin = template.totalDurationSeconds / 60
 
-    val borderColor = if (isSelected) Color.Black else Color.Transparent
-    val containerColor = if (isSelected)
-        MaterialTheme.colorScheme.surfaceVariant
-    else
-        MaterialTheme.colorScheme.surfaceVariant
+    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Transparent
+    val containerColor = MaterialTheme.colorScheme.surfaceVariant
 
     Card(
         modifier = modifier
@@ -208,7 +208,7 @@ private fun TemplateCard(
                     Icon(
                         Icons.Default.Check,
                         contentDescription = null,
-                        tint = Color.Black
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

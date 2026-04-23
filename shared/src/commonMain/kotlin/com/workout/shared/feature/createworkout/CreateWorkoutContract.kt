@@ -7,8 +7,10 @@ data class CreateWorkoutState(
     val name: String = "",
     val blocks: List<Block> = emptyList(),
     val isSaving: Boolean = false,
-    val totalDurationSeconds: Int = 0
-)
+    val createdAt: Long = 0L,
+) {
+    val totalDurationSeconds: Int get() = blocks.sumOf { it.totalDurationSeconds }
+}
 
 sealed interface CreateWorkoutIntent {
     data class LoadWorkout(val workoutId: Long) : CreateWorkoutIntent

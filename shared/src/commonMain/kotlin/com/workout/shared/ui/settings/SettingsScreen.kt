@@ -44,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -389,7 +388,6 @@ private fun SoundPickerSheet(
 ) {
     var selectedPresetId by remember { mutableStateOf(initialPresetId) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    LaunchedEffect(target) { sheetState.expand() }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Box(
@@ -525,10 +523,12 @@ private fun SecondsInputField(
     onValueChange: (String) -> Unit,
     supportingText: String? = null
 ) {
+    val onDialog = MaterialTheme.colorScheme.onPrimary
+    val onDialogMuted = MaterialTheme.colorScheme.onSurfaceVariant
     CompositionLocalProvider(
         LocalTextSelectionColors provides TextSelectionColors(
-            handleColor = Color.Black,
-            backgroundColor = Color.Black.copy(alpha = 0.3f)
+            handleColor = onDialog,
+            backgroundColor = onDialog.copy(alpha = 0.3f)
         )
     ) {
         OutlinedTextField(
@@ -541,13 +541,13 @@ private fun SecondsInputField(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedBorderColor = Color.Black,
-                unfocusedBorderColor = Color.Gray,
-                focusedLabelColor = Color.Black,
-                unfocusedLabelColor = Color.Gray,
-                cursorColor = Color.Black
+                focusedTextColor = onDialog,
+                unfocusedTextColor = onDialog,
+                focusedBorderColor = onDialog,
+                unfocusedBorderColor = onDialogMuted,
+                focusedLabelColor = onDialog,
+                unfocusedLabelColor = onDialogMuted,
+                cursorColor = onDialog
             )
         )
     }
