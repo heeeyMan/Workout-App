@@ -192,10 +192,17 @@ class TimerStore(
         if (delta == 0) return
         val s = state.value
         if (s.isFinished || s.isLoading) return
-        val maxCap = s.currentPhase?.durationSeconds ?: return
-        if (maxCap <= 0) return
-        val newVal = (s.secondsRemaining + delta).coerceIn(1, maxCap)
-        setState { copy(secondsRemaining = newVal) }
+        val idx = s.currentPhaseIndex
+        val phase = s.phases.getOrNull(idx) ?: return
+        if (phase.durationSeconds <= 0) return
+        val newRemaining = (s.secondsRemaining + delta).coerceAtLeast(1)
+        val newDuration = maxOf(phase.durationSeconds, newRemaining)
+        val updatedPhases = if (newDuration != phase.durationSeconds) {
+            s.phases.toMutableList().apply { set(idx, phase.copy(durationSeconds = newDuration)) }
+        } else {
+            s.phases
+        }
+        setState { copy(secondsRemaining = newRemaining, phases = updatedPhases) }
     }
 
     private fun togglePause() {
