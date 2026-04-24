@@ -58,6 +58,17 @@ TimerIntent.Tick
 
 ---
 
+## Кнопки быстрой корректировки (±10 сек)
+
+Интент: `TimerIntent.AdjustRemainingSeconds(delta)`.
+
+- **Верхней границы нет** — `+10` всегда добавляет 10 секунд к `secondsRemaining`, даже если результат превышает исходную `durationSeconds` фазы.
+- При превышении исходной длительности `durationSeconds` текущей фазы **увеличивается** до нового значения `secondsRemaining`. Это гарантирует корректный `phaseProgress` без "застывания" прогресс-бара.
+- `-10` уменьшает `secondsRemaining`, но не ниже 1. `durationSeconds` при этом не уменьшается обратно.
+- Если пользователь вернётся на фазу через `PreviousPhase`, таймер начнётся с обновлённого `durationSeconds`.
+
+---
+
 ## Настройки таймера (TimerSettings)
 
 Хранятся в `SharedPreferences` (Android) / `UserDefaults` (iOS) с префиксом `timer_settings`.
