@@ -7,7 +7,6 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.workout.android.MainActivity
-import com.workout.android.R
 import com.workout.core.repository.WorkoutRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,13 +43,13 @@ class WorkoutQuickSettingsTileService : TileService() {
                 return@launch
             }
 
-            lastWorkoutId = lastWorkout?.id
+            lastWorkoutId = lastWorkout.id
 
             withContext(Dispatchers.Main) {
                 qsTile?.apply {
                     state = Tile.STATE_ACTIVE
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        subtitle = lastWorkout?.name ?: getString(R.string.tile_no_workout)
+                        subtitle = lastWorkout.name
                     }
                     updateTile()
                 }
